@@ -6,8 +6,8 @@ export type Person = { id: string; name: string; nicknames: string[] };
 export type NotebookNote = { id: string; kind: "fact" | "interpretation"; text: string; createdAt: number };
 export type ChatMessage = { id: string; role: "user" | "assistant"; text: string; feedback?: "helpful" | "unhelpful"; suggestions?: Suggestions | undefined };
 export type Suggestions = { meanings: { phrase: string; meaning: string; language: string }[]; people: { mention: string; question: string }[] };
-export type PersonalData = { glossary: GlossaryWord[]; people: Person[]; notebook: NotebookNote[]; chat: ChatMessage[] };
-const empty = (): PersonalData => ({ glossary: [], people: [], notebook: [], chat: [] });
+export type PersonalData = { glossary: GlossaryWord[]; people: Person[]; notebook: NotebookNote[]; chat: ChatMessage[]; draft: string };
+const empty = (): PersonalData => ({ glossary: [], people: [], notebook: [], chat: [], draft: "" });
 export async function getPersonal(key: CryptoKey): Promise<PersonalData> {
   const row = await (await db()).get("private", "personal");
   return row ? { ...empty(), ...await decryptJSON<PersonalData>(key, row.data) } : empty();

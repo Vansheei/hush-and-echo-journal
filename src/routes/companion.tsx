@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useBlocker } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Mic, Send, Square, Volume2, ThumbsUp, ThumbsDown } from "lucide-react";
 import { AppHeader } from "@/components/diary/AppHeader";
@@ -20,6 +20,10 @@ function CompanionPage() {
   const { key, settings, version, bump, setBusy: setVaultBusy } = useVault();
   const [messages, setMessages] = useState<ChatMessage[]>([]); const [draft, setDraft] = useState(""); const [approach, setApproach] = useState("Combined"); const [speak, setSpeak] = useState(true); const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]); const [voice, setVoice] = useState(""); const [recording, setRecording] = useState(false); const [busy, setBusy] = useState(false); const [status, setStatus] = useState(""); const [confirm, setConfirm] = useState(false); const [includeEntries, setIncludeEntries] = useState(false); const [preview, setPreview] = useState(""); const [history, setHistory] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
   const alive = useRef(true); const recorder = useRef<MediaRecorder | null>(null); const stream = useRef<MediaStream | null>(null); const hold = useRef(false); const controller = useRef<AbortController | null>(null); const phase = useRef(false);
+  const draftRef = useRef("");
+  useBlocker({ shouldBlockFn: () => phase.current, enableBeforeUnload: recording || busy });
+  useEffect(() => { draftRef.current = draft; }, [draft]);
+  useEffect(() => { let active = true; if (key) getPersonal(key).then(d => { if (active) setDraft(d.draft); }); return () => { active = false; }; }, [key]);
   useEffect(() => { alive.current = true; if ("speechSynthesis" in window) { const load = () => setVoices(window.speechSynthesis.getVoices().filter(v => v.localService)); load(); window.speechSynthesis.addEventListener("voiceschanged", load); return () => { alive.current = false; controller.current?.abort(); hold.current = false; recorder.current?.stop(); stream.current?.getTracks().forEach(t => t.stop()); window.speechSynthesis.cancel(); window.speechSynthesis.removeEventListener("voiceschanged", load); }; } return () => { alive.current = false; controller.current?.abort(); stream.current?.getTracks().forEach(t => t.stop()); }; }, []);
   useEffect(() => { let active = true; if (key) getPersonal(key).then(d => { if (active) setMessages(d.chat); }); return () => { active = false; }; }, [key, version]);
   useEffect(() => { return () => setVaultBusy(false); }, [setVaultBusy]);
@@ -40,7 +44,7 @@ function CompanionPage() {
       rec.onstop = async () => {
         source.getTracks().forEach(t => t.stop()); stream.current = null; recorder.current = null; if (alive.current) { setRecording(false); setBusy(true); setStatus("Transcribing on this phone…"); }
         try { const segments = await transcribe(new Blob(chunks, { type: rec.mimeType }), settings.whisperModel, p => { if (alive.current) setStatus(`${p.phase === "download" ? "Preparing local speech model" : "Transcribing"} ${Math.round(p.pct)}%…`); });
-          if (alive.current) { const text = segments.map(s => s.text).join(" "); setDraft(d => [d, text].filter(Boolean).join(" ")); setStatus(text ? "" : "No speech detected."); }
+          if (alive.current) { const text = segments.map(s => s.text).join(" "); const next = [draftRef.current, text].filter(Boolean).join(" "); if (key) await updatePersonal(key, d => ({ ...d, draft: next })); if (alive.current) { setDraft(next); setStatus(text ? "" : "No speech detected."); } }
         } catch (e) { if (alive.current) setStatus(e instanceof Error ? e.message : "Transcription failed."); }
         finally { chunks.length = 0; phase.current = false; if (alive.current) setBusy(false); setVaultBusy(false); }
       };
@@ -63,7 +67,7 @@ function CompanionPage() {
       const response = await requestReflection({ confirmed: true, mode: "reflect", apiKey, text: draft.trim(), context: preview, conversation: history, approach, model: settings.models.companion, signal: abort.signal });
       if (!alive.current || abort.signal.aborted) return;
       const user: ChatMessage = { id: crypto.randomUUID(), role: "user", text: draft.trim() }; const assistant: ChatMessage = { id: crypto.randomUUID(), role: "assistant", text: response.text, suggestions: response.suggestions };
-      await updatePersonal(key, d => ({ ...d, chat: [...d.chat, user, assistant] }));
+      await updatePersonal(key, d => ({ ...d, chat: [...d.chat, user, assistant], draft: "" }));
       if (!alive.current) return; setDraft(""); setConfirm(false); bump(); if (speak) read(response.text);
     } catch (e) { if (alive.current) setStatus(e instanceof Error ? e.message : "Conversation failed."); }
     finally { controller.current = null; if (alive.current) setBusy(false); }
@@ -72,7 +76,7 @@ function CompanionPage() {
     <label className="flex items-center justify-between gap-3">Read replies aloud<Switch checked={speak} onCheckedChange={v => { setSpeak(v); if (!v && "speechSynthesis" in window) window.speechSynthesis.cancel(); }} /></label>
     {voices.length > 0 && <Select value={voice || voices[0]?.voiceURI || ""} onValueChange={setVoice}><SelectTrigger aria-label="On-device voice"><SelectValue /></SelectTrigger><SelectContent>{voices.map(v => <SelectItem key={v.voiceURI} value={v.voiceURI}>{v.name} · {v.lang}</SelectItem>)}</SelectContent></Select>}
     <div className="space-y-5">{messages.map(m => <article key={m.id} className={`space-y-2 border-l-2 pl-3 ${m.role === "user" ? "border-ribbon" : "border-gold"}`}><h2 className="font-display text-2xl">{m.role === "user" ? "You" : "Companion"}</h2><p className="whitespace-pre-wrap break-words">{m.text}</p>{m.role === "assistant" && <><div className="flex gap-1"><Button size="icon" variant="ghost" aria-label="Read reply" title="Read reply" onClick={() => read(m.text)}><Volume2 /></Button>{(["helpful", "unhelpful"] as const).map(f => <Button key={f} size="icon" variant={m.feedback === f ? "secondary" : "ghost"} aria-label={f === "helpful" ? "Helpful reply" : "Unhelpful reply"} aria-pressed={m.feedback === f} title={f} onClick={async () => { if (!key) return; try { await updatePersonal(key, d => ({ ...d, chat: d.chat.map(x => x.id === m.id ? { ...x, feedback: f } : x) })); bump(); } catch { setStatus("Could not save feedback."); } }}>{f === "helpful" ? <ThumbsUp /> : <ThumbsDown />}</Button>)}</div><Clarifications suggestions={m.suggestions} /></>}</article>)}</div>
-    <Textarea aria-label="Message to companion" value={draft} onChange={e => setDraft(e.target.value)} disabled={busy || recording} />
+    <Textarea aria-label="Message to companion" value={draft} onChange={e => setDraft(e.target.value)} onBlur={async () => { if (key) { try { await updatePersonal(key, d => ({ ...d, draft: draftRef.current })); } catch { setStatus("Could not save your draft."); } } }} disabled={busy || recording} />
     <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={includeEntries} disabled={busy} onChange={e => setIncludeEntries(e.target.checked)} />Include diary transcripts for this request</label>
     <div className="flex flex-wrap gap-2"><Button className="touch-none select-none" variant={recording ? "destructive" : "outline"} aria-label="Hold to talk" disabled={busy} onPointerDown={e => { e.currentTarget.setPointerCapture(e.pointerId); void startHold(); }} onPointerUp={stopHold} onPointerCancel={stopHold} onKeyDown={e => { if ((e.key === " " || e.key === "Enter") && !e.repeat) { e.preventDefault(); void startHold(); } }} onKeyUp={e => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); stopHold(); } }}><Mic />{recording ? "Listening…" : "Hold to talk"}</Button><Button disabled={busy || recording || !draft.trim()} aria-label="Prepare message" onClick={previewSend}><Send />Send</Button><Button size="icon" variant="ghost" aria-label="Stop speaking" title="Stop speaking" onClick={() => { if ("speechSynthesis" in window) window.speechSynthesis.cancel(); }}><Square /></Button></div>
     {status && <p role="status" className="whitespace-pre-wrap break-words text-sm text-muted-foreground">{status}</p>}<Select disabled><SelectTrigger aria-label="Future cloud voice"><SelectValue placeholder="Natural cloud voice · later" /></SelectTrigger><SelectContent /></Select>
