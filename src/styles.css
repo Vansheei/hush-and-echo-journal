@@ -229,15 +229,6 @@
 @utility rec-btn-stop {
   animation: pulse 2s ease-in-out infinite;
 }
-@utility settings-card-x {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  border-radius: var(--radius);
-  background: var(--card);
-  padding: 1rem;
-  box-shadow: var(--shadow-soft);
-}
 
 :root {
   --cloth:

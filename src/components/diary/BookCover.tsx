@@ -23,7 +23,7 @@ function Tooling({ className }: { className?: string }) {
 
 function Ornament() {
   return (
-    <svg viewBox="0 0 120 60" className="mx-auto w-24" fill="none" stroke="currentColor" strokeWidth="1" aria-hidden>
+    <svg viewBox="0 0 120 60" className="mx-auto w-[30cqw]" fill="none" stroke="currentColor" strokeWidth="1" aria-hidden>
       <path d="M60 8 L68 30 L60 52 L52 30 Z" />
       <circle cx="60" cy="30" r="5" />
       <path d="M8 30 C 25 14, 40 14, 50 30 C 40 46, 25 46, 8 30 M112 30 C 95 14, 80 14, 70 30 C 80 46, 95 46, 112 30" />
@@ -33,13 +33,13 @@ function Ornament() {
 
 export function BookCover({ children, lit = false }: { children?: ReactNode; lit?: boolean }) {
   return (
-    <div className="book-cover">
+    <div className="book-cover [container-type:inline-size]">
       <Tooling />
       {lit && <div className="cover-lit cover-gold-lit absolute inset-0"><Tooling /></div>}
       <div className="absolute inset-x-0 top-[24%] flex flex-col items-center gap-3">
         <div className={`cover-ornament ${lit ? "" : ""}`}><Ornament /></div>
         <div className="rounded-sm border border-gold px-6 py-1 outline outline-1 outline-offset-2 outline-gold/60">
-          <span className="font-display text-4xl text-gold">Diary</span>
+          <span className="font-display text-[13cqw] leading-tight text-gold">Diary</span>
         </div>
       </div>
       {children && <div className="absolute inset-x-6 bottom-8">{children}</div>}
