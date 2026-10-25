@@ -15,7 +15,7 @@ export async function requestReflection(input: {
     headers: { "content-type": "application/json", "x-api-key": input.apiKey,
       "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
     body: JSON.stringify({ model: MODELS[input.model].id, max_tokens: 900,
-      system: `${PERSONALITY}\nApproach: ${input.approach ?? "brief reflection"}. Return only JSON: {"text":"reply", "looseEnds":[], "worries":[], "meanings":[{"phrase":"unclear phrase","meaning":"tentative meaning","language":"language"}], "people":[{"mention":"name","question":"clarifying question"}]}. Leave suggestions empty unless needed.\n${input.context ?? ""}`,
+      system: `${PERSONALITY}\nApproach: ${input.approach ?? "brief reflection"}. Return only JSON: {"text":"reply", "looseEnds":[], "worries":[], "meanings":[{"phrase":"unclear phrase","meaning":"tentative meaning","language":"language"}], "people":[{"mention":"name","question":"clarifying question"}], "notes":[{"kind":"fact","text":"something learned about the owner, fact or interpretation"}]}. Suggest notes only when you genuinely learned something about the owner; leave suggestions empty unless needed.\n${input.context ?? ""}`,
       messages: [...(input.conversation ?? []), { role: "user", content: input.text }] }),
   });
   if (!response.ok) {
@@ -35,5 +35,6 @@ export async function requestReflection(input: {
   const list = (v: unknown) => Array.isArray(v) ? v.filter((s): s is string => typeof s === "string").slice(0, 8) : [];
   const meanings = "meanings" in result && Array.isArray(result.meanings) ? result.meanings.filter((v): v is Suggestions["meanings"][number] => v && typeof v.phrase === "string" && typeof v.meaning === "string" && typeof v.language === "string").slice(0, 8) : [];
   const people = "people" in result && Array.isArray(result.people) ? result.people.filter((v): v is Suggestions["people"][number] => v && typeof v.mention === "string" && typeof v.question === "string").slice(0, 8) : [];
-  return { text: result.text, looseEnds: list("looseEnds" in result ? result.looseEnds : []), worries: list("worries" in result ? result.worries : []), suggestions: { meanings, people } };
+  const notes = "notes" in result && Array.isArray(result.notes) ? result.notes.filter((v): v is Suggestions["notes"][number] => v && (v.kind === "fact" || v.kind === "interpretation") && typeof v.text === "string").slice(0, 8) : [];
+  return { text: result.text, looseEnds: list("looseEnds" in result ? result.looseEnds : []), worries: list("worries" in result ? result.worries : []), suggestions: { meanings, people, notes } };
 }

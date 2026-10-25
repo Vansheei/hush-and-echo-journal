@@ -10,3 +10,12 @@
 - [x] Phase 3: local semantic search with timestamps, facts/interpretations notebook, confirmed people clarification, voice/text companion with modes and feedback.
 - [x] Verify glossary/notebook/people persistence, transcript correction and reflection context, real semantic search, hold-to-talk, real Whisper cache reuse after worker recreation with model host blocked; give a short phone checklist.
 - [ ] Live Claude companion/reflection and actual phone voice/mixed-language quality verification (owner's key and phone required; no substitution).
+- [x] Pre–Phase 4 fixes: hands-free companion conversation with silence detection and trust switch, prominent companion spot, meaning-search-only past moments with tappable sources, notebook renamed "What I know about you" with AI-suggested notes and thumbs, written entries, red unsure-word flags, softer muffled page sound.
+- [x] Phase 4: weekly recap (Sonnet, on request, linked entries), drafts from entry/conversation (never sent), per-person pages from confirmed people only.
+- [ ] Verify Phase 4 live: companion conversation loop, recap, drafts and people pages with the owner's key and phone.
+
+## Design backlog (not built yet)
+- Overall design feels too minimal; the whimsy is missing.
+- Main page links look too plain.
+- Writing page: burnt paper animation with a page-style text box.
+- Companion spot should look special, not just placed.

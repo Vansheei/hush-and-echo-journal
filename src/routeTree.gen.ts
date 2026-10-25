@@ -11,15 +11,19 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CompanionRouteImport } from './routes/companion'
+import { Route as DraftsRouteImport } from './routes/drafts'
 import { Route as GlossaryRouteImport } from './routes/glossary'
 import { Route as LooseEndsRouteImport } from './routes/loose-ends'
 import { Route as NotebookRouteImport } from './routes/notebook'
 import { Route as PeopleRouteImport } from './routes/people'
+import { Route as RecapRouteImport } from './routes/recap'
 import { Route as RecordRouteImport } from './routes/record'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as WorryParkingRouteImport } from './routes/worry-parking'
+import { Route as WriteRouteImport } from './routes/write'
 import { Route as EntryIdRouteImport } from './routes/entry.$id'
+import { Route as PeopleIdRouteImport } from './routes/people_.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -29,6 +33,11 @@ const IndexRoute = IndexRouteImport.update({
 const CompanionRoute = CompanionRouteImport.update({
   id: '/companion',
   path: '/companion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DraftsRoute = DraftsRouteImport.update({
+  id: '/drafts',
+  path: '/drafts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GlossaryRoute = GlossaryRouteImport.update({
@@ -51,6 +60,11 @@ const PeopleRoute = PeopleRouteImport.update({
   path: '/people',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RecapRoute = RecapRouteImport.update({
+  id: '/recap',
+  path: '/recap',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RecordRoute = RecordRouteImport.update({
   id: '/record',
   path: '/record',
@@ -71,106 +85,144 @@ const WorryParkingRoute = WorryParkingRouteImport.update({
   path: '/worry-parking',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WriteRoute = WriteRouteImport.update({
+  id: '/write',
+  path: '/write',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EntryIdRoute = EntryIdRouteImport.update({
   id: '/entry/$id',
   path: '/entry/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleIdRoute = PeopleIdRouteImport.update({
+  id: '/people_/$id',
+  path: '/people/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/companion': typeof CompanionRoute
+  '/drafts': typeof DraftsRoute
   '/glossary': typeof GlossaryRoute
   '/loose-ends': typeof LooseEndsRoute
   '/notebook': typeof NotebookRoute
   '/people': typeof PeopleRoute
+  '/recap': typeof RecapRoute
   '/record': typeof RecordRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/worry-parking': typeof WorryParkingRoute
+  '/write': typeof WriteRoute
   '/entry/$id': typeof EntryIdRoute
+  '/people/$id': typeof PeopleIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/companion': typeof CompanionRoute
+  '/drafts': typeof DraftsRoute
   '/glossary': typeof GlossaryRoute
   '/loose-ends': typeof LooseEndsRoute
   '/notebook': typeof NotebookRoute
   '/people': typeof PeopleRoute
+  '/recap': typeof RecapRoute
   '/record': typeof RecordRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/worry-parking': typeof WorryParkingRoute
+  '/write': typeof WriteRoute
   '/entry/$id': typeof EntryIdRoute
+  '/people/$id': typeof PeopleIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/companion': typeof CompanionRoute
+  '/drafts': typeof DraftsRoute
   '/glossary': typeof GlossaryRoute
   '/loose-ends': typeof LooseEndsRoute
   '/notebook': typeof NotebookRoute
   '/people': typeof PeopleRoute
+  '/recap': typeof RecapRoute
   '/record': typeof RecordRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/worry-parking': typeof WorryParkingRoute
+  '/write': typeof WriteRoute
   '/entry/$id': typeof EntryIdRoute
+  '/people_/$id': typeof PeopleIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/companion'
+    | '/drafts'
     | '/glossary'
     | '/loose-ends'
     | '/notebook'
     | '/people'
+    | '/recap'
     | '/record'
     | '/search'
     | '/settings'
     | '/worry-parking'
+    | '/write'
     | '/entry/$id'
+    | '/people/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/companion'
+    | '/drafts'
     | '/glossary'
     | '/loose-ends'
     | '/notebook'
     | '/people'
+    | '/recap'
     | '/record'
     | '/search'
     | '/settings'
     | '/worry-parking'
+    | '/write'
     | '/entry/$id'
+    | '/people/$id'
   id:
     | '__root__'
     | '/'
     | '/companion'
+    | '/drafts'
     | '/glossary'
     | '/loose-ends'
     | '/notebook'
     | '/people'
+    | '/recap'
     | '/record'
     | '/search'
     | '/settings'
     | '/worry-parking'
+    | '/write'
     | '/entry/$id'
+    | '/people_/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CompanionRoute: typeof CompanionRoute
+  DraftsRoute: typeof DraftsRoute
   GlossaryRoute: typeof GlossaryRoute
   LooseEndsRoute: typeof LooseEndsRoute
   NotebookRoute: typeof NotebookRoute
   PeopleRoute: typeof PeopleRoute
+  RecapRoute: typeof RecapRoute
   RecordRoute: typeof RecordRoute
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
   WorryParkingRoute: typeof WorryParkingRoute
+  WriteRoute: typeof WriteRoute
   EntryIdRoute: typeof EntryIdRoute
+  PeopleIdRoute: typeof PeopleIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -187,6 +239,13 @@ declare module '@tanstack/react-router' {
       path: '/companion'
       fullPath: '/companion'
       preLoaderRoute: typeof CompanionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/drafts': {
+      id: '/drafts'
+      path: '/drafts'
+      fullPath: '/drafts'
+      preLoaderRoute: typeof DraftsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/glossary': {
@@ -217,6 +276,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PeopleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/recap': {
+      id: '/recap'
+      path: '/recap'
+      fullPath: '/recap'
+      preLoaderRoute: typeof RecapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/record': {
       id: '/record'
       path: '/record'
@@ -245,11 +311,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorryParkingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/write': {
+      id: '/write'
+      path: '/write'
+      fullPath: '/write'
+      preLoaderRoute: typeof WriteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/entry/$id': {
       id: '/entry/$id'
       path: '/entry/$id'
       fullPath: '/entry/$id'
       preLoaderRoute: typeof EntryIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people_/$id': {
+      id: '/people_/$id'
+      path: '/people/$id'
+      fullPath: '/people/$id'
+      preLoaderRoute: typeof PeopleIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -258,15 +338,19 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CompanionRoute: CompanionRoute,
+  DraftsRoute: DraftsRoute,
   GlossaryRoute: GlossaryRoute,
   LooseEndsRoute: LooseEndsRoute,
   NotebookRoute: NotebookRoute,
   PeopleRoute: PeopleRoute,
+  RecapRoute: RecapRoute,
   RecordRoute: RecordRoute,
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
   WorryParkingRoute: WorryParkingRoute,
+  WriteRoute: WriteRoute,
   EntryIdRoute: EntryIdRoute,
+  PeopleIdRoute: PeopleIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
