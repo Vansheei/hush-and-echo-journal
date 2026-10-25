@@ -23,7 +23,7 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as WorryParkingRouteImport } from './routes/worry-parking'
 import { Route as WriteRouteImport } from './routes/write'
 import { Route as EntryIdRouteImport } from './routes/entry.$id'
-import { Route as PeopleIdRouteImport } from './routes/people.$id'
+import { Route as PeopleIdRouteImport } from './routes/people_.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -96,9 +96,9 @@ const EntryIdRoute = EntryIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const PeopleIdRoute = PeopleIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => PeopleRoute,
+  id: '/people_/$id',
+  path: '/people/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -108,7 +108,7 @@ export interface FileRoutesByFullPath {
   '/glossary': typeof GlossaryRoute
   '/loose-ends': typeof LooseEndsRoute
   '/notebook': typeof NotebookRoute
-  '/people': typeof PeopleRouteWithChildren
+  '/people': typeof PeopleRoute
   '/recap': typeof RecapRoute
   '/record': typeof RecordRoute
   '/search': typeof SearchRoute
@@ -125,7 +125,7 @@ export interface FileRoutesByTo {
   '/glossary': typeof GlossaryRoute
   '/loose-ends': typeof LooseEndsRoute
   '/notebook': typeof NotebookRoute
-  '/people': typeof PeopleRouteWithChildren
+  '/people': typeof PeopleRoute
   '/recap': typeof RecapRoute
   '/record': typeof RecordRoute
   '/search': typeof SearchRoute
@@ -143,7 +143,7 @@ export interface FileRoutesById {
   '/glossary': typeof GlossaryRoute
   '/loose-ends': typeof LooseEndsRoute
   '/notebook': typeof NotebookRoute
-  '/people': typeof PeopleRouteWithChildren
+  '/people': typeof PeopleRoute
   '/recap': typeof RecapRoute
   '/record': typeof RecordRoute
   '/search': typeof SearchRoute
@@ -151,7 +151,7 @@ export interface FileRoutesById {
   '/worry-parking': typeof WorryParkingRoute
   '/write': typeof WriteRoute
   '/entry/$id': typeof EntryIdRoute
-  '/people/$id': typeof PeopleIdRoute
+  '/people_/$id': typeof PeopleIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -204,7 +204,7 @@ export interface FileRouteTypes {
     | '/worry-parking'
     | '/write'
     | '/entry/$id'
-    | '/people/$id'
+    | '/people_/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -214,7 +214,7 @@ export interface RootRouteChildren {
   GlossaryRoute: typeof GlossaryRoute
   LooseEndsRoute: typeof LooseEndsRoute
   NotebookRoute: typeof NotebookRoute
-  PeopleRoute: typeof PeopleRouteWithChildren
+  PeopleRoute: typeof PeopleRoute
   RecapRoute: typeof RecapRoute
   RecordRoute: typeof RecordRoute
   SearchRoute: typeof SearchRoute
@@ -222,6 +222,7 @@ export interface RootRouteChildren {
   WorryParkingRoute: typeof WorryParkingRoute
   WriteRoute: typeof WriteRoute
   EntryIdRoute: typeof EntryIdRoute
+  PeopleIdRoute: typeof PeopleIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -324,26 +325,15 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EntryIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/people/$id': {
-      id: '/people/$id'
-      path: '/$id'
+    '/people_/$id': {
+      id: '/people_/$id'
+      path: '/people/$id'
       fullPath: '/people/$id'
       preLoaderRoute: typeof PeopleIdRouteImport
-      parentRoute: typeof PeopleRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
-
-interface PeopleRouteChildren {
-  PeopleIdRoute: typeof PeopleIdRoute
-}
-
-const PeopleRouteChildren: PeopleRouteChildren = {
-  PeopleIdRoute: PeopleIdRoute,
-}
-
-const PeopleRouteWithChildren =
-  PeopleRoute._addFileChildren(PeopleRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -352,7 +342,7 @@ const rootRouteChildren: RootRouteChildren = {
   GlossaryRoute: GlossaryRoute,
   LooseEndsRoute: LooseEndsRoute,
   NotebookRoute: NotebookRoute,
-  PeopleRoute: PeopleRouteWithChildren,
+  PeopleRoute: PeopleRoute,
   RecapRoute: RecapRoute,
   RecordRoute: RecordRoute,
   SearchRoute: SearchRoute,
@@ -360,6 +350,7 @@ const rootRouteChildren: RootRouteChildren = {
   WorryParkingRoute: WorryParkingRoute,
   WriteRoute: WriteRoute,
   EntryIdRoute: EntryIdRoute,
+  PeopleIdRoute: PeopleIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
