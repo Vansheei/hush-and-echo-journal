@@ -1,0 +1,12 @@
+import type { CapacitorConfig } from "@capacitor/cli";
+
+// Loads the bundled web build from inside the APK. No server.url: nothing is fetched remotely at start-up.
+const config: CapacitorConfig = {
+  appId: "com.vanshika.diary",
+  appName: "Vanshika's Diary",
+  webDir: "dist/client",
+  android: { allowMixedContent: false },
+  server: { androidScheme: "https" },
+};
+
+export default config;

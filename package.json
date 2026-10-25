@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "build:android": "CAPACITOR=1 vite build && bun scripts/capacitor-shell.mjs && cap sync android"
   },
   "overrides": {
     "rolldown": "1.2.1"
