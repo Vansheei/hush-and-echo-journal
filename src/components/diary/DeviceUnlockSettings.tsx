@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { deviceUnlockAvailable, enableDeviceUnlock, getDeviceWrap, removeDeviceUnlock } from "@/lib/crypto/device";
 import { getVaultMeta } from "@/lib/storage/db";
 import { useVault } from "@/lib/vault-context";
+import { isNativeAndroid } from "@/lib/native/platform";
 
 export function DeviceUnlockSettings() {
   const { setBusy, version } = useVault();
@@ -29,14 +30,15 @@ export function DeviceUnlockSettings() {
   }
   return <div className="space-y-3 border-t border-border pt-4">
     <h3 className="flex items-center gap-2 font-display text-3xl"><Fingerprint className="size-5" />Fingerprint unlock</h3>
-    <p className="text-sm text-muted-foreground">Your device verifies you; the diary never receives your fingerprint. It may offer face recognition or your device PIN instead. Available only in supported browsers on this device and site.</p>
+    <p className="text-sm text-muted-foreground">{isNativeAndroid() ? "Android checks your enrolled fingerprint and releases the encrypted diary key. The diary never receives fingerprint data. Adding or changing fingerprints may require enabling this again. Passphrase and diary PIN remain available." : "Your device verifies you; the diary never receives your fingerprint. It may offer face recognition or your device PIN instead. Available only in supported browsers on this device and site."}</p>
     <p role="status" className="text-sm">{enabled ? "Enabled" : available === null ? "Checking device…" : available ? "Not enabled" : "Unavailable here — use your passphrase."}</p>
     {!enabled && available && <>
       <Input type="password" autoComplete="off" aria-label="Passphrase for fingerprint setup" placeholder="Current passphrase" value={pass} onChange={(e) => setPass(e.target.value)} />
       <Button disabled={working || !pass} onClick={() => void enable()}><Fingerprint />{working ? "Waiting for device…" : "Enable fingerprint unlock"}</Button>
     </>}
     {enabled && <Button variant="outline" disabled={working} onClick={async () => {
-      await removeDeviceUnlock(); setEnabled(false); setMessage("Diary device unlock removed. You can remove its passkey in your device settings too.");
+      try { await removeDeviceUnlock(); setEnabled(false); setMessage(isNativeAndroid() ? "Fingerprint diary key removed." : "Diary device unlock removed. You can remove its passkey in your device settings too."); }
+      catch { setMessage("Could not remove fingerprint unlock. Please try again."); }
     }}>Disable fingerprint unlock</Button>}
     {message && <p role="status" className="text-sm text-muted-foreground">{message}</p>}
   </div>;

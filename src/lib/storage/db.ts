@@ -2,6 +2,7 @@ import { openDB, type IDBPDatabase } from "idb";
 import { decryptBytes, decryptJSON, encryptBytes, encryptJSON, type Enc, type VaultMeta } from "@/lib/crypto/vault";
 import { MODEL_DEFAULTS, type Feature, type ModelChoice } from "@/lib/ai/models";
 import type { Reflection } from "@/lib/ai/anthropic";
+import { defaultWhisperModel, isNativeAndroid } from "@/lib/native/platform";
 
 let dbp: Promise<IDBPDatabase> | null = null;
 export function db() {
@@ -27,14 +28,16 @@ export const putVaultMeta = async (m: VaultMeta) => (await db()).put("meta", m, 
 export type WhisperModel = "base" | "small";
 export type Settings = { autoLockMin: number; whisperModel: WhisperModel; mode: "listen" | "reflect"; models: Record<Feature, ModelChoice> };
 export const DEFAULT_SETTINGS: Settings = { autoLockMin: 5, whisperModel: "small", mode: "listen", models: MODEL_DEFAULTS };
+export const platformSettings = (): Settings => ({ ...DEFAULT_SETTINGS, whisperModel: defaultWhisperModel() });
 
 export async function getSettings(key: CryptoKey): Promise<Settings> {
   const e = (await (await db()).get("meta", "settings")) as Enc | undefined;
   const saved = e ? await decryptJSON<Partial<Settings>>(key, e) : {};
   // Upgrade the former default once; later explicit base choices remain respected.
   const migrated = await (await db()).get("meta", "multilingualSmallDefault");
-  const result = { ...DEFAULT_SETTINGS, ...saved, whisperModel: migrated ? saved.whisperModel ?? "small" : "small", models: { ...MODEL_DEFAULTS, ...saved.models } } as Settings;
-  if (!migrated) { await putSettings(key, result); await (await db()).put("meta", true, "multilingualSmallDefault"); }
+  const native = isNativeAndroid();
+  const result = { ...platformSettings(), ...saved, whisperModel: native ? saved.whisperModel ?? "base" : migrated ? saved.whisperModel ?? "small" : "small", models: { ...MODEL_DEFAULTS, ...saved.models } } as Settings;
+  if (!migrated && !native) { await putSettings(key, result); await (await db()).put("meta", true, "multilingualSmallDefault"); }
   return result;
 }
 export async function putSettings(key: CryptoKey, s: Settings) {

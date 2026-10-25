@@ -3,6 +3,7 @@ import type React from "react";
 import { encryptionOnlyKey, unlockWithPassphrase, resetPassphrase, type VaultMeta } from "@/lib/crypto/vault";
 import {
   DEFAULT_SETTINGS,
+  platformSettings,
   completeEntry,
   getSettings,
   getVaultMeta,
@@ -116,7 +117,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
   const finishSetup = useCallback(
     async (meta: VaultMeta, k: CryptoKey) => {
       await putVaultMeta(meta);
-      await putSettings(k, DEFAULT_SETTINGS);
+      await putSettings(k, platformSettings());
       await requestPersistence();
       await openWith(k);
     },

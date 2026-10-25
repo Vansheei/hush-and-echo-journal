@@ -15,6 +15,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { VaultProvider } from "@/lib/vault-context";
 import { Gate } from "@/components/diary/Gate";
+import { NativeBack } from "@/components/diary/NativeBack";
 
 function NotFoundComponent() {
   return (
@@ -117,6 +118,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <ClientOnly fallback={<div className="screen-center text-paper/70">…</div>}>
         <VaultProvider>
+          <NativeBack />
           <Gate>
             <Outlet />
           </Gate>
