@@ -27,5 +27,5 @@
 - [x] Design pass 2: celestial-forest cover with vines/moons and rising-gold bloom unlock, scroll-banner headings, art-nouveau page frame with swan and faint butterflies, featured Companion card, ribbon bookmark sections, burnt-paper writing page in script.
 - [ ] Owner phone check of the new design and softer page sound.
 
-- [ ] Capacitor Android APK: offline bundle, mic/camera only, GitHub debug APK workflow.
-- [ ] Add burgundy and blue covers (user art) following the green cover pattern.
+- [x] Capacitor Android APK: offline bundle, mic/camera only, GitHub debug APK workflow (Gradle build first verified on GitHub).
+- [x] Add burgundy and blue covers following the green cover pattern.
