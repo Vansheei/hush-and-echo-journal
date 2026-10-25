@@ -47,7 +47,7 @@ export function RibbonTabs() {
       {TABS.map(({ to, label, Icon, tone }) => (
         <Link key={to} to={to} className={`ribbon-tab ${tone}`}>
           <Icon className="size-4 shrink-0 text-gold-bright" />
-          <span className="truncate">{label}</span>
+          <span className="line-clamp-2">{label}</span>
         </Link>
       ))}
     </nav>
