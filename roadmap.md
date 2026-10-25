@@ -1,6 +1,9 @@
 # Diary roadmap
 
-- [ ] Security group, optional PIN, recovery passphrase reset, fingerprint refusal diagnosis, warmer 40%-faded writing sheet; audit Phase 4 and APK readiness before Phase 5.
+- [x] Security group, optional PIN, recovery passphrase reset, clearer fingerprint refusal guidance, warm 40%-faded writing sheet; 36 tests and browser PIN/reset/save flow passed.
+- [x] Audit Phase 4 and APK readiness before Phase 5: features present, live Claude/phone tests remain unverified, people matching approximate, no Android build project.
+- [ ] Native Android contacts and notification permission requests (blocked: no Android package/permission bridge exists; browser cannot grant them).
+- [ ] APK build/install readiness (blocked: native project, permissions, biometric integration, packaging/signing and actual device validation remain absent).
 
 - [x] Add secure device unlock with passphrase fallback and six coming-later interfaces; 34 tests pass, simulated PRF setup/lock/unlock/removal verified.
 - [ ] Verify fingerprint unlock on the owner's device (physical biometrics and browser PRF support cannot be tested here).
