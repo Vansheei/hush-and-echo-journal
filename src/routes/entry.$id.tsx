@@ -25,6 +25,7 @@ import { TranscriptWords } from "@/components/diary/TranscriptWords";
 
 export const Route = createFileRoute("/entry/$id")({
   ssr: false,
+  validateSearch: (search: Record<string, unknown>) => ({ t: typeof search.t === "number" && Number.isFinite(search.t) && search.t >= 0 ? search.t : undefined }),
   head: () => ({
     meta: [
       { title: "Diary — Entry" },
@@ -40,6 +41,7 @@ export const Route = createFileRoute("/entry/$id")({
 
 function EntryPage() {
   const { id } = Route.useParams();
+  const { t } = Route.useSearch();
   const { key, version, progress, bump } = useVault();
   const nav = useNavigate();
   const [entry, setEntry] = useState<Entry | null | undefined>(undefined);
@@ -77,10 +79,12 @@ function EntryPage() {
     if (m && !Number.isFinite(m.duration)) {
       const back = () => {
         m.removeEventListener("durationchange", back);
-        m.currentTime = 0;
+        m.currentTime = t ?? 0;
       };
       m.addEventListener("durationchange", back);
       m.currentTime = 1e101;
+    } else if (m && t !== undefined) {
+      m.currentTime = t;
     }
   }
 
