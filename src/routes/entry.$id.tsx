@@ -25,7 +25,10 @@ import { TranscriptWords } from "@/components/diary/TranscriptWords";
 
 export const Route = createFileRoute("/entry/$id")({
   ssr: false,
-  validateSearch: (search: Record<string, unknown>) => ({ t: typeof search.t === "number" && Number.isFinite(search.t) && search.t >= 0 ? search.t : undefined }),
+  validateSearch: (search: Record<string, unknown>): { t?: number } => {
+    const t = search["t"];
+    return typeof t === "number" && Number.isFinite(t) && t >= 0 ? { t } : {};
+  },
   head: () => ({
     meta: [
       { title: "Diary — Entry" },

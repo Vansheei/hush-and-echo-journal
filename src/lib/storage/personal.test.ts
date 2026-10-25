@@ -1,0 +1,30 @@
+import "fake-indexeddb/auto";
+import { beforeAll, expect, it } from "vitest";
+import { webcrypto } from "node:crypto";
+import { createVault } from "@/lib/crypto/vault";
+import { db, DEFAULT_SETTINGS, getSettings, putSettings } from "./db";
+import { contextText, getPersonal, updatePersonal } from "./personal";
+import { exportBackup } from "./backup";
+beforeAll(() => { Object.defineProperty(globalThis, "crypto", { value: webcrypto, configurable: true }); });
+it("defaults existing and new diaries to multilingual small once, respecting later explicit base", async () => {
+  const { key } = await createVault("test-password", 1000);
+  expect(DEFAULT_SETTINGS.whisperModel).toBe("small");
+  await putSettings(key, { ...DEFAULT_SETTINGS, whisperModel: "base" });
+  await (await db()).delete("meta", "multilingualSmallDefault");
+  expect((await getSettings(key)).whisperModel).toBe("small");
+  await putSettings(key, { ...DEFAULT_SETTINGS, whisperModel: "base" });
+  expect((await getSettings(key)).whisperModel).toBe("base");
+});
+it("stores confirmed glossary encrypted and includes it in Claude context and ciphertext backups", async () => {
+  const { key } = await createVault("test-password", 1000);
+  expect((await getPersonal(key)).people).toEqual([]);
+  await updatePersonal(key, d => ({ ...d, glossary: [{ id: "word", phrase: "koot dungi", meaning: "I'll beat you", language: "Punjabi" }] }));
+  const personal = await getPersonal(key);
+  expect(personal.glossary[0]).toMatchObject({ phrase: "koot dungi", meaning: "I'll beat you", language: "Punjabi" });
+  expect(contextText(personal)).toContain("koot dungi");
+  const row = await (await db()).get("private", "personal");
+  expect(JSON.stringify(row)).not.toContain("koot dungi");
+  const blob = await exportBackup();
+  const text = await new Promise<string>((resolve) => { const r = new FileReader(); r.onload = () => resolve(String(r.result)); r.readAsText(blob); });
+  expect(text).not.toContain("koot dungi"); expect(JSON.parse(text).stores.private.length).toBeGreaterThan(0);
+});

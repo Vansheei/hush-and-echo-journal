@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useVault } from "@/lib/vault-context";
 import { updatePersonal, type Suggestions } from "@/lib/storage/personal";
 
-export function Clarifications({ suggestions }: { suggestions?: Suggestions }) {
+export function Clarifications({ suggestions }: { suggestions?: Suggestions | undefined }) {
   if (!suggestions) return null;
   return <div className="space-y-4">
     {suggestions.meanings.map((item, i) => <ConfirmMeaning key={`word-${i}`} {...item} />)}

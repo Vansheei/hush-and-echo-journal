@@ -4,7 +4,7 @@ import { decryptJSON, encryptJSON } from "@/lib/crypto/vault";
 export type GlossaryWord = { id: string; phrase: string; meaning: string; language: string };
 export type Person = { id: string; name: string; nicknames: string[] };
 export type NotebookNote = { id: string; kind: "fact" | "interpretation"; text: string; createdAt: number };
-export type ChatMessage = { id: string; role: "user" | "assistant"; text: string; feedback?: "helpful" | "unhelpful"; suggestions?: Suggestions };
+export type ChatMessage = { id: string; role: "user" | "assistant"; text: string; feedback?: "helpful" | "unhelpful"; suggestions?: Suggestions | undefined };
 export type Suggestions = { meanings: { phrase: string; meaning: string; language: string }[]; people: { mention: string; question: string }[] };
 export type PersonalData = { glossary: GlossaryWord[]; people: Person[]; notebook: NotebookNote[]; chat: ChatMessage[] };
 const empty = (): PersonalData => ({ glossary: [], people: [], notebook: [], chat: [] });
