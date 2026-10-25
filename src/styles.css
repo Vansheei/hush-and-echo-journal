@@ -321,6 +321,8 @@
   border-bottom: 1px solid var(--border);
 }
 [role="dialog"] {
+  top: calc(50% + (var(--safe-top) - var(--safe-bottom)) / 2);
+  left: calc(50% + (var(--safe-left) - var(--safe-right)) / 2);
   max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - 2rem);
   max-width: calc(100vw - var(--safe-left) - var(--safe-right) - 2rem);
   overflow-y: auto;

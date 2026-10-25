@@ -1,14 +1,15 @@
 # Diary roadmap
 
-- [ ] Fix Android status/gesture-bar overlap on every page and verify Settings is reachable.
-- [ ] Add Settings to the alphabetical index while retaining the header gear.
-- [ ] Investigate Android transcription sample rate, model cache and accuracy; report before changing model choices.
+- [x] Add Android status-bar overlay and native inset fallback; all 21 available pages verified with simulated system bars, Settings key field reachable. Physical APK retest still required.
+- [x] Add Settings to the alphabetical index while retaining the header gear.
+- [x] Investigate Android transcription: full 30-second-piece accumulation verified, real Chrome 48kHz-to-16kHz decode verified; guard unexpected decoded sample rates. Reported per-file download percentages do not prove complete cache, Base versus Small unproven cause; model choices unchanged.
+- [ ] Confirm new APK bar clearance and transcription on Nothing Phone 2a; inspect phone cache/backend and recording duration (blocked: physical device unavailable here).
 
 - [x] Diagnose GitHub APK failures using the latest job log; replace retired Android SDK `tools` default with explicit supported packages.
 - [x] Fix run #5 failure: speech plugin crashed start-page rendering in the web bundle step; lazy import + server stub, clean-copy build/sync verified.
 - [x] Workflow: save full logs of each build step and upload them as an artifact when the APK build fails.
 - [x] Run #7 cause: build output lands in .output/public on GitHub; script now detects either folder into android-web.
-- [ ] Confirm a successful GitHub APK run and download (blocked until the corrected workflow reaches GitHub and runs).
+- [x] Successful APK download/install confirmed by owner's Nothing Phone 2a testing.
 
 - [x] Reorganize Settings into seven heading-only linked sections; all section/back navigation and saved sound preferences verified on mobile and desktop.
 - [x] Add offline English/Hindi/German interface labels, buttons, section names and dates; encrypted writing preservation tested, AI/transcription language remains independent.
