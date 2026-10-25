@@ -47,7 +47,7 @@ export type EntryStatus = "pending" | "transcribing" | "done" | "error";
 export type Entry = {
   id: string;
   createdAt: number;
-  kind: "audio" | "video";
+  kind: "audio" | "video" | "written";
   mimeType: string;
   durationSec: number;
   size: number;
@@ -58,8 +58,17 @@ export type Entry = {
   toneNotes?: string[];
   mode?: "listen" | "reflect";
   ribbon?: boolean;
+  flagged?: string[];
   reflection?: Reflection;
 };
+
+/** A written entry: text only, no media, ready immediately. */
+export async function saveWritten(key: CryptoKey, text: string): Promise<Entry> {
+  const trimmed = text.trim();
+  const entry: Entry = { id: crypto.randomUUID(), createdAt: Date.now(), kind: "written", mimeType: "", durationSec: 0, size: trimmed.length, chunkCount: 0, status: "done", segments: [{ start: 0, end: 0, text: trimmed }] };
+  await putEntry(key, entry);
+  return entry;
+}
 
 const CHUNK = 1024 * 1024;
 
