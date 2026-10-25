@@ -1,13 +1,17 @@
-// Renders the app's start page from the built server bundle into dist/client/index.html,
-// so the Android app can load everything locally from inside the APK (no server, offline).
-import { writeFile } from "node:fs/promises";
+// Prepares the offline web files the Android app loads from inside the APK (no server, offline).
+// With CAPACITOR=1 the build prerenders the start page to _shell.html; its output folder differs by
+// environment (dist/client here, .output/public on GitHub), so find it and copy to one fixed folder.
+import { access, cp, copyFile, rm } from "node:fs/promises";
 
-const { default: worker } = await import(`${process.cwd()}/dist/server/index.mjs`);
-const env = { ASSETS: { fetch: () => new Response("", { status: 404 }) } };
-const ctx = { waitUntil() {}, passThroughOnException() {} };
-const res = await worker.fetch(new Request("https://localhost/"), env, ctx);
-const html = await res.text();
-if (res.status !== 200 || !html.includes("<html")) throw new Error(`Start page render failed (${res.status})`);
-await writeFile("dist/client/index.html", html);
-console.log("Wrote dist/client/index.html");
-process.exit(0);
+const candidates = ["dist/client", ".output/public"];
+const out = "android-web";
+let source;
+for (const dir of candidates) {
+  if (await access(`${dir}/_shell.html`).then(() => true, () => false)) { source = dir; break; }
+}
+if (!source) throw new Error(`Missing _shell.html in ${candidates.join(" or ")}. Was the build run with CAPACITOR=1?`);
+
+await rm(out, { recursive: true, force: true });
+await cp(source, out, { recursive: true });
+await copyFile(`${out}/_shell.html`, `${out}/index.html`);
+console.log(`Copied ${source} to ${out} and wrote ${out}/index.html`);
