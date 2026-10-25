@@ -59,8 +59,8 @@ function SettingsPage() {
             {(["green", "plum", "ocean"] as Cover[]).map((c) => (
               <Button variant="ghost" key={c} data-cover={c} aria-pressed={look.cover === c} onClick={() => setAppearance({ cover: c, coverChosen: true })}
                 className={`h-auto flex-col whitespace-normal p-2 text-center ${look.cover === c ? "ring-2 ring-gold" : ""}`}>
-                <div className="pointer-events-none w-full origin-top scale-100"><BookCover /></div>
-                <span className="text-sm">{c === "green" ? "Bottle green" : c === "plum" ? "Plum" : "Dark ocean blue"}</span>
+                <div className="pointer-events-none w-full origin-top scale-100"><BookCover variant={c} /></div>
+                <span className="text-sm">{c === "green" ? "Bottle green" : c === "plum" ? "Burgundy" : "Midnight blue"}</span>
               </Button>
             ))}
           </div>

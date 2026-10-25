@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Vanshika\'s Diary</string>
+    <string name="title_activity_main">Vanshika\'s Diary</string>
+    <string name="package_name">com.vanshika.diary</string>
+    <string name="custom_url_scheme">com.vanshika.diary</string>
+</resources>
