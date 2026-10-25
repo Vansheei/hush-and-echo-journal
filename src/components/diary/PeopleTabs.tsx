@@ -13,13 +13,13 @@ export const SAMPLE_PEOPLE: PersonTab[] = [
 /** Thumb-index tabs sticking out of the book's right edge. */
 export function PeopleTabs({ people, active, onSelect }: { people: PersonTab[]; active?: string; onSelect: (id: string) => void }) {
   return (
-    <nav aria-label="People" className="absolute -right-3 top-28 flex flex-col gap-1.5">
+    <nav aria-label="People" className="absolute right-0 top-28 z-10 flex flex-col gap-1.5">
       {people.map((p) => (
         <button
           key={p.id}
           onClick={() => onSelect(p.id)}
           aria-current={active === p.id}
-          className={`${p.color} rounded-r-md py-3 pl-2 pr-1.5 font-display text-lg text-paper [writing-mode:vertical-rl] transition-transform ${active === p.id ? "translate-x-1.5" : ""}`}
+          className={`${p.color} rounded-l-md px-1.5 py-3 font-display text-xl text-paper [writing-mode:vertical-rl] transition-transform ${active === p.id ? "-translate-x-1.5" : ""}`}
         >
           {p.name}
         </button>

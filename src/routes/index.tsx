@@ -84,7 +84,7 @@ function Timeline() {
                   onClick={() => (e.kind === "audio" ? cassetteClick() : pageTurn())}
                   className="relative flex items-center gap-3 rounded-md border border-border/70 bg-card p-3 transition-transform active:scale-[0.99]"
                 >
-                  {e.ribbon && <RibbonMark className="absolute -top-1 right-5" />}
+                  {e.ribbon && <RibbonMark className="absolute -top-1 right-16" />}
                   <EntryToken kind={e.kind} id={e.id} />
                   <div className="min-w-0 flex-1">
                     <div className="flex justify-between text-sm">

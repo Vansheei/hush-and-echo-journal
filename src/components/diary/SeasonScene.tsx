@@ -31,7 +31,7 @@ function Cafe({ className }: { className?: string }) {
 
 const ICON = "size-5";
 const SCENES: Record<Season, { label: string; nature: ReactNode; life: ReactNode }> = {
-  autumn: { label: "Autumn", nature: <Wind className={ICON} />, life: <><Coffee className={ICON} /></> },
+  autumn: { label: "Autumn", nature: null, life: null },
   winter: {
     label: "Winter",
     nature: <><CloudSun className={`${ICON} season-wind`} /><Wind className={`${ICON} season-wind`} /></>,
@@ -60,8 +60,8 @@ export function SeasonScene({ date = new Date() }: { date?: Date }) {
       )}
       <div className="flex items-center gap-3 px-4 pb-3 text-muted-foreground/70" aria-label={`${s.label}`}>
         <span className="flex items-center gap-1.5">{season === "autumn" ? <><Leaf className="w-4 text-tape-2" /><Leaf className="w-3 text-tape-1" /></> : s.nature}</span>
-        <span className="h-px flex-1 bg-border" />
-        <span className="flex items-center gap-2">{s.life}</span>
+        {s.life && <><span className="h-px flex-1 bg-border" />
+        <span className="flex items-center gap-2">{s.life}</span></>}
       </div>
     </>
   );
