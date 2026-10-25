@@ -26,7 +26,7 @@ export const putVaultMeta = async (m: VaultMeta) => (await db()).put("meta", m, 
 
 // ---- Settings (encrypted) ----
 export type WhisperModel = "base" | "small";
-export type Settings = { autoLockMin: number; whisperModel: WhisperModel; mode: "listen" | "reflect"; models: Record<Feature, ModelChoice> };
+export type Settings = { autoLockMin: number; whisperModel: WhisperModel; whisperModelChosen?: boolean; mode: "listen" | "reflect"; models: Record<Feature, ModelChoice> };
 export const DEFAULT_SETTINGS: Settings = { autoLockMin: 5, whisperModel: "small", mode: "listen", models: MODEL_DEFAULTS };
 export const platformSettings = (): Settings => ({ ...DEFAULT_SETTINGS, whisperModel: defaultWhisperModel() });
 
@@ -36,7 +36,9 @@ export async function getSettings(key: CryptoKey): Promise<Settings> {
   // Upgrade the former default once; later explicit base choices remain respected.
   const migrated = await (await db()).get("meta", "multilingualSmallDefault");
   const native = isNativeAndroid();
-  const result = { ...platformSettings(), ...saved, whisperModel: native ? saved.whisperModel ?? "base" : migrated ? saved.whisperModel ?? "small" : "small", models: { ...MODEL_DEFAULTS, ...saved.models } } as Settings;
+  const nativeMigrated = await (await db()).get("meta", "nativeBaseDefault");
+  const result = { ...platformSettings(), ...saved, whisperModel: native ? (!nativeMigrated && !saved.whisperModelChosen ? "base" : saved.whisperModel ?? "base") : migrated ? saved.whisperModel ?? "small" : "small", models: { ...MODEL_DEFAULTS, ...saved.models } } as Settings;
+  if (native && !nativeMigrated) { await putSettings(key, result); await (await db()).put("meta", true, "nativeBaseDefault"); }
   if (!migrated && !native) { await putSettings(key, result); await (await db()).put("meta", true, "multilingualSmallDefault"); }
   return result;
 }

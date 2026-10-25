@@ -50,7 +50,7 @@ describe("native Android rules", () => {
     expect(defaultWhisperModel(true)).toBe("base"); expect(defaultWhisperModel(false)).toBe("small");
     const { key } = await createVault("owner-pass", 1000);
     await putSettings(key, platformSettings()); expect((await getSettings(key)).whisperModel).toBe("base");
-    await putSettings(key, { ...platformSettings(), whisperModel: "small" }); expect((await getSettings(key)).whisperModel).toBe("small");
+    await putSettings(key, { ...platformSettings(), whisperModel: "small", whisperModelChosen: true }); expect((await getSettings(key)).whisperModel).toBe("small");
   });
   it("writes the encrypted backup before sharing the returned file URI", async () => {
     const ciphertext = '{"format":"diary-encrypted-backup","stores":{"entries":[{"ct":[1,2,3]}]}}';

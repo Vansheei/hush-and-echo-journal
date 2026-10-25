@@ -120,10 +120,10 @@ function SettingsPage() {
                 type="radio"
                 name="model"
                 checked={settings.whisperModel === v}
-                onChange={() => updateSettings({ whisperModel: v })}
+                onChange={() => updateSettings({ whisperModel: v, whisperModelChosen: true })}
               />
               <span className="flex-1">{l}</span>
-              <span className="text-sm text-muted-foreground">{d}</span>
+              <span className="max-w-[45%] text-sm text-muted-foreground">{d}</span>
             </label>
           ))}
         </section>
