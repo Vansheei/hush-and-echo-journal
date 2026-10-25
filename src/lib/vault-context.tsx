@@ -115,7 +115,9 @@ export function VaultProvider({ children }: { children: ReactNode }) {
   // Auto-lock: inactivity and leaving the app (skipped while recording).
   useEffect(() => {
     if (status !== "unlocked") return;
-    const touch = () => (lastActive.current = Date.now());
+    const touch = () => {
+      lastActive.current = Date.now();
+    };
     const onVis = () => {
       if (document.visibilityState === "hidden" && !busy.current) lock();
     };
@@ -123,7 +125,10 @@ export function VaultProvider({ children }: { children: ReactNode }) {
     evs.forEach((e) => window.addEventListener(e, touch, { passive: true }));
     document.addEventListener("visibilitychange", onVis);
     const t = window.setInterval(() => {
-      if (busy.current) return touch();
+      if (busy.current) {
+        touch();
+        return;
+      }
       if (Date.now() - lastActive.current > settings.autoLockMin * 60_000) lock();
     }, 5000);
     return () => {
