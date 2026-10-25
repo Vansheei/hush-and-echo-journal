@@ -152,6 +152,12 @@
   --sidebar-border: var(--border);
   --sidebar-ring: var(--ring);
 }
+[data-cover="green"] {
+  --cover: var(--bottle);
+  --cover-deep: var(--bottle-deep);
+  --ribbon: var(--plum);
+  --glow: oklch(0.55 0.13 345);
+}
 [data-cover="plum"] {
   --cover: var(--plum);
   --cover-deep: var(--plum-deep);
