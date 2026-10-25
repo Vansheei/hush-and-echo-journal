@@ -19,6 +19,8 @@ import {
 import { deleteEntry, getEntry, loadMedia, putEntry, type Entry } from "@/lib/storage/db";
 import { useVault } from "@/lib/vault-context";
 import { ReflectionPanel } from "@/components/diary/ReflectionPanel";
+import { RibbonMark } from "@/components/diary/EntryToken";
+import { pageTurn } from "@/lib/sounds";
 
 export const Route = createFileRoute("/entry/$id")({
   ssr: false,
@@ -42,6 +44,7 @@ function EntryPage() {
   const [entry, setEntry] = useState<Entry | null | undefined>(undefined);
   const [url, setUrl] = useState<string | null>(null);
   const [now, setNow] = useState(0);
+  const [view, setView] = useState<"journal" | "timed">("journal");
   const media = useRef<HTMLVideoElement & HTMLAudioElement>(null);
 
   useEffect(() => {
@@ -121,8 +124,32 @@ function EntryPage() {
             ))}
         </div>
 
+        <button
+          aria-pressed={!!entry.ribbon}
+          onClick={async () => {
+            if (!key) return;
+            const latest = await getEntry(key, entry.id);
+            if (latest) { await putEntry(key, { ...latest, ribbon: !latest.ribbon }); bump(); }
+          }}
+          className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm ${entry.ribbon ? "border-ribbon bg-accent text-ribbon" : "border-border text-muted-foreground"}`}
+        >
+          <RibbonMark className="w-3" /> {entry.ribbon ? "Ribbon marked" : "Mark with ribbon"}
+        </button>
+
         <section className="space-y-3">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Transcript</h2>
+          <div className="flex items-end justify-between gap-3">
+            <h2 className="font-display text-3xl">Transcript</h2>
+            {entry.segments.length > 0 && (
+              <div className="flex gap-1 text-sm" role="tablist">
+                {(["journal", "timed"] as const).map((v) => (
+                  <button key={v} role="tab" aria-selected={view === v} onClick={() => { setView(v); pageTurn(); }}
+                    className={`rounded-full px-3 py-0.5 ${view === v ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
+                    {v === "journal" ? "Journal" : "With times"}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           {entry.status === "pending" && <p className="text-sm text-muted-foreground">Waiting to transcribe…</p>}
           {entry.status === "transcribing" && (
             <div className="space-y-2">
@@ -152,7 +179,10 @@ function EntryPage() {
           {entry.status === "done" && entry.segments.length === 0 && (
             <p className="text-sm text-muted-foreground">No speech detected.</p>
           )}
-          <ul className="space-y-1">
+          {view === "journal" && entry.segments.length > 0 && (
+            <div className="journal-page">{entry.segments.map((s) => s.text.trim()).join(" ")}</div>
+          )}
+          <ul className={`space-y-1 ${view === "journal" ? "hidden" : ""}`}>
             {entry.segments.map((s, i) => {
               const active = now >= s.start && now < s.end;
               return (
