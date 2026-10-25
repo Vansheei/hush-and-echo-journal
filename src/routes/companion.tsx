@@ -14,6 +14,8 @@ import { contextText, learningText, getPersonal, updatePersonal, type ChatMessag
 import { requestReflection } from "@/lib/ai/anthropic";
 import { transcribe } from "@/lib/transcription";
 import { semanticSearch, stopSearch } from "@/lib/search";
+import { localVoices, speakLocal, stopSpeech, type LocalVoice } from "@/lib/native/speech";
+import { registerBackHandler } from "@/lib/native/back";
 
 export const Route = createFileRoute("/companion")({ ssr: false, head: () => ({ meta: [
   { title: "Diary — Companion" }, { name: "description", content: "Your private voice and text diary companion." }, { property: "og:title", content: "Diary — Companion" }, { property: "og:description", content: "An explicitly requested conversation with your diary companion." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
@@ -27,7 +29,7 @@ function CompanionPage() {
   const [draft, setDraft] = useState("");
   const [approach, setApproach] = useState("Combined");
   const [speak, setSpeak] = useState(true);
-  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [voices, setVoices] = useState<LocalVoice[]>([]);
   const [voice, setVoice] = useState("");
   const [convo, setConvo] = useState(false);
   const [listening, setListening] = useState(false);
@@ -55,27 +57,24 @@ function CompanionPage() {
   useEffect(() => { let active = true; if (key) getPersonal(key).then(d => { if (active) setMessages(d.chat); }); return () => { active = false; }; }, [key, version]);
   useEffect(() => {
     alive.current = true;
-    const load = () => { if ("speechSynthesis" in window) setVoices(window.speechSynthesis.getVoices().filter(v => v.localService)); };
+    const load = () => { void localVoices().then(v => { if (alive.current) setVoices(v); }).catch(() => { if (alive.current) setStatus("No on-device voice is available. Text replies remain available."); }); };
     load();
     window.speechSynthesis?.addEventListener("voiceschanged", load);
     return () => {
       alive.current = false; convoRef.current = false;
       turnStop.current?.(); controller.current?.abort();
       stream.current?.getTracks().forEach(t => t.stop()); stream.current = null;
-      window.speechSynthesis?.cancel();
+      void stopSpeech().catch(() => {});
       window.speechSynthesis?.removeEventListener("voiceschanged", load);
       stopSearch(); setVaultBusy(false);
     };
   }, [setVaultBusy]);
 
-  function read(text: string) {
-    if (!("speechSynthesis" in window)) { setStatus("This phone has no built-in speech voice."); return; }
+  async function read(text: string) {
     const selected = voices.find(v => v.voiceURI === voice) ?? voices[0];
     if (!selected) { setStatus("No on-device voice is installed. Text replies remain available."); return; }
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.voice = selected; utterance.lang = selected.lang; utterance.rate = 1.15;
-    window.speechSynthesis.speak(utterance);
+    try { await speakLocal(text, selected); }
+    catch { if (alive.current) setStatus("Voice playback failed. Install an offline Android voice or use text replies."); }
   }
 
   /** One listening turn: records until you stop speaking, then transcribes locally. */
@@ -134,10 +133,14 @@ function CompanionPage() {
     convoRef.current = false; setConvo(false);
     turnStop.current?.(); turnStop.current = null;
     controller.current?.abort();
-    window.speechSynthesis?.cancel();
+    void stopSpeech().catch(() => {});
     stream.current?.getTracks().forEach(t => t.stop()); stream.current = null;
     setListening(false); setVaultBusy(false); setStatus("Conversation ended.");
   }
+  useEffect(() => registerBackHandler(() => {
+    if (!convoRef.current && !sending.current) return false;
+    endConversation(); return true;
+  }), []);
 
   /** Pick only the most relevant past moments via local meaning search; never every transcript. */
   async function buildPacket(text: string): Promise<Packet> {
@@ -185,7 +188,7 @@ function CompanionPage() {
       const assistant: ChatMessage = { id: crypto.randomUUID(), role: "assistant", text: response.text, suggestions: response.suggestions, sources: p.sources };
       await updatePersonal(key, d => ({ ...d, chat: [...d.chat, user, assistant] }));
       if (!alive.current) return;
-      bump(); setStatus(""); if (speakRef.current) read(response.text);
+      bump(); setStatus(""); if (speakRef.current) await read(response.text);
     } catch (e) { if (alive.current && !abort.signal.aborted) setStatus(e instanceof Error ? e.message : "Conversation failed."); }
     finally {
       controller.current = null; sending.current = false;
@@ -205,14 +208,14 @@ function CompanionPage() {
   return <div className="app-shell"><AppHeader back title="Night Companion" /><main className="space-y-5 px-4 pb-20">
     <div className="flex flex-wrap gap-2">{["CBT", "Interpersonal", "Combined"].map(v => <Button size="sm" key={v} variant={approach === v ? "default" : "outline"} onClick={() => setApproach(v)} disabled={busy}>{v}</Button>)}</div>
     <label className="flex items-center justify-between gap-3">Trust this conversation: skip the send preview until you leave or lock<Switch checked={trust} onCheckedChange={setTrust} /></label>
-    <label className="flex items-center justify-between gap-3">Read replies aloud<Switch checked={speak} onCheckedChange={v => { setSpeak(v); if (!v && "speechSynthesis" in window) window.speechSynthesis.cancel(); }} /></label>
+    <label className="flex items-center justify-between gap-3">Read replies aloud<Switch checked={speak} onCheckedChange={v => { setSpeak(v); if (!v) void stopSpeech().catch(() => {}); }} /></label>
     {voices.length > 0 && <Select value={voice || voices[0]?.voiceURI || ""} onValueChange={setVoice}><SelectTrigger aria-label="On-device voice"><SelectValue /></SelectTrigger><SelectContent>{voices.map(v => <SelectItem key={v.voiceURI} value={v.voiceURI}>{v.name} · {v.lang}</SelectItem>)}</SelectContent></Select>}
     <div className="flex flex-col items-center gap-2 py-2">
       <button
         aria-label={convo ? "End conversation" : "Start talking"}
         aria-pressed={convo}
         onClick={toggleConversation}
-        disabled={busy && !listening}
+        disabled={!convo && busy}
         className={`flex size-20 items-center justify-center rounded-full border-2 transition-colors ${convo ? "border-ribbon bg-ribbon/10 text-ribbon" : "border-gold bg-card text-cover"}`}
       >
         {convo ? <Square className="size-8" /> : <Mic className="size-8" />}
@@ -223,7 +226,7 @@ function CompanionPage() {
       <h2 className="font-display text-2xl">{m.role === "user" ? "You" : "Companion"}</h2>
       <p className="whitespace-pre-wrap break-words">{m.text}</p>
       {m.role === "assistant" && <>
-        {(m.sources?.length ?? 0) > 0 && <p className="text-sm text-muted-foreground">Used these moments: {m.sources!.map((s, i) => <Link key={i} to="/entry/$id" params={{ id: s.entryId }} search={{ t: s.start }} className="mr-2 text-primary underline">{fmtDuration(s.start)}</Link>)}</p>}
+        {(m.sources?.length ?? 0) > 0 && <p className="text-sm text-muted-foreground">Used these moments: {m.sources?.map((s, i) => <Link key={i} to="/entry/$id" params={{ id: s.entryId }} search={{ t: s.start }} className="mr-2 text-primary underline">{fmtDuration(s.start)}</Link>)}</p>}
         <div className="flex gap-1"><Button size="icon" variant="ghost" aria-label="Read reply" title="Read reply" onClick={() => read(m.text)}><Volume2 /></Button>{(["helpful", "unhelpful"] as const).map(f => <Button key={f} size="icon" variant={m.feedback === f ? "secondary" : "ghost"} aria-label={f === "helpful" ? "Helpful reply" : "Unhelpful reply"} aria-pressed={m.feedback === f} title={f} onClick={async () => { if (!key) return; try { await updatePersonal(key, d => ({ ...d, chat: d.chat.map(x => x.id === m.id ? { ...x, feedback: f } : x) })); bump(); } catch { setStatus("Could not save feedback."); } }}>{f === "helpful" ? <ThumbsUp /> : <ThumbsDown />}</Button>)}</div>
         <Clarifications suggestions={m.suggestions} />
       </>}

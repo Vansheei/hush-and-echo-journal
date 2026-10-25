@@ -14,6 +14,8 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SecuritySettings } from "@/components/diary/SecuritySettings";
 import { FutureFeatures } from "@/components/diary/FutureFeatures";
+import { deliverBackup } from "@/lib/native/backup";
+import { isNativeAndroid } from "@/lib/native/platform";
 
 export const Route = createFileRoute("/settings")({
   ssr: false,
@@ -77,11 +79,7 @@ function SettingsPage() {
             setBackupBusy(true); setNotice("");
             try {
               const blob = await exportBackup();
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement("a"); a.href = url; a.download = `diary-encrypted-${new Date().toISOString().slice(0, 10)}.json`;
-              document.body.appendChild(a); a.click(); a.remove();
-              setTimeout(() => URL.revokeObjectURL(url), 60_000);
-              setNotice("Backup download started. Check your downloads and keep it outside this browser. Use the passphrase or recovery phrase valid today.");
+              setNotice(await deliverBackup(blob, `diary-encrypted-${new Date().toISOString().slice(0, 10)}-${Date.now()}.json`));
             } catch { setNotice("Backup could not be exported. Please try again."); }
             finally { setBackupBusy(false); }
           }}>{backupBusy ? "Exporting…" : "Export encrypted backup"}</Button>
@@ -113,8 +111,8 @@ function SettingsPage() {
           <p className="text-sm text-muted-foreground">Multilingual · automatic language detection · no translation. Model files stay on this phone unless browser storage is cleared or evicted.</p>
           {(
             [
-              ["base", "Multilingual base", "Lighter download"],
-              ["small", "Multilingual small", "Default · more accurate"],
+              ["base", "Multilingual base", isNativeAndroid() ? "Android default · faster, slightly less accurate" : "Lighter download"],
+              ["small", "Multilingual small", isNativeAndroid() ? "Slower · more accurate" : "Default · more accurate"],
             ] as [WhisperModel, string, string][]
           ).map(([v, l, d]) => (
             <label key={v} className="flex items-center gap-3 py-1">
@@ -122,10 +120,10 @@ function SettingsPage() {
                 type="radio"
                 name="model"
                 checked={settings.whisperModel === v}
-                onChange={() => updateSettings({ whisperModel: v })}
+                onChange={() => updateSettings({ whisperModel: v, whisperModelChosen: true })}
               />
               <span className="flex-1">{l}</span>
-              <span className="text-sm text-muted-foreground">{d}</span>
+              <span className="max-w-[45%] text-sm text-muted-foreground">{d}</span>
             </label>
           ))}
         </section>

@@ -1,5 +1,6 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { pageTurn } from "@/lib/sounds";
+import { registerBackHandler } from "@/lib/native/back";
 
 type Turn = { dir: 1 | -1; p: number; settling?: boolean; commit?: boolean };
 
@@ -8,13 +9,21 @@ export function TurnableBook({ pages, page, onPage }: { pages: ReactNode[]; page
   const [turn, setTurn] = useState<Turn | null>(null);
   const ref = useRef<HTMLDivElement>(null);
   const start = useRef<{ x: number; y: number; axis?: "x" | "y"; moved: boolean } | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(timer.current), []);
 
   const finish = (t: Turn) => {
     const commit = t.p > 0.3;
     pageTurn();
     setTurn({ ...t, p: commit ? 1 : 0, settling: true, commit });
-    setTimeout(() => { if (commit) onPage(page + t.dir); setTurn(null); }, 560);
+    timer.current = setTimeout(() => { if (commit) onPage(page + t.dir); setTurn(null); }, 560);
   };
+  useEffect(() => registerBackHandler(() => {
+    if (turn) return true;
+    if (page <= 0) return false;
+    finish({ dir: -1, p: 1 });
+    return true;
+  }), [page, turn, onPage]);
 
   const onDown = (e: React.PointerEvent) => { if (!turn?.settling) start.current = { x: e.clientX, y: e.clientY, moved: false }; };
   const onMove = (e: React.PointerEvent) => {

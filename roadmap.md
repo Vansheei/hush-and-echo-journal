@@ -1,9 +1,12 @@
 # Diary roadmap
 
+- [x] Android native upgrades: biometric-protected diary key, local TTS at 1.15x, encrypted file sharing, back gesture navigation, native base-model default; 42 automated tests and browser fallback flow verified. Phase 5 not started.
+- [ ] Nothing Phone 2a native checks: enable/lock/fingerprint and PIN fallback; hear a reply with an installed offline voice; export/save backup via share sheet; back from chapters to index and from other pages; confirm base selected. Blocked on an installed APK and physical phone.
+
 - [x] Security group, optional PIN, recovery passphrase reset, clearer fingerprint refusal guidance, warm 40%-faded writing sheet; 36 tests and browser PIN/reset/save flow passed.
 - [x] Audit Phase 4 and APK readiness before Phase 5: features present, live Claude/phone tests remain unverified, people matching approximate, no Android build project.
 - [ ] Native Android contacts and notification permission requests (blocked: no Android package/permission bridge exists; browser cannot grant them).
-- [ ] APK build/install readiness (blocked: native project, permissions, biometric integration, packaging/signing and actual device validation remain absent).
+- [ ] APK build/install readiness: native project, plugin registration and fixed signing are configured; Gradle compilation awaits GitHub Action and installation/device behavior require the owner's phone.
 
 - [x] Add secure device unlock with passphrase fallback and six coming-later interfaces; 34 tests pass, simulated PRF setup/lock/unlock/removal verified.
 - [ ] Verify fingerprint unlock on the owner's device (physical biometrics and browser PRF support cannot be tested here).
