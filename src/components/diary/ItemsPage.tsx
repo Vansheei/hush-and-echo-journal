@@ -55,7 +55,7 @@ export function ItemsPage({ kind }: { kind: DiaryItem["kind"] }) {
           </div>
         </li>)}
       </ul>
-      {!items.some((i) => i.closed === closed) && <p className="text-sm text-muted-foreground">{t("No")}{closed ? kind === "loose" ? t("resolved items") : t("archived worries") : kind === "loose" ? t("loose ends") : t("parked worries")}.</p>}
+      {!items.some((i) => i.closed === closed) && <p className="text-sm text-muted-foreground">{t("No {items}.", { items: t(closed ? kind === "loose" ? "resolved items" : "archived worries" : kind === "loose" ? "loose ends" : "parked worries") })}</p>}
     </main>
   </div>;
 }

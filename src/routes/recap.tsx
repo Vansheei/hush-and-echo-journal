@@ -60,7 +60,7 @@ function RecapPage() {
   }
 
   return <div className="app-shell"><AppHeader back title={t("The Week’s Tale")} /><main className="space-y-5 px-4 pb-20">
-    <p className="text-sm text-muted-foreground">{entries.length ? `${entries.length} ${entries.length === 1 ? "entry" : "entries"} from the last 7 days. Nothing is sent unless you ask.` : t("No finished entries from the last 7 days yet.")}</p>
+    <p className="text-sm text-muted-foreground">{entries.length ? t("{count} entries from the last 7 days. Nothing is sent unless you ask.", { count: entries.length }) : t("No finished entries from the last 7 days yet.")}</p>
     <Button disabled={!entries.length || busy} onClick={prepare}>{busy ? t("Waiting for Claude…") : t("Ask for The Week’s Tale")}</Button>
     {recap && <section className="scroll-letter"><div className="scroll-rod" /><div className="scroll-body space-y-4">
       <p className="font-display text-3xl">{t("My dearest Vanshi,")}</p>

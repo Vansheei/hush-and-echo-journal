@@ -90,7 +90,7 @@ export function SetupScreen() {
               <Input
                 key={i}
                 autoCapitalize="none"
-                placeholder={`Word #${i + 1}`}
+                placeholder={t("Word #{number}", { number: i + 1 })}
                 value={answers[i] ?? ""}
                 onChange={(e) => setAnswers((a) => ({ ...a, [i]: e.target.value }))}
               />

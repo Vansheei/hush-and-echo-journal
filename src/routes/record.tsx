@@ -184,7 +184,7 @@ function RecordPage() {
                 onClick={() => setKind(k)}
                 className={`flex items-center gap-1 rounded-full px-4 py-1.5 capitalize ${kind === k ? "bg-stage-foreground text-stage" : ""}`}
               >
-                {k === "video" ? <Video className="size-4" /> : <Mic className="size-4" />} {k}
+                {k === "video" ? <Video className="size-4" /> : <Mic className="size-4" />} {t(k === "video" ? "Video" : "Audio")}
               </button>
             ))}
           </div>

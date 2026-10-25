@@ -110,7 +110,7 @@ function CompanionPage() {
       setBusy(true); setStatus("Transcribing on this phone…");
       try {
         const segments = await transcribe(new Blob(chunks, { type: rec.mimeType }), settings.whisperModel,
-          p => { if (alive.current) setStatus(`${p.phase === "download" ? "Preparing local speech model" : "Transcribing"} ${Math.round(p.pct)}%…`); });
+          p => { if (alive.current) setStatus(`${t(p.phase === "download" ? "Preparing local speech model" : "Transcribing")} ${Math.round(p.pct)}%…`); });
         if (!alive.current || !convoRef.current) return;
         const text = segments.map(s => s.text).join(" ").trim();
         setBusy(false);
@@ -231,7 +231,7 @@ function CompanionPage() {
       <p className="whitespace-pre-wrap break-words">{m.text}</p>
       {m.role === "assistant" && <>
         {(m.sources?.length ?? 0) > 0 && <p className="text-sm text-muted-foreground">{t("Used these moments:")}{m.sources?.map((s, i) => <Link key={i} to="/entry/$id" params={{ id: s.entryId }} search={{ t: s.start }} className="mr-2 text-primary underline">{fmtDuration(s.start)}</Link>)}</p>}
-        <div className="flex gap-1"><Button size="icon" variant="ghost" aria-label={t("Read reply")} title={t("Read reply")} onClick={() => read(m.text)}><Volume2 /></Button>{(["helpful", "unhelpful"] as const).map(f => <Button key={f} size="icon" variant={m.feedback === f ? "secondary" : "ghost"} aria-label={f === "helpful" ? t("Helpful reply") : t("Unhelpful reply")} aria-pressed={m.feedback === f} title={f} onClick={async () => { if (!key) return; try { await updatePersonal(key, d => ({ ...d, chat: d.chat.map(x => x.id === m.id ? { ...x, feedback: f } : x) })); bump(); } catch { setStatus("Could not save feedback."); } }}>{f === "helpful" ? <ThumbsUp /> : <ThumbsDown />}</Button>)}</div>
+        <div className="flex gap-1"><Button size="icon" variant="ghost" aria-label={t("Read reply")} title={t("Read reply")} onClick={() => read(m.text)}><Volume2 /></Button>{(["helpful", "unhelpful"] as const).map(f => <Button key={f} size="icon" variant={m.feedback === f ? "secondary" : "ghost"} aria-label={f === "helpful" ? t("Helpful reply") : t("Unhelpful reply")} aria-pressed={m.feedback === f} title={t(f === "helpful" ? "Helpful reply" : "Unhelpful reply")} onClick={async () => { if (!key) return; try { await updatePersonal(key, d => ({ ...d, chat: d.chat.map(x => x.id === m.id ? { ...x, feedback: f } : x) })); bump(); } catch { setStatus("Could not save feedback."); } }}>{f === "helpful" ? <ThumbsUp /> : <ThumbsDown />}</Button>)}</div>
         <Clarifications suggestions={m.suggestions} />
       </>}
     </article>)}</div>

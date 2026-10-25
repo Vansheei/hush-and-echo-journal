@@ -30,8 +30,8 @@ export const Route = createFileRoute("/")({
 
 type IndexItemLike = { label: string; onSelect: () => void };
 
-function dayLabel(t: number) {
-  const d = new Date(t);
+function dayLabel(timestamp: number) {
+  const d = new Date(timestamp);
   if (isToday(d)) return t("Today");
   if (isYesterday(d)) return t("Yesterday");
   return format(d, "EEEE, d MMMM yyyy");
@@ -101,8 +101,8 @@ function Timeline() {
         </button>
       </div>
       {groups.map(([label, list]) => (
-        <div key={t(label)} className="space-y-2">
-          <h3 className="font-display text-2xl">{t(label)} <span className="font-sans text-sm text-muted-foreground">{format(list[0]!.createdAt, "d MMMM yyyy")}</span></h3>
+        <div key={label} className="space-y-2">
+          <h3 className="font-display text-2xl">{t(label)} <span className="font-sans text-sm text-muted-foreground">{format(list[0]?.createdAt ?? Date.now(), "d MMMM yyyy")}</span></h3>
           {list.map(renderEntry)}
         </div>
       ))}

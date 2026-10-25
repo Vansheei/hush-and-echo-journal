@@ -62,7 +62,7 @@ export function TurnableBook({ pages, page, onPage }: { pages: ReactNode[]; page
       )}
       <div className="mt-3 flex items-center justify-between text-sm text-muted-foreground">
         <button type="button" disabled={page <= 0 || !!turn} onClick={() => finish({ dir: -1, p: 1 })} className="rounded-full border border-border px-3 py-0.5 disabled:opacity-30">{t("‹ Back")}</button>
-        <span>{t("Page")}{page + 1} {t("of")}{pages.length} {t("· drag to turn")}</span>
+        <span>{t("Page")} {page + 1} {t("of")} {pages.length} {t("· drag to turn")}</span>
         <button type="button" disabled={page >= pages.length - 1 || !!turn} onClick={() => finish({ dir: 1, p: 1 })} className="rounded-full border border-border px-3 py-0.5 disabled:opacity-30">{t("Next ›")}</button>
       </div>
     </div>

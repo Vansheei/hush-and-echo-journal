@@ -196,7 +196,7 @@ function EntryPage() {
               return (
                 <li key={i}>
                   <div className={`flex w-full gap-3 rounded-md px-2 py-1.5 text-left ${active ? "bg-secondary" : ""}`}>
-                    <Button variant="ghost" onClick={() => seek(s.start)} aria-label={`Play from ${fmtDuration(s.start)}`} className="h-auto w-10 shrink-0 p-0 font-mono text-xs text-muted-foreground">
+                    <Button variant="ghost" onClick={() => seek(s.start)} aria-label={t("Play from {time}", { time: fmtDuration(s.start) })} className="h-auto w-10 shrink-0 p-0 font-mono text-xs text-muted-foreground">
                       {fmtDuration(s.start)}
                     </Button>
                     <span className="leading-relaxed"><TranscriptWords entry={entry} segment={i} /></span>
