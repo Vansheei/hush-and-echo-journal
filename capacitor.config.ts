@@ -4,7 +4,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 const config: CapacitorConfig = {
   appId: "com.vanshika.diary",
   appName: "Vanshika's Diary",
-  webDir: "dist/client",
+  webDir: "android-web",
   android: { allowMixedContent: false },
   server: { androidScheme: "https" },
 };
