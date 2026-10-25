@@ -1,4 +1,5 @@
 import "fake-indexeddb/auto";
+import { Blob as NodeBlob } from "node:buffer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinWrap, createVault, decryptJSON, encryptJSON, unlockWithPinWrap } from "@/lib/crypto/vault";
 
@@ -53,10 +54,12 @@ describe("native Android rules", () => {
   });
   it("writes the encrypted backup before sharing the returned file URI", async () => {
     const ciphertext = '{"format":"diary-encrypted-backup","stores":{"entries":[{"ct":[1,2,3]}]}}';
-    await deliverBackup(new Blob([ciphertext]), "diary.json");
+    await deliverBackup(new NodeBlob([ciphertext]) as unknown as Blob, "diary.json");
     expect(mocks.write).toHaveBeenCalledWith({ path: "backups/diary.json", directory: "CACHE", data: ciphertext, encoding: "utf8" });
-    expect(mocks.share.mock.calls[0][0].files).toEqual(["content://backup"]);
-    expect(mocks.write.mock.invocationCallOrder[0]).toBeLessThan(mocks.share.mock.invocationCallOrder[0]);
+    expect(mocks.share.mock.calls[0]?.[0]?.files).toEqual(["content://backup"]);
+    const written = mocks.write.mock.invocationCallOrder[0], shared = mocks.share.mock.invocationCallOrder[0];
+    if (written === undefined || shared === undefined) throw new Error("Missing write or share");
+    expect(written).toBeLessThan(shared);
   });
   it("uses only local Android voices at 1.15x and waits for playback", async () => {
     mocks.voices.mockResolvedValue({ voices: [{ name: "remote", localService: false, voiceURI: "remote", lang: "en" }, { name: "offline", localService: true, voiceURI: "offline", lang: "en-IN" }] });
@@ -67,7 +70,7 @@ describe("native Android rules", () => {
     let ended = false; const speaking = speakLocal("reply", voice).then(() => { ended = true; });
     await vi.waitFor(() => expect(mocks.speak).toHaveBeenCalled());
     expect(ended).toBe(false);
-    expect(mocks.speak.mock.calls[0][0]).toEqual({ text: "reply", lang: "en-IN", voice: 1, rate: 1.15, queueStrategy: 0 });
+    expect(mocks.speak.mock.calls[0]?.[0]).toEqual({ text: "reply", lang: "en-IN", voice: 1, rate: 1.15, queueStrategy: 0 });
     complete?.(); await speaking; expect(ended).toBe(true);
     await stopSpeech(); expect(mocks.stop).toHaveBeenCalled();
   });
