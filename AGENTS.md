@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Architecture rules
+- Device unlock wraps the existing DEK using platform WebAuthn PRF with required user verification; store only credential metadata and ciphertext, invalidate on recovery, and keep passphrase fallback. Why: a biometric success flag alone cannot securely unlock an encrypted diary without retaining a decryption secret.
 - No backend: all data lives in IndexedDB on device, encrypted with a random data key wrapped by passphrase and recovery-phrase keys (`src/lib/crypto`, `src/lib/storage`). Why: the owner requires nothing to leave the device unencrypted.
 - App routes use `ssr: false` and the root wraps everything in ClientOnly + VaultProvider + Gate. Why: Web Crypto/IndexedDB/media are browser-only and the app must run in a Capacitor WebView.
 - Transcription runs in a Web Worker behind `src/lib/transcription`; tone analysis is a swappable voice-cue interface in `src/lib/tone` (audio + Whisper timestamps; per-entry Listen/Reflect overrides the Settings default) and browser-direct, explicitly confirmed AI lives in `src/lib/ai`. Why: keep inference isolated and avoid server access to diary content.

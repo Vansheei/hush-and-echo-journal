@@ -4,6 +4,7 @@ import { generateMnemonic, validateMnemonic } from "@scure/bip39";
 import { wordlist } from "@scure/bip39/wordlists/english.js";
 
 export type Enc = { iv: Uint8Array; ct: ArrayBuffer };
+export type DeviceWrap = { v: 1; id: Uint8Array; salt: Uint8Array; wrap: Enc };
 export type VaultMeta = {
   v: 1;
   iterations: number;
@@ -113,4 +114,22 @@ export async function changePassphrase(meta: VaultMeta, oldPass: string, newPass
   const next: VaultMeta = { ...meta, ...(await wrapWithPass(raw, newPass, meta.iterations)) };
   raw.fill(0);
   return next;
+}
+
+async function deviceWrappingKey(secret: Uint8Array) {
+  if (secret.byteLength !== 32) throw new Error("Invalid device encryption secret.");
+  const base = await crypto.subtle.importKey("raw", secret as BufferSource, "HKDF", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({ name: "HKDF", hash: "SHA-256", salt: new Uint8Array(32), info: te.encode("diary-device-wrap-v1") }, base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+}
+
+export async function createDeviceWrap(meta: VaultMeta, pass: string, secret: Uint8Array, id: Uint8Array, salt: Uint8Array): Promise<DeviceWrap> {
+  const raw = await unwrap(pass, meta.passSalt, meta.passWrap, meta.iterations);
+  try { return { v: 1, id, salt, wrap: await encryptBytes(await deviceWrappingKey(secret), raw as BufferSource) }; }
+  finally { raw.fill(0); }
+}
+
+export async function unlockWithDeviceWrap(record: DeviceWrap, secret: Uint8Array) {
+  const raw = new Uint8Array(await decryptBytes(await deviceWrappingKey(secret), record.wrap));
+  try { return await importDek(raw); }
+  finally { raw.fill(0); }
 }

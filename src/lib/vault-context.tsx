@@ -16,6 +16,7 @@ import {
 import { decodeToMono16k, transcribeAudio, type TranscribeProgress } from "@/lib/transcription";
 import { requestPersistence } from "@/lib/storage/persistence";
 import { defaultToneAnalyzer } from "@/lib/tone";
+import { unlockUsingDevice, removeDeviceUnlock } from "@/lib/crypto/device";
 
 type Status = "loading" | "setup" | "locked" | "unlocked";
 
@@ -28,6 +29,7 @@ type Ctx = {
   bump: () => void;
   lock: () => void;
   unlock: (pass: string) => Promise<void>;
+  unlockDevice: () => Promise<void>;
   recover: (phrase: string, newPass: string) => Promise<void>;
   finishSetup: (meta: VaultMeta, key: CryptoKey) => Promise<void>;
   updateSettings: (s: Partial<Settings>) => Promise<void>;
@@ -102,6 +104,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
       if (!meta) throw new Error("No diary found");
       const r = await resetPassphrase(meta, phrase, newPass);
       await putVaultMeta(r.meta);
+      await removeDeviceUnlock();
       await openWith(r.key);
     },
     [openWith],
@@ -213,6 +216,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
         bump,
         lock,
         unlock,
+        unlockDevice: async () => { await openWith(await unlockUsingDevice()); },
         recover,
         finishSetup,
         updateSettings,

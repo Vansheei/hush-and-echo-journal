@@ -1,5 +1,8 @@
 # Diary roadmap
 
+- [x] Add secure device unlock with passphrase fallback and six coming-later interfaces; 34 tests pass, simulated PRF setup/lock/unlock/removal verified.
+- [ ] Verify fingerprint unlock on the owner's device (physical biometrics and browser PRF support cannot be tested here).
+
 - [x] Warm larger lantern beside heading, autumn scroll tones, burgundy ribbons, 60% faded page artwork; correct default-thinking reply exhaustion and verify recap preview/scroll using a simulated Claude reply.
 
 - [x] Implement the four Phase 1 safeguards; verify recording through background lock, playback, ciphertext backup round-trip and lock lifecycle tests.
