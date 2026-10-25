@@ -33,6 +33,15 @@ it("device unlock enters the same vault and releases its key when locked", async
   act(() => vault?.lock());
   expect(vault?.status).toBe("locked"); expect(vault?.key).toBeNull();
 });
+it("keeps app-switch locking paused during testing", async () => {
+  render(<VaultProvider><Probe /></VaultProvider>);
+  await waitFor(() => expect(vault?.status).toBe("locked"));
+  await act(async () => vault?.unlock("pass"));
+  const visibility = vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden");
+  act(() => document.dispatchEvent(new Event("visibilitychange")));
+  expect(vault?.status).toBe("unlocked");
+  visibility.mockRestore();
+});
 it("finishes current transcription encrypted after lock without starting another job", async () => {
   const entry = { id: "job", status: "pending", segments: [] };
   mocks.list.mockResolvedValue([entry]);

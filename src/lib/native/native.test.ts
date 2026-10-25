@@ -83,4 +83,8 @@ describe("native Android rules", () => {
     await handleNativeBack({ canGoBack: false, path: "/settings", back, home, exit }); expect(home).toHaveBeenCalledOnce(); expect(exit).not.toHaveBeenCalled();
     await handleNativeBack({ canGoBack: false, path: "/", back, home, exit }); expect(exit).toHaveBeenCalledOnce();
   });
+  it("uses the selected companion speed for Android speech", async () => {
+    await speakLocal("reply", { voiceURI: "offline", name: "Offline", lang: "en", nativeIndex: 0 }, 1.25);
+    expect(mocks.speak.mock.calls[0]?.[0]?.rate).toBe(1.25);
+  });
 });
