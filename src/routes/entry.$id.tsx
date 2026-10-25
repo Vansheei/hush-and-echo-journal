@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { deleteEntry, getEntry, loadMedia, putEntry, type Entry } from "@/lib/storage/db";
 import { useVault } from "@/lib/vault-context";
+import { ReflectionPanel } from "@/components/diary/ReflectionPanel";
 
 export const Route = createFileRoute("/entry/$id")({
   ssr: false,
@@ -44,18 +45,23 @@ function EntryPage() {
   const media = useRef<HTMLVideoElement & HTMLAudioElement>(null);
 
   useEffect(() => {
-    if (key) getEntry(key, id).then((e) => setEntry(e ?? null));
+    let active = true;
+    if (key) getEntry(key, id).then((e) => { if (active) setEntry(e ?? null); });
+    return () => { active = false; };
   }, [key, id, version]);
 
   const ready = !!entry;
   useEffect(() => {
     if (!key || !entry) return;
     let u: string | null = null;
+    let active = true;
     loadMedia(key, entry).then((b) => {
+      if (!active) return;
       u = URL.createObjectURL(b);
       setUrl(u);
     });
     return () => {
+      active = false;
       if (u) URL.revokeObjectURL(u);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -166,6 +172,7 @@ function EntryPage() {
           </ul>
         </section>
 
+        <ReflectionPanel key={entry.id} entry={entry} />
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="ghost" className="text-destructive">

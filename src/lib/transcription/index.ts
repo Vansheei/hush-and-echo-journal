@@ -21,6 +21,12 @@ function getWorker() {
         else h.reject(new Error(e.data.message));
       }
     };
+    const fail = () => {
+      for (const h of handlers.values()) h.reject(new Error("Speech worker stopped. Please retry transcription."));
+      handlers.clear(); worker?.terminate(); worker = null;
+    };
+    worker.onerror = fail;
+    worker.onmessageerror = fail;
   }
   return worker;
 }
@@ -82,5 +88,6 @@ export async function transcribeAudio(audio: Float32Array, model: WhisperModel, 
     onProgress({ phase: "transcribe", pct: Math.round(((i + 1) / n) * 100) });
   }
   audio.fill(0);
+  if (!handlers.size) { worker?.terminate(); worker = null; }
   return segments;
 }
