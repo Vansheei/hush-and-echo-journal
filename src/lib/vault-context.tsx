@@ -14,7 +14,7 @@ import {
 } from "@/lib/storage/db";
 import { decodeToMono16k, transcribeAudio, type TranscribeProgress } from "@/lib/transcription";
 import { requestPersistence } from "@/lib/storage/persistence";
-import { textCueAnalyzer } from "@/lib/tone";
+import { defaultToneAnalyzer } from "@/lib/tone";
 
 type Status = "loading" | "setup" | "locked" | "unlocked";
 
@@ -177,7 +177,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
               { if (keyRef.current) setProgress((m) => ({ ...m, [job.entry.id]: p })); },
             );
             await completeEntry(job.writer, { ...job.entry, status: "done", segments, error: undefined,
-              toneNotes: textCueAnalyzer.analyze(segments.map((s) => s.text).join(" ")) }, job.revision);
+              toneNotes: defaultToneAnalyzer.analyze({ audio: job.audio, sampleRate: 16000, segments }) }, job.revision);
           } catch (err) {
             await completeEntry(job.writer, { ...job.entry, status: "error", error: err instanceof Error ? err.message : String(err) }, job.revision);
           } finally {

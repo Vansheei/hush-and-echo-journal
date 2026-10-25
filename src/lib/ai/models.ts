@@ -1,6 +1,6 @@
 export const MODELS = {
-  haiku: { label: "claude-haiku 5.5", id: "claude-haiku-5-5" },
-  sonnet: { label: "sonne 5.5", id: "claude-sonnet-5-5" },
+  haiku: { label: "Claude Haiku 5.5", id: "claude-haiku-5-5" },
+  sonnet: { label: "Claude Sonnet 5.5", id: "claude-sonnet-5-5" },
 } as const;
 export type ModelChoice = keyof typeof MODELS;
 export const FEATURES = ["extraction", "tagging", "notebook", "reflection", "companion", "recap", "drafts"] as const;
