@@ -13,6 +13,8 @@ import { useAppearance, setAppearance, type Cover } from "@/lib/appearance";
 import { BookCover } from "@/components/diary/BookCover";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DeviceUnlockSettings } from "@/components/diary/DeviceUnlockSettings";
+import { FutureFeatures } from "@/components/diary/FutureFeatures";
 
 export const Route = createFileRoute("/settings")({
   ssr: false,
@@ -69,6 +71,7 @@ function SettingsPage() {
     <div className="app-shell">
       <AppHeader back title="Settings" />
       <main className="space-y-6 px-4 pb-16">
+        <DeviceUnlockSettings />
         <section className="settings-card">
           <h2>Cover</h2>
           <div className="grid grid-cols-3 gap-3">
@@ -176,6 +179,7 @@ function SettingsPage() {
           </Button>
         </section>
 
+        <FutureFeatures />
         <p className="text-center text-sm text-muted-foreground">
           Google Drive sync and a natural cloud voice are reserved for later.
         </p>

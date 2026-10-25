@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Fingerprint } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,9 +6,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { useVault } from "@/lib/vault-context";
 import { touchPoint } from "@/lib/appearance";
 import { BookCover } from "./BookCover";
+import { getDeviceWrap } from "@/lib/crypto/device";
 
 export function LockScreen({ closing = false }: { closing?: boolean }) {
-  const { unlock, recover } = useVault();
+  const { unlock, unlockDevice, recover } = useVault();
+  const [deviceEnabled, setDeviceEnabled] = useState(false);
+  useEffect(() => { let active = true; getDeviceWrap().then((wrap) => { if (active) setDeviceEnabled(!!wrap); }); return () => { active = false; }; }, []);
   const [mode, setMode] = useState<"pass" | "recover">("pass");
   const [pass, setPass] = useState("");
   const [phrase, setPhrase] = useState("");
@@ -63,8 +66,11 @@ export function LockScreen({ closing = false }: { closing?: boolean }) {
             </BookCover>
           </div>
           <div className="flex flex-col items-center gap-2 text-gold/80">
-            <Button type="button" variant="ghost" className="text-gold/70" disabled>
-              <Fingerprint /> Fingerprint · coming later
+            <Button type="button" variant="ghost" className="text-gold/70" disabled={busy} onClick={() => {
+              if (deviceEnabled) void run(unlockDevice);
+              else setErr("Open with your passphrase, then enable fingerprint unlock in Settings.");
+            }}>
+              <Fingerprint /> Fingerprint unlock
             </Button>
             <button type="button" className="text-sm underline" onClick={() => setMode("recover")}>
               Forgot passphrase?
