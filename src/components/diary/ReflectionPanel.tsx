@@ -5,6 +5,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { getApiKey, getEntry, putEntry, putItem, type Entry } from "@/lib/storage/db";
 import { requestReflection } from "@/lib/ai/anthropic";
 import { useVault } from "@/lib/vault-context";
+import { contextText, getPersonal } from "@/lib/storage/personal";
+import { Clarifications } from "./Clarifications";
 
 export function ReflectionPanel({ entry }: { entry: Entry }) {
   const { key, settings, bump } = useVault();
@@ -13,6 +15,8 @@ export function ReflectionPanel({ entry }: { entry: Entry }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [context, setContext] = useState("");
+  useEffect(() => { let alive = true; if (key) getPersonal(key).then(d => { if (alive) setContext(contextText(d)); }); return () => { alive = false; }; }, [key, entry]);
   const controller = useRef<AbortController | null>(null);
   const active = useRef(true);
   useEffect(() => { active.current = true; return () => { active.current = false; controller.current?.abort(); }; }, []);
@@ -32,7 +36,7 @@ export function ReflectionPanel({ entry }: { entry: Entry }) {
       const apiKey = await getApiKey(key);
       if (!active.current) return;
       if (!apiKey) throw new Error("Save your Anthropic key in Settings first.");
-      const reflection = await requestReflection({ confirmed: true, mode, apiKey, text: outgoing, model: settings.models.reflection, signal: abort.signal });
+      const reflection = await requestReflection({ confirmed: true, mode, apiKey, text: outgoing, context, model: settings.models.reflection, signal: abort.signal });
       if (!active.current || abort.signal.aborted) return;
       const latest = await getEntry(key, entry.id);
       if (!active.current || !latest) return;
@@ -71,6 +75,7 @@ export function ReflectionPanel({ entry }: { entry: Entry }) {
     {mode === "reflect" && transcript.trim() && <Button onClick={() => { setError(""); setOpen(true); }}>Request reflection</Button>}
     {entry.reflection && <div className="space-y-3">
       <h2 className="font-medium">Reflection</h2><p className="whitespace-pre-wrap break-words">{entry.reflection.text}</p>
+      <Clarifications suggestions={entry.reflection.suggestions} />
       {entry.reflection.looseEnds.map((text, i) => <div key={`l${i}`} className="space-y-2"><p>{text}</p><Button size="sm" variant="outline" onClick={() => accept(text, "loose")}>Add to loose ends</Button></div>)}
       {entry.reflection.worries.map((text, i) => <div key={`w${i}`} className="space-y-2"><p>{text}</p><Button size="sm" variant="outline" onClick={() => accept(text, "worry")}>Park this worry</Button></div>)}
     </div>}
@@ -79,7 +84,7 @@ export function ReflectionPanel({ entry }: { entry: Entry }) {
       <DialogContent className="max-h-[85dvh] overflow-y-auto">
         <DialogHeader><DialogTitle>Send this text to Claude?</DialogTitle><DialogDescription>Only the text below will leave this device. No audio or video is sent.</DialogDescription></DialogHeader>
         <label className="flex gap-2 text-sm"><input type="checkbox" checked={includeTone} disabled={busy} onChange={(e) => setIncludeTone(e.target.checked)} />Include tone notes</label>
-        <pre className="max-h-72 overflow-y-auto whitespace-pre-wrap break-words bg-muted p-3 text-sm">{outgoing}</pre>
+        <pre className="max-h-72 overflow-y-auto whitespace-pre-wrap break-words bg-muted p-3 text-sm">{outgoing}{"\n\n"}{context}</pre>
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
         <div className="flex gap-2"><Button disabled={busy} onClick={reflect}>{busy ? "Waiting for Claude…" : "Confirm and send"}</Button><Button variant="outline" onClick={() => { controller.current?.abort(); setOpen(false); }}>Cancel</Button></div>
       </DialogContent>

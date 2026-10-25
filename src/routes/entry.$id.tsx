@@ -21,6 +21,7 @@ import { useVault } from "@/lib/vault-context";
 import { ReflectionPanel } from "@/components/diary/ReflectionPanel";
 import { RibbonMark } from "@/components/diary/EntryToken";
 import { pageTurn } from "@/lib/sounds";
+import { TranscriptWords } from "@/components/diary/TranscriptWords";
 
 export const Route = createFileRoute("/entry/$id")({
   ssr: false,
@@ -180,22 +181,19 @@ function EntryPage() {
             <p className="text-sm text-muted-foreground">No speech detected.</p>
           )}
           {view === "journal" && entry.segments.length > 0 && (
-            <div className="journal-page">{entry.segments.map((s) => s.text.trim()).join(" ")}</div>
+            <div className="journal-page">{entry.segments.map((s, i) => <span key={i}><TranscriptWords entry={entry} segment={i} />{" "}</span>)}</div>
           )}
           <ul className={`space-y-1 ${view === "journal" ? "hidden" : ""}`}>
             {entry.segments.map((s, i) => {
               const active = now >= s.start && now < s.end;
               return (
                 <li key={i}>
-                  <button
-                    onClick={() => seek(s.start)}
-                    className={`flex w-full gap-3 rounded-lg px-2 py-1.5 text-left transition-colors ${active ? "bg-secondary" : "active:bg-muted"}`}
-                  >
-                    <span className="w-10 shrink-0 pt-0.5 font-mono text-xs text-muted-foreground">
+                  <div className={`flex w-full gap-3 rounded-md px-2 py-1.5 text-left ${active ? "bg-secondary" : ""}`}>
+                    <Button variant="ghost" onClick={() => seek(s.start)} aria-label={`Play from ${fmtDuration(s.start)}`} className="h-auto w-10 shrink-0 p-0 font-mono text-xs text-muted-foreground">
                       {fmtDuration(s.start)}
-                    </span>
-                    <span className="leading-relaxed">{s.text}</span>
-                  </button>
+                    </Button>
+                    <span className="leading-relaxed"><TranscriptWords entry={entry} segment={i} /></span>
+                  </div>
                 </li>
               );
             })}
