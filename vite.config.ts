@@ -16,10 +16,10 @@ const ttsServerStub = {
   name: "tts-server-stub",
   enforce: "pre" as const,
   resolveId(this: { environment?: { name: string } }, id: string) {
-    if (id === TTS && this.environment && this.environment.name !== "client") return "\0tts-server-stub";
+    return id === TTS && this.environment && this.environment.name !== "client" ? "\0tts-server-stub" : null;
   },
   load(id: string) {
-    if (id === "\0tts-server-stub") return "export const TextToSpeech = {}; export const QueueStrategy = { Flush: 0, Add: 1 };";
+    return id === "\0tts-server-stub" ? "export const TextToSpeech = {}; export const QueueStrategy = { Flush: 0, Add: 1 };" : null;
   },
 };
 
