@@ -164,9 +164,9 @@ function EntryPage() {
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">
                 {p?.phase === "download" ? t("Downloading speech model (first time only)") : t("Transcribing on this phone")}…{" "}
-                {Math.round(p?.pcstartTime ?? 0)}%
+                {Math.round(p?.pct ?? 0)}%
               </p>
-              <Progress value={p?.pcstartTime ?? 0} />
+              <Progress value={p?.pct ?? 0} />
             </div>
           )}
           {entry.status === "error" && (
