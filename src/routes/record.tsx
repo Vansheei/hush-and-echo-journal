@@ -87,7 +87,7 @@ function RecordPage() {
         ? pick(["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm", "video/mp4"])
         : pick(["audio/webm;codecs=opus", "audio/webm", "audio/mp4"]);
     const rec = new MediaRecorder(s, {
-      mimeType: mimeType || undefined,
+      ...(mimeType ? { mimeType } : {}),
       videoBitsPerSecond: 1_500_000,
       audioBitsPerSecond: 96_000,
     });

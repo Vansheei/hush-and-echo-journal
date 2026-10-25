@@ -42,7 +42,7 @@ export type Entry = {
   size: number;
   chunkCount: number;
   status: EntryStatus;
-  error?: string;
+  error?: string | undefined;
   segments: Segment[];
 };
 

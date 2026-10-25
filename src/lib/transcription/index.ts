@@ -40,7 +40,7 @@ export async function decodeToMono16k(blob: Blob): Promise<Float32Array> {
     const out = new Float32Array(buf.length);
     for (let c = 0; c < buf.numberOfChannels; c++) {
       const ch = buf.getChannelData(c);
-      for (let i = 0; i < ch.length; i++) out[i] += ch[i] / buf.numberOfChannels;
+      for (let i = 0; i < ch.length; i++) out[i] = (out[i] ?? 0) + (ch[i] ?? 0) / buf.numberOfChannels;
     }
     return out;
   } finally {
