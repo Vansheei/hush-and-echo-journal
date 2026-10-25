@@ -2,7 +2,7 @@
 
 - [x] Diagnose GitHub APK failures using the latest job log; replace retired Android SDK `tools` default with explicit supported packages.
 - [x] Fix run #5 failure: speech plugin crashed start-page rendering in the web bundle step; lazy import + server stub, clean-copy build/sync verified.
-- [ ] Workflow: save full logs of each build step and upload them as an artifact when the APK build fails.
+- [x] Workflow: save full logs of each build step and upload them as an artifact when the APK build fails.
 - [ ] Run #7 still fails in the web bundle step on GitHub only (passes on a fresh GitHub clone here with Node 20/22 and CI=true); read the uploaded logs once available.
 - [ ] Confirm a successful GitHub APK run and download (blocked until the corrected workflow reaches GitHub and runs).
 
