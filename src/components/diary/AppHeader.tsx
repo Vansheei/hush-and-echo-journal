@@ -32,6 +32,19 @@ export function ScrollBanner({ children }: { children: ReactNode }) {
   );
 }
 
+/** A small hanging lantern drawn in plain ink. */
+function Lantern() {
+  return (
+    <svg viewBox="0 0 24 32" className="h-8 w-6" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" aria-hidden>
+      <path d="M12 1 v3 M9 4 h6 M7 7 h10 l-1.5 -3 h-7 Z" />
+      <path d="M7 7 C 4 12, 4 22, 7 26 h10 C 20 22, 20 12, 17 7" />
+      <path d="M12 7 v19 M8.5 9 C 7 14, 7 20, 8.5 25 M15.5 9 C 17 14, 17 20, 15.5 25" strokeWidth="0.8" />
+      <path d="M12 13 c -2 3, -1.5 5, 0 6 c 1.5 -1, 2 -3, 0 -6 Z" strokeWidth="0.9" />
+      <path d="M7 26 h10 l-1.5 3 h-7 Z" />
+    </svg>
+  );
+}
+
 export function AppHeader({ title, back }: { title: ReactNode; back?: boolean }) {
   const { lock } = useVault();
   return (
@@ -44,9 +57,12 @@ export function AppHeader({ title, back }: { title: ReactNode; back?: boolean })
           ) : <span className="size-10" />}
           <span className="flex-1" />
           <Link to="/settings" className="icon-btn" aria-label="Settings"><Settings className="size-5" /></Link>
-          <button className="icon-btn" aria-label="Lock now" onClick={lock}><Lock className="size-5" /></button>
+          <div className="flex flex-col items-center">
+            <button className="icon-btn" aria-label="Lock now" onClick={lock}><Lock className="size-5" /></button>
+            <Link to="/companion" className="icon-btn !size-12" aria-label="Night Companion" title="Night Companion"><Lantern /></Link>
+          </div>
         </div>
-        <div className="-mt-3 mb-2"><ScrollBanner>{title}</ScrollBanner></div>
+        <div className="-mt-14 mb-2"><ScrollBanner>{title}</ScrollBanner></div>
       </header>
     </>
   );
