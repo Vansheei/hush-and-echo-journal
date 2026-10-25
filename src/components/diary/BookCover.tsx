@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
-import { useAppearance } from "@/lib/appearance";
+import { useAppearance, type Cover } from "@/lib/appearance";
 
 const COVER_ART = { green: "/art/cover-green.webp", plum: "/art/cover-burgundy.webp", ocean: "/art/cover-blue.webp" } as const;
 
@@ -24,8 +24,9 @@ const SEEDS = HEADS.flatMap(([x, y], h) => [0, 1, 2, 3, 4].map((i) => ({
 // Daffodils in the art: they glow softly in place.
 const DAFFS: [number, number][] = [[9, 86], [14, 88], [92, 85], [88, 91]];
 
-export function BookCover({ children, lit = false }: { children?: ReactNode; lit?: boolean }) {
-  const { cover } = useAppearance();
+export function BookCover({ children, lit = false, variant }: { children?: ReactNode; lit?: boolean; variant?: Cover }) {
+  const chosen = useAppearance().cover;
+  const cover = variant ?? chosen;
   return (
     <div className="book-cover [container-type:inline-size]">
       <img src={COVER_ART[cover] ?? COVER_ART.green} alt="Vanshika’s Diary" className={`absolute inset-0 size-full object-cover ${lit ? "cover-art-lit" : ""}`} draggable={false} />
