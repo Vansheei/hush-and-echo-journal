@@ -1,14 +1,19 @@
 import { openDB, type IDBPDatabase } from "idb";
 import { decryptBytes, decryptJSON, encryptBytes, encryptJSON, type Enc, type VaultMeta } from "@/lib/crypto/vault";
+import { MODEL_DEFAULTS, type Feature, type ModelChoice } from "@/lib/ai/models";
+import type { Reflection } from "@/lib/ai/anthropic";
 
 let dbp: Promise<IDBPDatabase> | null = null;
 export function db() {
   if (!dbp)
-    dbp = openDB("diary", 1, {
-      upgrade(d) {
-        d.createObjectStore("meta");
-        d.createObjectStore("entries", { keyPath: "id" });
-        d.createObjectStore("media", { keyPath: "id" }).createIndex("entryId", "entryId");
+    dbp = openDB("diary", 2, {
+      upgrade(d, oldVersion) {
+        if (oldVersion < 1) {
+          d.createObjectStore("meta");
+          d.createObjectStore("entries", { keyPath: "id" });
+          d.createObjectStore("media", { keyPath: "id" }).createIndex("entryId", "entryId");
+        }
+        if (oldVersion < 2) d.createObjectStore("items", { keyPath: "id" });
       },
     });
   return dbp;
@@ -19,12 +24,13 @@ export const putVaultMeta = async (m: VaultMeta) => (await db()).put("meta", m, 
 
 // ---- Settings (encrypted) ----
 export type WhisperModel = "base" | "small";
-export type Settings = { autoLockMin: number; whisperModel: WhisperModel };
-export const DEFAULT_SETTINGS: Settings = { autoLockMin: 5, whisperModel: "base" };
+export type Settings = { autoLockMin: number; whisperModel: WhisperModel; mode: "listen" | "reflect"; models: Record<Feature, ModelChoice> };
+export const DEFAULT_SETTINGS: Settings = { autoLockMin: 5, whisperModel: "base", mode: "listen", models: MODEL_DEFAULTS };
 
 export async function getSettings(key: CryptoKey): Promise<Settings> {
   const e = (await (await db()).get("meta", "settings")) as Enc | undefined;
-  return e ? { ...DEFAULT_SETTINGS, ...(await decryptJSON<Settings>(key, e)) } : DEFAULT_SETTINGS;
+  const saved = e ? await decryptJSON<Partial<Settings>>(key, e) : {};
+  return { ...DEFAULT_SETTINGS, ...saved, models: { ...MODEL_DEFAULTS, ...saved.models } };
 }
 export async function putSettings(key: CryptoKey, s: Settings) {
   await (await db()).put("meta", await encryptJSON(key, s), "settings");
@@ -44,13 +50,44 @@ export type Entry = {
   status: EntryStatus;
   error?: string | undefined;
   segments: Segment[];
+  toneNotes?: string[];
+  reflection?: Reflection;
 };
 
 const CHUNK = 1024 * 1024;
 
 export async function putEntry(key: CryptoKey, e: Entry) {
-  await (await db()).put("entries", { id: e.id, data: await encryptJSON(key, e) });
+  const revision = crypto.randomUUID();
+  await (await db()).put("entries", { id: e.id, revision, data: await encryptJSON(key, e) });
+  return revision;
 }
+
+export async function completeEntry(key: CryptoKey, e: Entry, revision: string) {
+  const data = await encryptJSON(key, e);
+  const tx = (await db()).transaction("entries", "readwrite");
+  const row = await tx.store.get(e.id);
+  if (row?.revision === revision) await tx.store.put({ id: e.id, revision: crypto.randomUUID(), data });
+  await tx.done;
+}
+
+export async function getApiKey(key: CryptoKey): Promise<string> {
+  const value = await (await db()).get("meta", "anthropicKey");
+  return value ? decryptJSON<string>(key, value) : "";
+}
+export async function putApiKey(key: CryptoKey, value: string) {
+  if (value) await (await db()).put("meta", await encryptJSON(key, value), "anthropicKey");
+  else await (await db()).delete("meta", "anthropicKey");
+}
+
+export type DiaryItem = { id: string; kind: "loose" | "worry"; text: string; closed: boolean; createdAt: number; entryId?: string };
+export async function putItem(key: CryptoKey, item: DiaryItem) {
+  await (await db()).put("items", { id: item.id, data: await encryptJSON(key, item) });
+}
+export async function listItems(key: CryptoKey): Promise<DiaryItem[]> {
+  const rows = await (await db()).getAll("items");
+  return Promise.all(rows.map((row) => decryptJSON<DiaryItem>(key, row.data)));
+}
+export async function deleteItem(id: string) { await (await db()).delete("items", id); }
 
 export async function saveEntry(
   key: CryptoKey,

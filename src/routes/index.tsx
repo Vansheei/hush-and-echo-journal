@@ -34,7 +34,9 @@ function Timeline() {
   const [entries, setEntries] = useState<Entry[] | null>(null);
 
   useEffect(() => {
-    if (key) listEntries(key).then(setEntries);
+    let active = true;
+    if (key) listEntries(key).then((rows) => { if (active) setEntries(rows); });
+    return () => { active = false; };
   }, [key, version]);
 
   const groups: [string, Entry[]][] = [];
@@ -48,6 +50,10 @@ function Timeline() {
   return (
     <div className="app-shell">
       <AppHeader title="Diary" />
+      <nav className="flex gap-5 px-4 pb-5 text-sm text-primary">
+        <Link to="/loose-ends">Loose ends</Link>
+        <Link to="/worry-parking">Worry parking</Link>
+      </nav>
       <main className="space-y-6 px-4 pb-32">
         {entries && entries.length === 0 && (
           <p className="pt-20 text-center text-muted-foreground">No entries yet. Tap record when you're ready.</p>
