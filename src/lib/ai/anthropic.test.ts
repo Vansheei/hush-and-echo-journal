@@ -30,6 +30,12 @@ it("sends confirmed glossary and ambiguity instructions on reflection without sa
   expect(body.system).toContain("koot dungi"); expect(body.system).toContain("80 percent"); expect(body.system).toContain("Swearing"); expect(body.system).toContain("never assume or create people");
   expect(result.suggestions?.people[0]?.question).toBe("Your mum or maternal uncle?"); expect(fetcher).toHaveBeenCalledTimes(1);
 });
+it("parses suggested notes marked as fact or interpretation, dropping invalid ones", async () => {
+  const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ content: [{ type: "text", text: JSON.stringify({ text: "Noted.", notes: [{ kind: "fact", text: "Has a dog named Bruno" }, { kind: "interpretation", text: "Seems to dread Sundays" }, { kind: "guess", text: "bad" }, { kind: "fact" }] }) }] }) });
+  vi.stubGlobal("fetch", fetcher);
+  const result = await requestReflection(input);
+  expect(result.suggestions?.notes).toEqual([{ kind: "fact", text: "Has a dog named Bruno" }, { kind: "interpretation", text: "Seems to dread Sundays" }]);
+});
 it("stops on an empty refusal without retrying", async () => {
   const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ stop_reason: "refusal", content: [] }) }); vi.stubGlobal("fetch", fetcher);
   await expect(requestReflection(input)).rejects.toThrow("declined"); expect(fetcher).toHaveBeenCalledTimes(1);
