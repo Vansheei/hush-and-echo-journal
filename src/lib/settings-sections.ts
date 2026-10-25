@@ -5,6 +5,7 @@ export const SETTINGS_SECTIONS = [
   { id: "sounds", name: "Sounds", to: "/settings/sounds" },
   { id: "backup", name: "Encrypted backup", to: "/settings/backup" },
   { id: "future", name: "Coming later", to: "/settings/future" },
+  { id: "language", name: "Language", to: "/settings/language" },
 ] as const;
 export type SettingsSection = typeof SETTINGS_SECTIONS[number]["id"];
 export function sectionDetails(id: SettingsSection) {

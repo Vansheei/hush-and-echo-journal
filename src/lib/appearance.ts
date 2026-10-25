@@ -3,9 +3,9 @@
 import { useSyncExternalStore } from "react";
 
 export type Cover = "green" | "plum" | "ocean";
-type Prefs = { cover: Cover; coverChosen: boolean; sounds: boolean; seasonalScene: boolean; readRepliesAloud: boolean; companionVoiceSpeed: number };
+type Prefs = { cover: Cover; coverChosen: boolean; sounds: boolean; seasonalScene: boolean; readRepliesAloud: boolean; companionVoiceSpeed: number; language: "en" | "hi" | "de" };
 const KEY = "diary-appearance";
-const DEFAULTS: Prefs = { cover: "green", coverChosen: false, sounds: true, seasonalScene: true, readRepliesAloud: true, companionVoiceSpeed: 1.15 };
+const DEFAULTS: Prefs = { cover: "green", coverChosen: false, sounds: true, seasonalScene: true, readRepliesAloud: true, companionVoiceSpeed: 1.15, language: "en" };
 const listeners = new Set<() => void>();
 let cache: Prefs | null = null;
 
@@ -24,6 +24,7 @@ export function setAppearance(p: Partial<Prefs>) {
 }
 export function applyCover() {
   document.documentElement.dataset["cover"] = read().cover;
+  document.documentElement.lang = read().language;
 }
 export function useAppearance() {
   return useSyncExternalStore((l) => { listeners.add(l); return () => listeners.delete(l); }, read, () => DEFAULTS);
