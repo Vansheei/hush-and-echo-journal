@@ -7,7 +7,7 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 // CAPACITOR=1 builds a static single-page bundle that the Android app loads from inside the APK.
-const capacitor = process.env.CAPACITOR === "1";
+const capacitor = process.env["CAPACITOR"] === "1";
 
 export default defineConfig({
   tanstackStart: {
