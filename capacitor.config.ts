@@ -5,7 +5,8 @@ const config: CapacitorConfig = {
   appId: "com.vanshika.diary",
   appName: "Vanshika's Diary",
   webDir: "android-web",
-  android: { allowMixedContent: false },
+  android: { allowMixedContent: false, adjustMarginsForEdgeToEdge: "disable" },
+  plugins: { StatusBar: { overlaysWebView: true, style: "LIGHT" } },
   server: { androidScheme: "https" },
 };
 
