@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { format, isToday, isYesterday } from "date-fns";
-import { Plus, AlertCircle, Mic } from "lucide-react";
+import { Plus, AlertCircle } from "lucide-react";
+import { CompanionCard, RibbonTabs } from "@/components/diary/BookSections";
 import { EntryToken, RibbonMark } from "@/components/diary/EntryToken";
 import { SeasonScene } from "@/components/diary/SeasonScene";
 import { cassetteClick } from "@/lib/sounds";
@@ -55,25 +56,13 @@ function Timeline() {
     <div className="app-shell">
       <AppHeader title="Diary" />
       <SeasonScene />
-      <Link to="/companion" className="mx-4 mb-6 flex items-center gap-4 rounded-2xl border-2 border-gold bg-card p-4 transition-transform active:scale-[0.99]">
-        <span className="flex size-14 items-center justify-center rounded-full border-2 border-gold text-cover"><Mic className="size-7" /></span>
-        <span><span className="block font-display text-4xl leading-tight text-cover">Companion</span>
-        <span className="block text-sm text-muted-foreground">Tap once and just talk — it listens, replies and reads aloud.</span></span>
-      </Link>
-      <nav className="flex flex-wrap items-center gap-5 px-4 pb-5 text-cover">
-        <Link to="/write">Write</Link>
-        <Link to="/recap">Weekly recap</Link>
-        <Link to="/drafts">Drafts</Link>
-        <Link to="/loose-ends">Loose ends</Link>
-        <Link to="/worry-parking">Worry parking</Link>
-        <Link to="/people">People</Link>
-        <Link to="/glossary">Glossary</Link>
-        <Link to="/search">Search</Link>
-        <Link to="/notebook">What I know about you</Link>
-        <button aria-pressed={onlyRibbon} onClick={() => setOnlyRibbon((v) => !v)} className={`ml-auto inline-flex items-center gap-1.5 rounded-full border px-3 py-0.5 text-sm ${onlyRibbon ? "border-ribbon bg-accent text-ribbon" : "border-border"}`}>
+      <CompanionCard />
+      <RibbonTabs />
+      <div className="relative z-[1] flex justify-end px-4 pb-4">
+        <button aria-pressed={onlyRibbon} onClick={() => setOnlyRibbon((v) => !v)} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-0.5 text-sm ${onlyRibbon ? "border-ribbon bg-accent text-ribbon" : "border-border"}`}>
           <RibbonMark className="w-2.5" /> Ribboned
         </button>
-      </nav>
+      </div>
       <main className="space-y-6 px-4 pb-32">
         {entries && entries.length === 0 && (
           <p className="pt-20 text-center text-muted-foreground">No entries yet. Tap record when you're ready.</p>

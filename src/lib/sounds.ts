@@ -22,24 +22,26 @@ function env(c: AudioContext, peak: number, attack: number, decay: number, at = 
   g.connect(c.destination); return g;
 }
 
-/** Old paper turning: a slow, muffled low sweep and a soft settle. Cosy, never crisp. */
+/** Old paper turning, heard through a closed door: slow, quiet, heavily muffled. No crackle, no highs. */
 export function pageTurn() {
   const c = ac(); if (!c) return;
-  const t0 = c.currentTime, dur = 0.6 + Math.random() * 0.25;
-  const sweep = noise(c, dur), lp = c.createBiquadFilter();
-  lp.type = "lowpass"; lp.Q.value = 0.4;
-  lp.frequency.setValueAtTime(500 + Math.random() * 150, t0);
-  lp.frequency.linearRampToValueAtTime(950 + Math.random() * 200, t0 + dur * 0.45);
-  lp.frequency.linearRampToValueAtTime(300, t0 + dur);
+  const t0 = c.currentTime, dur = 1.0 + Math.random() * 0.25;
+  const sweep = noise(c, dur);
+  const lp = c.createBiquadFilter(), lp2 = c.createBiquadFilter();
+  lp.type = lp2.type = "lowpass"; lp.Q.value = lp2.Q.value = 0.3;
+  lp.frequency.setValueAtTime(260, t0);
+  lp.frequency.linearRampToValueAtTime(560, t0 + dur * 0.45);
+  lp.frequency.linearRampToValueAtTime(180, t0 + dur);
+  lp2.frequency.value = 900; // second pole: cuts any remaining brightness
   const g = c.createGain();
   g.gain.setValueAtTime(0, t0);
-  g.gain.linearRampToValueAtTime(0.045, t0 + dur * 0.5);
+  g.gain.linearRampToValueAtTime(0.028, t0 + dur * 0.45);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-  sweep.connect(lp).connect(g).connect(c.destination); sweep.start(t0);
-  // the page settling flat, soft and heavy
-  const thump = noise(c, 0.09), lp2 = c.createBiquadFilter();
-  lp2.type = "lowpass"; lp2.frequency.value = 260;
-  thump.connect(lp2).connect(env(c, 0.07, 0.008, 0.09, t0 + dur * 0.85)); thump.start(t0 + dur * 0.85);
+  sweep.connect(lp).connect(lp2).connect(g).connect(c.destination); sweep.start(t0);
+  // a soft, heavy settle as the page lies down
+  const settle = noise(c, 0.18), lp3 = c.createBiquadFilter();
+  lp3.type = "lowpass"; lp3.frequency.value = 160;
+  settle.connect(lp3).connect(env(c, 0.035, 0.03, 0.16, t0 + dur * 0.82)); settle.start(t0 + dur * 0.82);
 }
 export function cassetteClick() {
   const c = ac(); if (!c) return;
