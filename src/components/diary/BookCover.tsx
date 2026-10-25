@@ -71,7 +71,6 @@ function CelestialArt({ lit }: { lit?: boolean | undefined }) {
         <Star x={92} y={80} s={2} />
         <circle cx="232" cy="66" r="26" fill="var(--moon)" opacity="0.92" stroke="currentColor" strokeWidth="0.8" />
         <circle cx="224" cy="60" r="5" fill="var(--moon-shade)" /><circle cx="242" cy="76" r="3.5" fill="var(--moon-shade)" /><circle cx="236" cy="54" r="2.4" fill="var(--moon-shade)" />
-        <circle cx="70" cy="372" r="16" fill="var(--moon)" mask="url(#crescent)" transform="translate(-14 300) scale(1.2 1.2) translate(0 -300)" opacity="0.8" />
       </g>
       <g className={lit ? "text-gold-bright" : "text-gold"}><Vine lit={lit} /><Vine mirror lit={lit} /></g>
       <rect x="4" y="4" width="292" height="412" rx="6" fill="none" stroke="var(--gold-dim)" strokeWidth="5" filter="url(#burn)" opacity="0.75" />
