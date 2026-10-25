@@ -20,11 +20,12 @@ export async function stopSpeech() {
 }
 export async function speakLocal(text: string, selected: LocalVoice, rate = COMPANION_RATE) {
   await stopSpeech();
+  const TextToSpeech = isNativeAndroid() ? await tts() : undefined;
   // Native stop clears plugin callbacks without settling speak; settle our own wait on cancellation.
   return new Promise<void>((resolve, reject) => {
     const done = () => { if (cancelPending === done) cancelPending = undefined; resolve(); };
     cancelPending = done;
-    if (isNativeAndroid()) {
+    if (TextToSpeech) {
       if (selected.nativeIndex === undefined) { done(); reject(new Error("Select an installed on-device voice.")); return; }
       TextToSpeech.speak({ text, lang: selected.lang, voice: selected.nativeIndex, rate, queueStrategy: 0 })
         .then(done, error => { done(); reject(error); });
