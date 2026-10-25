@@ -113,7 +113,7 @@ function Timeline() {
 
   return (
     <div className="app-shell">
-      <AppHeader title="Vanshi’s Diary" />
+      <AppHeader title="Vanshika’s Diary" />
       <div className="relative z-[1] flex justify-end px-4 pb-3">
         <button aria-pressed={onlyRibbon} onClick={() => { setOnlyRibbon((v) => !v); setPage(0); }} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-0.5 text-sm ${onlyRibbon ? "border-ribbon bg-accent text-ribbon" : "border-border"}`}>
           <RibbonMark className="w-2.5" /> The Keepsakes
