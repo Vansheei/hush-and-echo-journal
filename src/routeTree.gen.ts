@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CompanionRouteImport } from './routes/companion'
 import { Route as GlossaryRouteImport } from './routes/glossary'
 import { Route as LooseEndsRouteImport } from './routes/loose-ends'
 import { Route as NotebookRouteImport } from './routes/notebook'
@@ -23,6 +24,11 @@ import { Route as EntryIdRouteImport } from './routes/entry.$id'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompanionRoute = CompanionRouteImport.update({
+  id: '/companion',
+  path: '/companion',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GlossaryRoute = GlossaryRouteImport.update({
@@ -73,6 +79,7 @@ const EntryIdRoute = EntryIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/companion': typeof CompanionRoute
   '/glossary': typeof GlossaryRoute
   '/loose-ends': typeof LooseEndsRoute
   '/notebook': typeof NotebookRoute
@@ -85,6 +92,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/companion': typeof CompanionRoute
   '/glossary': typeof GlossaryRoute
   '/loose-ends': typeof LooseEndsRoute
   '/notebook': typeof NotebookRoute
@@ -98,6 +106,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/companion': typeof CompanionRoute
   '/glossary': typeof GlossaryRoute
   '/loose-ends': typeof LooseEndsRoute
   '/notebook': typeof NotebookRoute
@@ -112,6 +121,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/companion'
     | '/glossary'
     | '/loose-ends'
     | '/notebook'
@@ -124,6 +134,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/companion'
     | '/glossary'
     | '/loose-ends'
     | '/notebook'
@@ -136,6 +147,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/companion'
     | '/glossary'
     | '/loose-ends'
     | '/notebook'
@@ -149,6 +161,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CompanionRoute: typeof CompanionRoute
   GlossaryRoute: typeof GlossaryRoute
   LooseEndsRoute: typeof LooseEndsRoute
   NotebookRoute: typeof NotebookRoute
@@ -167,6 +180,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/companion': {
+      id: '/companion'
+      path: '/companion'
+      fullPath: '/companion'
+      preLoaderRoute: typeof CompanionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/glossary': {
@@ -237,6 +257,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CompanionRoute: CompanionRoute,
   GlossaryRoute: GlossaryRoute,
   LooseEndsRoute: LooseEndsRoute,
   NotebookRoute: NotebookRoute,
