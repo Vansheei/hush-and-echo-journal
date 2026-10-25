@@ -53,7 +53,9 @@ export function ReflectionPanel({ entry }: { entry: Entry }) {
       bump();
     } catch { setError("Could not save the item. Please try again."); }
   }
-  if (entry.status !== "done") return null;
+  if (entry.status !== "done") return <p className="border-t border-border pt-5 text-sm text-muted-foreground">
+    {entry.status === "error" ? "Transcription failed, so reflection isn't available for this entry." : "Reflection and tone notes appear here once the transcript is ready. Keep the app open while it finishes."}
+  </p>;
   return <section className="space-y-4 border-t border-border pt-5">
     <div className="space-y-2">
       <h2 className="font-medium">For this entry</h2>
