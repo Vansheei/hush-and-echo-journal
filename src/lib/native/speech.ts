@@ -1,11 +1,13 @@
-import { TextToSpeech } from "@capacitor-community/text-to-speech";
 import { isNativeAndroid } from "./platform";
+
+// The plugin touches `window` at import time, so load it only on Android (never during server rendering).
+const tts = async () => (await import("@capacitor-community/text-to-speech")).TextToSpeech;
 
 export const COMPANION_RATE = 1.15;
 export type LocalVoice = { voiceURI: string; name: string; lang: string; nativeIndex?: number };
 export async function localVoices(): Promise<LocalVoice[]> {
   if (isNativeAndroid()) {
-    const { voices } = await TextToSpeech.getSupportedVoices();
+    const { voices } = await (await tts()).getSupportedVoices();
     return voices.map((v, nativeIndex) => ({ ...v, nativeIndex })).filter(v => v.localService);
   }
   return window.speechSynthesis?.getVoices().filter(v => v.localService) ?? [];
@@ -13,16 +15,17 @@ export async function localVoices(): Promise<LocalVoice[]> {
 let cancelPending: (() => void) | undefined;
 export async function stopSpeech() {
   cancelPending?.(); cancelPending = undefined;
-  if (isNativeAndroid()) await TextToSpeech.stop();
+  if (isNativeAndroid()) await (await tts()).stop();
   else window.speechSynthesis?.cancel();
 }
 export async function speakLocal(text: string, selected: LocalVoice, rate = COMPANION_RATE) {
   await stopSpeech();
+  const TextToSpeech = isNativeAndroid() ? await tts() : undefined;
   // Native stop clears plugin callbacks without settling speak; settle our own wait on cancellation.
   return new Promise<void>((resolve, reject) => {
     const done = () => { if (cancelPending === done) cancelPending = undefined; resolve(); };
     cancelPending = done;
-    if (isNativeAndroid()) {
+    if (TextToSpeech) {
       if (selected.nativeIndex === undefined) { done(); reject(new Error("Select an installed on-device voice.")); return; }
       TextToSpeech.speak({ text, lang: selected.lang, voice: selected.nativeIndex, rate, queueStrategy: 0 })
         .then(done, error => { done(); reject(error); });

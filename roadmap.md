@@ -1,6 +1,7 @@
 # Diary roadmap
 
 - [x] Diagnose GitHub APK failures using the latest job log; replace retired Android SDK `tools` default with explicit supported packages.
+- [x] Fix run #5 failure: speech plugin crashed start-page rendering in the web bundle step; lazy import + server stub, clean-copy build/sync verified.
 - [ ] Confirm a successful GitHub APK run and download (blocked until the corrected workflow reaches GitHub and runs).
 
 - [x] Reorganize Settings into seven heading-only linked sections; all section/back navigation and saved sound preferences verified on mobile and desktop.
