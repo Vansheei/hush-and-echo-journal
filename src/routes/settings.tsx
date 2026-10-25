@@ -9,6 +9,9 @@ import { useVault } from "@/lib/vault-context";
 import { exportBackup } from "@/lib/storage/backup";
 import { persistenceGranted, requestPersistence } from "@/lib/storage/persistence";
 import { FEATURES, MODELS, type ModelChoice } from "@/lib/ai/models";
+import { useAppearance, setAppearance, type Cover } from "@/lib/appearance";
+import { BookCover } from "@/components/diary/BookCover";
+import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/settings")({
@@ -30,6 +33,7 @@ const LOCKS = [1, 2, 5, 10, 30];
 
 function SettingsPage() {
   const { key, settings, updateSettings, lock } = useVault();
+  const look = useAppearance();
   const [persisted, setPersisted] = useState<boolean | null>(null);
   const [api, setApi] = useState("");
   const [hasKey, setHasKey] = useState(false);
@@ -65,6 +69,23 @@ function SettingsPage() {
     <div className="app-shell">
       <AppHeader back title="Settings" />
       <main className="space-y-6 px-4 pb-16">
+        <section className="settings-card">
+          <h2>Cover</h2>
+          <p className="text-sm text-muted-foreground">{look.coverChosen ? "The other colour is used for the ribbon and glows." : "Choose your cover. The other colour becomes the ribbon and glows."}</p>
+          <div className="grid grid-cols-2 gap-3">
+            {(["green", "plum"] as Cover[]).map((c) => (
+              <button key={c} data-cover={c} aria-pressed={look.cover === c} onClick={() => setAppearance({ cover: c, coverChosen: true })}
+                className={`space-y-2 rounded-md p-2 text-center ${look.cover === c ? "ring-2 ring-gold" : ""}`}>
+                <div className="pointer-events-none origin-top scale-100"><BookCover /></div>
+                <span className="text-sm">{c === "green" ? "Bottle green" : "Plum"}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+        <section className="settings-card">
+          <h2>Sounds</h2>
+          <label className="flex items-center justify-between gap-3 text-sm">Page turn, cassette click and lock sound<Switch checked={look.sounds} onCheckedChange={(v) => setAppearance({ sounds: v })} /></label>
+        </section>
         <section className="settings-card">
           <h2 className="font-medium">Encrypted backup</h2>
           <p className="text-sm text-muted-foreground">Storage protection: {persisted === null ? "Checking…" : persisted ? "Granted" : "Not granted"}. Clearing browser data or losing this phone can still erase your diary.</p>

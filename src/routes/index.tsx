@@ -1,7 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { format, isToday, isYesterday } from "date-fns";
-import { Mic, Video, Plus, AlertCircle } from "lucide-react";
+import { Plus, AlertCircle } from "lucide-react";
+import { EntryToken, RibbonMark } from "@/components/diary/EntryToken";
+import { SeasonScene } from "@/components/diary/SeasonScene";
+import { cassetteClick, pageTurn } from "@/lib/sounds";
 import { AppHeader, fmtDuration } from "@/components/diary/AppHeader";
 import { listEntries, type Entry } from "@/lib/storage/db";
 import { useVault } from "@/lib/vault-context";
@@ -32,6 +35,7 @@ function dayLabel(t: number) {
 function Timeline() {
   const { key, version, progress } = useVault();
   const [entries, setEntries] = useState<Entry[] | null>(null);
+  const [onlyRibbon, setOnlyRibbon] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -40,7 +44,7 @@ function Timeline() {
   }, [key, version]);
 
   const groups: [string, Entry[]][] = [];
-  for (const e of entries ?? []) {
+  for (const e of (entries ?? []).filter((x) => !onlyRibbon || x.ribbon)) {
     const l = dayLabel(e.createdAt);
     const g = groups.at(-1);
     if (g && g[0] === l) g[1].push(e);
@@ -50,17 +54,25 @@ function Timeline() {
   return (
     <div className="app-shell">
       <AppHeader title="Diary" />
-      <nav className="flex gap-5 px-4 pb-5 text-sm text-primary">
+      <SeasonScene />
+      <nav className="flex flex-wrap items-center gap-5 px-4 pb-5 text-cover">
         <Link to="/loose-ends">Loose ends</Link>
         <Link to="/worry-parking">Worry parking</Link>
+        <Link to="/people">People</Link>
+        <button aria-pressed={onlyRibbon} onClick={() => setOnlyRibbon((v) => !v)} className={`ml-auto inline-flex items-center gap-1.5 rounded-full border px-3 py-0.5 text-sm ${onlyRibbon ? "border-ribbon bg-accent text-ribbon" : "border-border"}`}>
+          <RibbonMark className="w-2.5" /> Ribboned
+        </button>
       </nav>
       <main className="space-y-6 px-4 pb-32">
         {entries && entries.length === 0 && (
           <p className="pt-20 text-center text-muted-foreground">No entries yet. Tap record when you're ready.</p>
         )}
+        {entries && entries.length > 0 && onlyRibbon && groups.length === 0 && (
+          <p className="pt-12 text-center text-muted-foreground">No ribboned entries yet. Open an entry and tap the ribbon to mark it.</p>
+        )}
         {groups.map(([label, list]) => (
           <section key={label} className="space-y-2">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</h2>
+            <h2 className="day-label">{label}</h2>
             {list.map((e) => {
               const p = progress[e.id];
               const snippet = e.segments.map((s) => s.text).join(" ");
@@ -69,17 +81,17 @@ function Timeline() {
                   key={e.id}
                   to="/entry/$id"
                   params={{ id: e.id }}
-                  className="flex gap-3 rounded-xl bg-card p-4 shadow-soft transition-transform active:scale-[0.99]"
+                  onClick={() => (e.kind === "audio" ? cassetteClick() : pageTurn())}
+                  className="relative flex items-center gap-3 rounded-md border border-border/70 bg-card p-3 transition-transform active:scale-[0.99]"
                 >
-                  <div className="grid size-10 shrink-0 place-items-center rounded-full bg-secondary text-primary">
-                    {e.kind === "video" ? <Video className="size-5" /> : <Mic className="size-5" />}
-                  </div>
+                  {e.ribbon && <RibbonMark className="absolute -top-1 right-16" />}
+                  <EntryToken kind={e.kind} id={e.id} />
                   <div className="min-w-0 flex-1">
                     <div className="flex justify-between text-sm">
-                      <span className="font-medium">{format(e.createdAt, "HH:mm")}</span>
+                      <span className="font-medium text-base">{format(e.createdAt, "HH:mm")}</span>
                       <span className="text-muted-foreground">{fmtDuration(e.durationSec)}</span>
                     </div>
-                    <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                    <p className="mt-0.5 line-clamp-2 text-muted-foreground">
                       {e.status === "done" && (snippet || "No speech detected")}
                       {e.status === "pending" && "Waiting to transcribe…"}
                       {e.status === "transcribing" &&

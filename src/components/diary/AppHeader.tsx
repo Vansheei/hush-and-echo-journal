@@ -2,17 +2,18 @@ import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Lock, Settings } from "lucide-react";
 import type { ReactNode } from "react";
 import { useVault } from "@/lib/vault-context";
+import { pageTurn } from "@/lib/sounds";
 
 export function AppHeader({ title, back }: { title: ReactNode; back?: boolean }) {
   const { lock } = useVault();
   return (
-    <header className="sticky top-0 z-10 flex items-center gap-2 bg-background/90 px-4 py-3 backdrop-blur">
+    <header className="sticky top-0 z-10 flex items-center gap-2 bg-paper/90 px-4 py-3 backdrop-blur">
       {back && (
-        <Link to="/" className="icon-btn" aria-label="Back">
+        <Link to="/" className="icon-btn" aria-label="Back" onClick={pageTurn}>
           <ArrowLeft className="size-5" />
         </Link>
       )}
-      <h1 className="flex-1 truncate font-display text-2xl">{title}</h1>
+      <h1 className="flex-1 truncate font-display text-4xl leading-tight text-cover">{title}</h1>
       <Link to="/settings" className="icon-btn" aria-label="Settings">
         <Settings className="size-5" />
       </Link>

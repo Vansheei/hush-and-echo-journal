@@ -52,6 +52,7 @@ export type Entry = {
   segments: Segment[];
   toneNotes?: string[];
   mode?: "listen" | "reflect";
+  ribbon?: boolean;
   reflection?: Reflection;
 };
 
