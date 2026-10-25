@@ -5,7 +5,7 @@ const STARS = Array.from({ length: 70 }, (_, i) => {
   const r = (n: number) => ((Math.sin(i * 12.9898 + n * 78.233) * 43758.5453) % 1 + 1) % 1;
   return { x: 18 + r(1) * 264, y: 18 + r(2) * 384, s: 0.3 + r(3) * 0.9, o: 0.35 + r(4) * 0.6 };
 });
-const SPARKS = [[150, 70], [232, 168], [72, 300], [214, 330], [118, 120], [260, 250]];
+const SPARKS: [number, number][] = [[150, 70], [232, 168], [72, 300], [214, 330], [118, 120], [260, 250]];
 
 // Vines climb from the bottom; leaves/flowers carry a delay so the lit sweep reaches them in order.
 const LEFT_VINE = "M34 412 C 52 360, 18 318, 38 266 S 20 170, 44 118 S 40 52, 70 30";
@@ -18,7 +18,7 @@ function Star({ x, y, s }: { x: number; y: number; s: number }) {
   return <path d={`M${x} ${y - s * 5} L${x + s} ${y - s} L${x + s * 5} ${y} L${x + s} ${y + s} L${x} ${y + s * 5} L${x - s} ${y + s} L${x - s * 5} ${y} L${x - s} ${y - s} Z`} fill="currentColor" />;
 }
 
-function Vine({ mirror, lit }: { mirror?: boolean; lit?: boolean }) {
+function Vine({ mirror, lit }: { mirror?: boolean | undefined; lit?: boolean | undefined }) {
   return (
     <g transform={mirror ? "translate(300 0) scale(-1 1)" : undefined}>
       <path d={LEFT_VINE} pathLength={1} className={lit ? "vine-draw" : undefined} stroke="currentColor" strokeWidth="1.1" fill="none" />
@@ -39,7 +39,7 @@ function Vine({ mirror, lit }: { mirror?: boolean; lit?: boolean }) {
 }
 
 /** Original celestial-forest cover art: speckled night green, light rays, moons, stars, climbing vines. */
-function CelestialArt({ lit }: { lit?: boolean }) {
+function CelestialArt({ lit }: { lit?: boolean | undefined }) {
   return (
     <svg viewBox="0 0 300 420" className="absolute inset-0 size-full" aria-hidden>
       <defs>
