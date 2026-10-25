@@ -51,6 +51,7 @@ export type Entry = {
   error?: string | undefined;
   segments: Segment[];
   toneNotes?: string[];
+  mode?: "listen" | "reflect";
   reflection?: Reflection;
 };
 

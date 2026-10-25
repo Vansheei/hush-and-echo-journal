@@ -16,6 +16,12 @@ export function ReflectionPanel({ entry }: { entry: Entry }) {
   const controller = useRef<AbortController | null>(null);
   const active = useRef(true);
   useEffect(() => { active.current = true; return () => { active.current = false; controller.current?.abort(); }; }, []);
+  const mode = entry.mode ?? settings.mode;
+  async function setMode(m: "listen" | "reflect") {
+    if (!key) return;
+    const latest = await getEntry(key, entry.id);
+    if (latest) { await putEntry(key, { ...latest, mode: m }); bump(); }
+  }
   const transcript = entry.segments.map((s) => s.text).join("\n");
   const outgoing = transcript + (includeTone && notes.trim() ? `\n\nOptional, uncertain tone notes:\n${notes}` : "");
   async function reflect() {
@@ -26,7 +32,7 @@ export function ReflectionPanel({ entry }: { entry: Entry }) {
       const apiKey = await getApiKey(key);
       if (!active.current) return;
       if (!apiKey) throw new Error("Save your Anthropic key in Settings first.");
-      const reflection = await requestReflection({ confirmed: true, mode: settings.mode, apiKey, text: outgoing, model: settings.models.reflection, signal: abort.signal });
+      const reflection = await requestReflection({ confirmed: true, mode, apiKey, text: outgoing, model: settings.models.reflection, signal: abort.signal });
       if (!active.current || abort.signal.aborted) return;
       const latest = await getEntry(key, entry.id);
       if (!active.current || !latest) return;
@@ -49,13 +55,18 @@ export function ReflectionPanel({ entry }: { entry: Entry }) {
   }
   if (entry.status !== "done") return null;
   return <section className="space-y-4 border-t border-border pt-5">
+    <div className="space-y-2">
+      <h2 className="font-medium">For this entry</h2>
+      <div className="flex gap-2">{(["listen", "reflect"] as const).map((m) => <Button key={m} size="sm" aria-pressed={mode === m} variant={mode === m ? "default" : "outline"} onClick={() => setMode(m)}>{m === "listen" ? "Listen" : "Reflect"}</Button>)}</div>
+      <p className="text-sm text-muted-foreground">{mode === "listen" ? "Listen: nothing is sent, no reflection." : "Reflect: you can ask Claude for a reflection, after confirming."}{entry.mode ? "" : " (Default from Settings.)"}</p>
+    </div>
     <h2 className="font-medium">Tone notes</h2>
-    <Textarea aria-label="Tone notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="No clear text cues" />
+    <Textarea aria-label="Tone notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="No clear voice cues" />
     <div className="flex gap-2">
       <Button size="sm" variant="outline" onClick={async () => { if (key) { const latest = await getEntry(key, entry.id); if (latest) await putEntry(key, { ...latest, toneNotes: notes.split("\n").filter(Boolean) }); bump(); } }}>Save notes</Button>
       <Button size="sm" variant="ghost" onClick={async () => { setNotes(""); if (key) { const latest = await getEntry(key, entry.id); if (latest) await putEntry(key, { ...latest, toneNotes: [] }); bump(); } }}>Remove notes</Button>
     </div>
-    {settings.mode === "reflect" && transcript.trim() && <Button onClick={() => { setError(""); setOpen(true); }}>Request reflection</Button>}
+    {mode === "reflect" && transcript.trim() && <Button onClick={() => { setError(""); setOpen(true); }}>Request reflection</Button>}
     {entry.reflection && <div className="space-y-3">
       <h2 className="font-medium">Reflection</h2><p className="whitespace-pre-wrap break-words">{entry.reflection.text}</p>
       {entry.reflection.looseEnds.map((text, i) => <div key={`l${i}`} className="space-y-2"><p>{text}</p><Button size="sm" variant="outline" onClick={() => accept(text, "loose")}>Add to loose ends</Button></div>)}
