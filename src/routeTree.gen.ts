@@ -10,13 +10,20 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LooseEndsRouteImport } from './routes/loose-ends'
 import { Route as RecordRouteImport } from './routes/record'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as WorryParkingRouteImport } from './routes/worry-parking'
 import { Route as EntryIdRouteImport } from './routes/entry.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LooseEndsRoute = LooseEndsRouteImport.update({
+  id: '/loose-ends',
+  path: '/loose-ends',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RecordRoute = RecordRouteImport.update({
@@ -29,6 +36,11 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WorryParkingRoute = WorryParkingRouteImport.update({
+  id: '/worry-parking',
+  path: '/worry-parking',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EntryIdRoute = EntryIdRouteImport.update({
   id: '/entry/$id',
   path: '/entry/$id',
@@ -37,35 +49,62 @@ const EntryIdRoute = EntryIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/loose-ends': typeof LooseEndsRoute
   '/record': typeof RecordRoute
   '/settings': typeof SettingsRoute
+  '/worry-parking': typeof WorryParkingRoute
   '/entry/$id': typeof EntryIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/loose-ends': typeof LooseEndsRoute
   '/record': typeof RecordRoute
   '/settings': typeof SettingsRoute
+  '/worry-parking': typeof WorryParkingRoute
   '/entry/$id': typeof EntryIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/loose-ends': typeof LooseEndsRoute
   '/record': typeof RecordRoute
   '/settings': typeof SettingsRoute
+  '/worry-parking': typeof WorryParkingRoute
   '/entry/$id': typeof EntryIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/record' | '/settings' | '/entry/$id'
+  fullPaths:
+    | '/'
+    | '/loose-ends'
+    | '/record'
+    | '/settings'
+    | '/worry-parking'
+    | '/entry/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/record' | '/settings' | '/entry/$id'
-  id: '__root__' | '/' | '/record' | '/settings' | '/entry/$id'
+  to:
+    | '/'
+    | '/loose-ends'
+    | '/record'
+    | '/settings'
+    | '/worry-parking'
+    | '/entry/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/loose-ends'
+    | '/record'
+    | '/settings'
+    | '/worry-parking'
+    | '/entry/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LooseEndsRoute: typeof LooseEndsRoute
   RecordRoute: typeof RecordRoute
   SettingsRoute: typeof SettingsRoute
+  WorryParkingRoute: typeof WorryParkingRoute
   EntryIdRoute: typeof EntryIdRoute
 }
 
@@ -76,6 +115,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/loose-ends': {
+      id: '/loose-ends'
+      path: '/loose-ends'
+      fullPath: '/loose-ends'
+      preLoaderRoute: typeof LooseEndsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/record': {
@@ -92,6 +138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/worry-parking': {
+      id: '/worry-parking'
+      path: '/worry-parking'
+      fullPath: '/worry-parking'
+      preLoaderRoute: typeof WorryParkingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/entry/$id': {
       id: '/entry/$id'
       path: '/entry/$id'
@@ -104,8 +157,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LooseEndsRoute: LooseEndsRoute,
   RecordRoute: RecordRoute,
   SettingsRoute: SettingsRoute,
+  WorryParkingRoute: WorryParkingRoute,
   EntryIdRoute: EntryIdRoute,
 }
 export const routeTree = rootRouteImport
