@@ -84,7 +84,7 @@ function SettingsPage() {
           {notice && <p role="status" className="text-sm text-muted-foreground">{notice}</p>}
         </section>
         <section className="settings-card">
-          <h2 className="font-medium">Listen or reflect</h2>
+          <h2 className="font-medium">Default: listen or reflect</h2>
           <div className="flex gap-2">{(["listen", "reflect"] as const).map((mode) => <Button key={mode} variant={settings.mode === mode ? "default" : "outline"} onClick={() => updateSettings({ mode })}>{mode === "listen" ? "Listen" : "Reflect"}</Button>)}</div>
         </section>
         <section className="settings-card">
