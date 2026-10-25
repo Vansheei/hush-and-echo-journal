@@ -5,6 +5,7 @@ import { wordlist } from "@scure/bip39/wordlists/english.js";
 
 export type Enc = { iv: Uint8Array; ct: ArrayBuffer };
 export type DeviceWrap = { v: 1; id: Uint8Array; salt: Uint8Array; wrap: Enc };
+export type PinWrap = { v: 1; iterations: number; passSalt: Uint8Array; passWrap: Enc };
 export type VaultMeta = {
   v: 1;
   iterations: number;
@@ -130,6 +131,19 @@ export async function createDeviceWrap(meta: VaultMeta, pass: string, secret: Ui
 
 export async function unlockWithDeviceWrap(record: DeviceWrap, secret: Uint8Array) {
   const raw = new Uint8Array(await decryptBytes(await deviceWrappingKey(secret), record.wrap));
+  try { return await importDek(raw); }
+  finally { raw.fill(0); }
+}
+
+export async function createPinWrap(meta: VaultMeta, pass: string, pin: string): Promise<PinWrap> {
+  if (!/^\d{6,12}$/.test(pin)) throw new Error("Use 6–12 digits for your diary PIN.");
+  const raw = await unwrap(pass, meta.passSalt, meta.passWrap, meta.iterations);
+  try { return { v: 1, iterations: DEFAULT_ITERATIONS, ...await wrapWithPass(raw, pin, DEFAULT_ITERATIONS) }; }
+  finally { raw.fill(0); }
+}
+
+export async function unlockWithPinWrap(record: PinWrap, pin: string) {
+  const raw = await unwrap(pin, record.passSalt, record.passWrap, record.iterations);
   try { return await importDek(raw); }
   finally { raw.fill(0); }
 }

@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Architecture rules
+- Optional diary PIN uses a PBKDF2-wrapped DEK in metadata (never a saved PIN); recovery deletes both PIN and device wraps. Why: PIN unlock must release the same encrypted diary key without retaining plaintext credentials.
 - Device unlock wraps the existing DEK using platform WebAuthn PRF with required user verification; store only credential metadata and ciphertext, invalidate on recovery, and keep passphrase fallback. Why: a biometric success flag alone cannot securely unlock an encrypted diary without retaining a decryption secret.
 - No backend: all data lives in IndexedDB on device, encrypted with a random data key wrapped by passphrase and recovery-phrase keys (`src/lib/crypto`, `src/lib/storage`). Why: the owner requires nothing to leave the device unencrypted.
 - App routes use `ssr: false` and the root wraps everything in ClientOnly + VaultProvider + Gate. Why: Web Crypto/IndexedDB/media are browser-only and the app must run in a Capacitor WebView.

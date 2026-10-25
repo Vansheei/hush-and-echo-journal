@@ -10,11 +10,16 @@ const features = [
 ];
 
 export function FutureFeatures() {
-  return <section className="settings-card">
+  return <><section className="settings-card">
+    <h2>Android access</h2>
+    <p className="text-sm text-muted-foreground">Contacts and notification access need the Android app. Not available in this browser; no permission has been granted.</p>
+    <p className="text-sm">Contacts access · Awaiting Android app</p>
+    <p className="text-sm">Notification access · Awaiting Android app</p>
+  </section><section className="settings-card">
     <h2>Coming later</h2>
     <ul className="divide-y divide-border">{features.map(({ icon: Icon, name, detail }) => <li key={name} className="flex gap-3 py-3">
       <Icon className="mt-1 size-5 shrink-0 text-muted-foreground" aria-hidden />
       <div className="min-w-0"><h3 className="text-base">{name}</h3><span className="text-xs text-muted-foreground">Coming later</span><p className="text-sm text-muted-foreground">{detail}</p></div>
     </li>)}</ul>
-  </section>;
+  </section></>;
 }
