@@ -8,7 +8,7 @@ type Stats = { start: number; rate: number; db: number; pitchCv: number | null; 
 
 const median = (xs: number[]) => {
   const s = [...xs].sort((a, b) => a - b);
-  return s.length ? s[Math.floor(s.length / 2)] : 0;
+  return s[Math.floor(s.length / 2)] ?? 0;
 };
 const fmt = (t: number) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
 
