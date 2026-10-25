@@ -1,37 +1,39 @@
 import type { CSSProperties, ReactNode } from "react";
-import coverArt from "@/assets/cover-art.jpg";
+import cover from "@/assets/cover.png.asset.json";
 
-/** A small daffodil: six pale petals around a golden trumpet. */
-function Daffodil() {
+/** A single feathery dandelion seed: a fine stalk with a soft tuft. */
+function Seed() {
   return (
-    <svg viewBox="-10 -10 20 20" className="size-full" aria-hidden>
-      {[0, 60, 120, 180, 240, 300].map((a) => (
-        <ellipse key={a} cx="0" cy="-5" rx="2.6" ry="5" transform={`rotate(${a})`} fill="oklch(0.9 0.11 95)" stroke="oklch(0.65 0.12 80)" strokeWidth="0.4" />
+    <svg viewBox="-10 -12 20 24" className="size-full" aria-hidden>
+      <path d="M0 -4 L0 10" stroke="oklch(0.95 0.03 90)" strokeWidth="0.5" />
+      {[-70, -45, -22, 0, 22, 45, 70].map((a) => (
+        <path key={a} d="M0 -4 L0 -11" stroke="oklch(0.97 0.02 90)" strokeWidth="0.35" transform={`rotate(${a} 0 -4)`} />
       ))}
-      <circle r="3" fill="oklch(0.78 0.16 75)" stroke="oklch(0.6 0.14 60)" strokeWidth="0.5" />
-      <circle r="1.3" fill="oklch(0.65 0.15 60)" />
+      <ellipse cx="0" cy="10.5" rx="0.7" ry="1.2" fill="oklch(0.8 0.05 80)" />
     </svg>
   );
 }
 
-// Start points along the bottom flower beds (x%, y%) — they drift up to the title.
-const DAFFS: [number, number, number][] = [
-  [10, 84, 0.3], [16, 90, 0.55], [88, 86, 0.45], [84, 93, 0.75], [24, 78, 0.9], [78, 80, 1.05], [12, 70, 1.2], [90, 72, 1.35],
-];
+// Dandelion heads in the art (x%, y%); seeds drift up and away from them.
+const HEADS: [number, number][] = [[18, 64], [23, 74], [82, 79]];
+const SEEDS = HEADS.flatMap(([x, y], h) => [0, 1, 2, 3, 4].map((i) => ({
+  x, y, d: 0.3 + h * 0.25 + i * 0.22, tx: (i - 2) * 4 + (x < 50 ? 4 : -4), ty: -(14 + i * 5),
+})));
+// Daffodils in the art: they glow softly in place.
+const DAFFS: [number, number][] = [[9, 86], [14, 88], [92, 85], [88, 91]];
 
 export function BookCover({ children, lit = false }: { children?: ReactNode; lit?: boolean }) {
   return (
     <div className="book-cover [container-type:inline-size]">
-      <img src={coverArt} alt="" className={`absolute inset-0 size-full object-cover ${lit ? "cover-art-lit" : ""}`} draggable={false} />
-      {lit && DAFFS.map(([x, y, d], i) => (
-        <span key={i} className="daffodil-fly" style={{ left: `${x}%`, top: `${y}%`, "--d": `${d}s`, "--tx": `${50 - x}cqw`, "--ty": `${(36 - y) * 1.4}cqw` } as CSSProperties}>
-          <Daffodil />
+      <img src={cover.url} alt="Vanshika’s Diary" className={`absolute inset-0 size-full object-cover ${lit ? "cover-art-lit" : ""}`} draggable={false} />
+      {lit && DAFFS.map(([x, y], i) => (
+        <span key={`d${i}`} className="daffodil-glow" style={{ left: `${x}%`, top: `${y}%`, "--d": `${0.3 + i * 0.2}s` } as CSSProperties} />
+      ))}
+      {lit && SEEDS.map((s, i) => (
+        <span key={i} className="seed-fly" style={{ left: `${s.x}%`, top: `${s.y}%`, "--d": `${s.d}s`, "--tx": `${s.tx}cqw`, "--ty": `${s.ty}cqw` } as CSSProperties}>
+          <Seed />
         </span>
       ))}
-      <div className="absolute inset-x-0 top-[33%] flex flex-col items-center">
-        <span className={`font-display text-[15cqw] leading-tight text-gold ${lit ? "title-lit" : ""}`}>Vanshi’s Diary</span>
-        <span className="mt-1 h-px w-[30cqw] bg-gold/60" />
-      </div>
       {children && <div className="absolute inset-x-8 bottom-[15%]">{children}</div>}
     </div>
   );
