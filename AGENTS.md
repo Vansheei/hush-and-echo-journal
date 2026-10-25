@@ -21,3 +21,4 @@
 - Shared AI personality and confirmed context apply at the single browser AI request boundary; suggestions require explicit owner confirmation before persistence. Why: every Claude feature must honour humour, ambiguity and consent consistently.
 - Speech and multilingual embeddings have separate workers and a shared public-weights Cache API adapter; retain the speech worker across locks and stop semantic work on unmount. Why: reusing model weights must not retain vault keys or search plaintext while locked.
 - Companion uses local Whisper and only localService speech voices, with explicit outgoing-text preview and a text fallback. Why: voice interaction must not upload audio to speech services.
+- Browser Claude requests explicitly configure model-supported reply-only thinking, and reject exhausted or empty replies without retrying. Why: default thinking can consume the reply allowance, and resending personal text requires fresh consent.
