@@ -35,6 +35,7 @@ type Ctx = {
 };
 
 // Keep one context object across hot reloads so an already-mounted provider still matches useVault.
+const LOCK_ON_HIDE = false;
 const g = globalThis as { __vaultCtx?: React.Context<Ctx | null> };
 const VaultCtx = (g.__vaultCtx ??= createContext<Ctx | null>(null));
 
@@ -134,7 +135,8 @@ export function VaultProvider({ children }: { children: ReactNode }) {
       lastActive.current = Date.now();
     };
     const onVis = () => {
-      if (document.visibilityState === "hidden") lock();
+      // TESTING PHASE: lock-on-app-switch paused. Set LOCK_ON_HIDE back to true before real use.
+      if (LOCK_ON_HIDE && document.visibilityState === "hidden") lock();
     };
     const evs = ["pointerdown", "keydown", "scroll", "touchstart"] as const;
     evs.forEach((e) => window.addEventListener(e, touch, { passive: true }));
