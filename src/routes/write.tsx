@@ -1,3 +1,4 @@
+import { t, useLanguage } from "@/lib/i18n";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { AppHeader } from "@/components/diary/AppHeader";
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/write")({
 });
 
 function WritePage() {
+  useLanguage();
   const { key, bump } = useVault();
   const nav = useNavigate();
   const [text, setText] = useState("");
@@ -36,13 +38,13 @@ function WritePage() {
   }
   return (
     <div className="app-shell">
-      <AppHeader back title="Spill the tea" />
+      <AppHeader back title={t("Spill the tea")} />
       <main className="relative z-[1] space-y-4 px-4 pb-20">
         <div className="writing-sheet">
-          <Textarea aria-label="Written entry" autoFocus rows={14} value={text} onChange={(e) => setText(e.target.value)} placeholder="Just write…" className="journal-page writing-script min-h-80 w-full border-0 bg-transparent shadow-none focus-visible:ring-0" />
+          <Textarea aria-label={t("Written entry")} autoFocus rows={14} value={text} onChange={(e) => setText(e.target.value)} placeholder={t("Just write…")} className="journal-page writing-script min-h-80 w-full border-0 bg-transparent shadow-none focus-visible:ring-0" />
         </div>
-        {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-        <Button disabled={!text.trim() || saving} onClick={save}>{saving ? "Saving…" : "Save entry"}</Button>
+        {error && <p role="alert" className="text-sm text-destructive">{t(error)}</p>}
+        <Button disabled={!text.trim() || saving} onClick={save}>{saving ? t("Saving…") : t("Save entry")}</Button>
       </main>
       <div className="burnt-reveal" aria-hidden />
     </div>

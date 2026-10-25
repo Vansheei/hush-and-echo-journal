@@ -300,6 +300,19 @@
   color: var(--cover);
   line-height: 1;
 }
+.settings-pages {
+  --primary: var(--ink);
+  --primary-foreground: var(--paper);
+  --ring: var(--ink);
+  --gold: var(--ink);
+}
+.settings-pages .settings-card {
+  border: 0;
+  border-radius: 0;
+  background: none;
+  padding: 0 0 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
 @utility journal-page {
   font-family: var(--font-hand-family);
   font-size: 1.45rem;

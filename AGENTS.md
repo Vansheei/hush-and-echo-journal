@@ -10,6 +10,8 @@
 <!-- LOVABLE:END -->
 
 ## Architecture rules
+- Settings sections use independent un-nested routes and a shared name registry in `src/lib/settings-sections.ts`; non-sensitive seasonal/audio preferences share the appearance store. Why: headings can be renamed together and preferences apply consistently in Settings and Companion without extra navigation nesting.
+- Interface language uses offline catalogs and render-time subscriptions, never translated diary data, AI prompts or model output. Why: switching labels must not remount the vault or affect the owner's spoken/written language.
 - Optional diary PIN uses a PBKDF2-wrapped DEK in metadata (never a saved PIN); recovery deletes both PIN and device wraps. Why: PIN unlock must release the same encrypted diary key without retaining plaintext credentials.
 - Device unlock wraps the existing DEK with browser WebAuthn PRF or the Android DiaryBiometric Capacitor plugin's per-operation BiometricPrompt CryptoObject/Keystore-protected wrapping secret; store only ciphertext, invalidate on recovery/enrollment changes, and keep PIN/passphrase fallback. Why: biometric success alone must never release an unprotected saved decryption secret.
 - No backend: all data lives in IndexedDB on device, encrypted with a random data key wrapped by passphrase and recovery-phrase keys (`src/lib/crypto`, `src/lib/storage`). Why: the owner requires nothing to leave the device unencrypted.

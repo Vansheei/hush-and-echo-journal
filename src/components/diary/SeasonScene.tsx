@@ -1,6 +1,7 @@
 import { CloudSun, Coffee, IceCreamCone, Shirt, Sun, Car, Utensils, Tent, Flower2, Wind, Sunrise } from "lucide-react";
 import type React from "react";
 import type { ReactNode } from "react";
+import { useAppearance } from "@/lib/appearance";
 
 export type Season = "spring" | "summer" | "autumn" | "winter";
 
@@ -68,14 +69,16 @@ const SCENES: Record<Season, { label: string; nature: ReactNode; life: ReactNode
 
 /** Quiet strip under the header (home/timeline only). The season and its pleasures sit side by side. */
 export function SeasonScene({ date = new Date() }: { date?: Date }) {
+  const look = useAppearance();
   const season = seasonFor(date);
   const s = SCENES[season];
+  if (!look.seasonalScene) return null;
   return (
     <>
       {season === "autumn" && (
         <div className="pointer-events-none fixed inset-x-0 top-0 z-0 mx-auto h-0 max-w-[40rem]" aria-hidden>
           {[6, 20, 34, 48, 62, 76, 90].map((left, i) => {
-            const Shape = [Leaf, Maple, Leaf, Palm, Maple, Leaf, Palm][i]!;
+            const Shape = [Leaf, Maple, Leaf, Palm, Maple, Leaf, Palm][i] ?? Leaf;
             const color = ["text-tape-2", "text-leaf-1", "text-tape-1", "text-leaf-3", "text-leaf-2", "text-tape-4", "text-leaf-2"][i];
             const size = Shape === Leaf ? "w-3" : "w-6 opacity-80";
             return <Shape key={left} className={`season-leaf ${size} ${color}`} style={{ left: `${left}%`, animationDuration: `${14 + (i % 4) * 3}s`, animationDelay: `${i * -3}s` }} />;

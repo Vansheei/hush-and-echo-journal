@@ -1,3 +1,4 @@
+import { t, useLanguage } from "@/lib/i18n";
 import { createFileRoute, useBlocker, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Mic, Pause, Play, RefreshCw, Square, Video, X } from "lucide-react";
@@ -24,6 +25,7 @@ export const Route = createFileRoute("/record")({
 const pick = (list: string[]) => list.find((t) => MediaRecorder.isTypeSupported(t)) ?? "";
 
 function RecordPage() {
+  useLanguage();
   const { key, setBusy, bump } = useVault();
   const nav = useNavigate();
   const [kind, setKind] = useState<"video" | "audio">("video");
@@ -141,14 +143,14 @@ function RecordPage() {
   return (
     <div className="app-shell flex min-h-dvh flex-col bg-stage text-stage-foreground">
       <div className="flex items-center justify-between p-4">
-        <Button variant="ghost" size="icon" className="icon-btn" aria-label="Close" disabled={state !== "idle" || saving} onClick={() => nav({ to: "/" })}>
+        <Button variant="ghost" size="icon" className="icon-btn" aria-label={t("Close")} disabled={state !== "idle" || saving} onClick={() => nav({ to: "/" })}>
           <X className="size-5" />
         </Button>
         <span className="font-mono text-lg tabular-nums">{fmtDuration(secs)}</span>
         {kind === "video" && state === "idle" ? (
           <button
             className="icon-btn"
-            aria-label="Switch camera"
+            aria-label={t("Switch camera")}
             onClick={() => setFacing((f) => (f === "user" ? "environment" : "user"))}
           >
             <RefreshCw className="size-5" />
@@ -170,7 +172,7 @@ function RecordPage() {
         ) : (
           <Mic className={`size-20 ${state === "rec" ? "animate-pulse text-recording" : "opacity-60"}`} />
         )}
-        {err && <p className="absolute inset-x-4 bottom-4 text-center text-sm">{err}</p>}
+        {err && <p className="absolute inset-x-4 bottom-4 text-center text-sm">{t(err)}</p>}
       </div>
 
       <div className="space-y-4 p-6">
@@ -182,19 +184,19 @@ function RecordPage() {
                 onClick={() => setKind(k)}
                 className={`flex items-center gap-1 rounded-full px-4 py-1.5 capitalize ${kind === k ? "bg-stage-foreground text-stage" : ""}`}
               >
-                {k === "video" ? <Video className="size-4" /> : <Mic className="size-4" />} {k}
+                {k === "video" ? <Video className="size-4" /> : <Mic className="size-4" />} {t(k === "video" ? "Video" : "Audio")}
               </button>
             ))}
           </div>
         )}
 
         <div className="flex items-center justify-center gap-6">
-          {state === "idle" && <button className="rec-btn" aria-label="Start recording" onClick={start} />}
+          {state === "idle" && <button className="rec-btn" aria-label={t("Start recording")} onClick={start} />}
           {(state === "rec" || state === "paused") && (
             <>
               <button
                 className="icon-btn-lg"
-                aria-label={state === "rec" ? "Pause" : "Resume"}
+                aria-label={state === "rec" ? t("Pause") : t("Resume")}
                 onClick={() => {
                   if (state === "rec") {
                     recRef.current?.pause();
@@ -207,7 +209,7 @@ function RecordPage() {
               >
                 {state === "rec" ? <Pause /> : <Play />}
               </button>
-              <button className="rec-btn rec-btn-stop" aria-label="Stop" onClick={() => recRef.current?.stop()}>
+              <button className="rec-btn rec-btn-stop" aria-label={t("Stop")} onClick={() => recRef.current?.stop()}>
                 <Square className="size-6 fill-current" />
               </button>
             </>
@@ -215,10 +217,9 @@ function RecordPage() {
           {state === "review" && (
             <div className="flex w-full gap-3">
               <Button variant="outline" size="lg" className="flex-1" onClick={discard} disabled={saving}>
-                Discard
-              </Button>
+                {t("Discard")}</Button>
               <Button size="lg" className="flex-1" onClick={save} disabled={saving}>
-                {saving ? "Encrypting…" : "Save"}
+                {saving ? t("Encrypting…") : t("Save")}
               </Button>
             </div>
           )}

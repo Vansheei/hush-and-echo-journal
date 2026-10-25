@@ -1,3 +1,4 @@
+import { t, useLanguage } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppHeader } from "@/components/diary/AppHeader";
@@ -22,19 +23,20 @@ export const Route = createFileRoute("/people")({
 });
 
 function PeoplePage() {
+  useLanguage();
   const { key, version, bump } = useVault();
   const [people, setPeople] = useState<Person[]>([]);
   const [name, setName] = useState(""); const [nicknames, setNicknames] = useState(""); const [edit, setEdit] = useState<string | null>(null); const [error, setError] = useState("");
   useEffect(() => { let active = true; if (key) getPersonal(key).then(d => { if (active) setPeople(d.people); }); return () => { active = false; }; }, [key, version]);
   return (
     <div className="app-shell">
-      <AppHeader back title="Side Characters" />
+      <AppHeader back title={t("Side Characters")} />
       <main className="space-y-4 px-4 pb-20">
-        <Input aria-label="Person name" placeholder="Name" value={name} onChange={e => setName(e.target.value)} />
-        <Input aria-label="Nicknames" placeholder="Nicknames, separated by commas" value={nicknames} onChange={e => setNicknames(e.target.value)} />
-        <div className="flex gap-2"><Button disabled={!name.trim()} onClick={async () => { if (!key) return; try { const person = { id: edit ?? crypto.randomUUID(), name: name.trim(), nicknames: nicknames.split(",").map(s => s.trim()).filter(Boolean) }; await updatePersonal(key, d => ({ ...d, people: [...d.people.filter(p => p.id !== edit), person] })); setName(""); setNicknames(""); setEdit(null); bump(); } catch { setError("Could not save person."); } }}>{edit ? "Save person" : "Confirm new person"}</Button>{edit && <Button variant="ghost" onClick={() => { setEdit(null); setName(""); setNicknames(""); }}>Cancel</Button>}</div>
-        {error && <p role="alert">{error}</p>}
-        {people.map(person => <section key={person.id} className="space-y-2 border-t border-border pt-3"><h2 className="font-display text-3xl"><Link to="/people/$id" params={{ id: person.id }} className="underline decoration-gold underline-offset-4">{person.name}</Link></h2><p className="break-words">{person.nicknames.join(", ")}</p><div className="flex gap-2"><Button size="sm" variant="outline" onClick={() => { setEdit(person.id); setName(person.name); setNicknames(person.nicknames.join(", ")); }}>Edit</Button><Button size="sm" variant="ghost" onClick={async () => { if (!key || !window.confirm("Forget this person?")) return; try { await updatePersonal(key, d => ({ ...d, people: d.people.filter(p => p.id !== person.id) })); bump(); } catch { setError("Could not forget person."); } }}>Forget</Button></div></section>)}
+        <Input aria-label={t("Person name")} placeholder={t("Name")} value={name} onChange={e => setName(e.target.value)} />
+        <Input aria-label={t("Nicknames")} placeholder={t("Nicknames, separated by commas")} value={nicknames} onChange={e => setNicknames(e.target.value)} />
+        <div className="flex gap-2"><Button disabled={!name.trim()} onClick={async () => { if (!key) return; try { const person = { id: edit ?? crypto.randomUUID(), name: name.trim(), nicknames: nicknames.split(",").map(s => s.trim()).filter(Boolean) }; await updatePersonal(key, d => ({ ...d, people: [...d.people.filter(p => p.id !== edit), person] })); setName(""); setNicknames(""); setEdit(null); bump(); } catch { setError("Could not save person."); } }}>{edit ? t("Save person") : t("Confirm new person")}</Button>{edit && <Button variant="ghost" onClick={() => { setEdit(null); setName(""); setNicknames(""); }}>{t("Cancel")}</Button>}</div>
+        {error && <p role="alert">{t(error)}</p>}
+        {people.map(person => <section key={person.id} className="space-y-2 border-t border-border pt-3"><h2 className="font-display text-3xl"><Link to="/people/$id" params={{ id: person.id }} className="underline decoration-gold underline-offset-4">{person.name}</Link></h2><p className="break-words">{person.nicknames.join(", ")}</p><div className="flex gap-2"><Button size="sm" variant="outline" onClick={() => { setEdit(person.id); setName(person.name); setNicknames(person.nicknames.join(", ")); }}>{t("Edit")}</Button><Button size="sm" variant="ghost" onClick={async () => { if (!key || !window.confirm(t("Forget this person?"))) return; try { await updatePersonal(key, d => ({ ...d, people: d.people.filter(p => p.id !== person.id) })); bump(); } catch { setError("Could not forget person."); } }}>{t("Forget")}</Button></div></section>)}
       </main>
     </div>
   );

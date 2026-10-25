@@ -1,6 +1,6 @@
+import { t, useLanguage, format } from "@/lib/i18n";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { format } from "date-fns";
 import { Trash2 } from "lucide-react";
 import { AppHeader, fmtDuration } from "@/components/diary/AppHeader";
 import { Button } from "@/components/ui/button";
@@ -43,8 +43,9 @@ export const Route = createFileRoute("/entry/$id")({
 });
 
 function EntryPage() {
+  useLanguage();
   const { id } = Route.useParams();
-  const { t } = Route.useSearch();
+  const { t: startTime } = Route.useSearch();
   const { key, version, progress, bump } = useVault();
   const nav = useNavigate();
   const [entry, setEntry] = useState<Entry | null | undefined>(undefined);
@@ -82,23 +83,23 @@ function EntryPage() {
     if (m && !Number.isFinite(m.duration)) {
       const back = () => {
         m.removeEventListener("durationchange", back);
-        m.currentTime = t ?? 0;
+        m.currentTime = startTime ?? 0;
       };
       m.addEventListener("durationchange", back);
       m.currentTime = 1e101;
-    } else if (m && t !== undefined) {
-      m.currentTime = t;
+    } else if (m && startTime !== undefined) {
+      m.currentTime = startTime;
     }
   }
 
-  function seek(t: number) {
+  function seek(time: number) {
     const m = media.current;
     if (!m) return;
-    m.currentTime = t;
+    m.currentTime = time;
     void m.play();
   }
 
-  if (entry === null) return <div className="screen-center text-paper">Entry not found.</div>;
+  if (entry === null) return <div className="screen-center text-paper">{t("Entry not found.")}</div>;
   if (!entry) return null;
   const p = progress[entry.id];
 
@@ -141,28 +142,28 @@ function EntryPage() {
           }}
           className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm ${entry.ribbon ? "border-ribbon bg-accent text-ribbon" : "border-border text-muted-foreground"}`}
         >
-          <RibbonMark className="w-3" /> {entry.ribbon ? "Ribbon marked" : "Mark with ribbon"}
+          <RibbonMark className="w-3" /> {entry.ribbon ? t("Ribbon marked") : t("Mark with ribbon")}
         </button>
 
         <section className="space-y-3">
           <div className="flex items-end justify-between gap-3">
-            <h2 className="font-display text-3xl">Transcript</h2>
+            <h2 className="font-display text-3xl">{t("Transcript")}</h2>
             {entry.segments.length > 0 && (
               <div className="flex gap-1 text-sm" role="tablist">
                 {(["journal", "timed"] as const).map((v) => (
                   <button key={v} role="tab" aria-selected={view === v} onClick={() => { setView(v); pageTurn(); }}
                     className={`rounded-full px-3 py-0.5 ${view === v ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
-                    {v === "journal" ? "Journal" : "With times"}
+                    {v === "journal" ? t("Journal") : t("With times")}
                   </button>
                 ))}
               </div>
             )}
           </div>
-          {entry.status === "pending" && <p className="text-sm text-muted-foreground">Waiting to transcribe…</p>}
+          {entry.status === "pending" && <p className="text-sm text-muted-foreground">{t("Waiting to transcribe…")}</p>}
           {entry.status === "transcribing" && (
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">
-                {p?.phase === "download" ? "Downloading speech model (first time only)" : "Transcribing on this phone"}…{" "}
+                {p?.phase === "download" ? t("Downloading speech model (first time only)") : t("Transcribing on this phone")}…{" "}
                 {Math.round(p?.pct ?? 0)}%
               </p>
               <Progress value={p?.pct ?? 0} />
@@ -170,7 +171,7 @@ function EntryPage() {
           )}
           {entry.status === "error" && (
             <div className="space-y-2">
-              <p className="text-sm text-destructive">Transcription failed: {entry.error}</p>
+              <p className="text-sm text-destructive">{t("Transcription failed:")}{entry.error}</p>
               <Button
                 variant="outline"
                 size="sm"
@@ -180,12 +181,11 @@ function EntryPage() {
                   bump();
                 }}
               >
-                Try again
-              </Button>
+                {t("Try again")}</Button>
             </div>
           )}
           {entry.status === "done" && entry.segments.length === 0 && (
-            <p className="text-sm text-muted-foreground">No speech detected.</p>
+            <p className="text-sm text-muted-foreground">{t("No speech detected.")}</p>
           )}
           {view === "journal" && entry.segments.length > 0 && (
             <div className="journal-page">{entry.segments.map((s, i) => <span key={i}><TranscriptWords entry={entry} segment={i} />{" "}</span>)}</div>
@@ -196,7 +196,7 @@ function EntryPage() {
               return (
                 <li key={i}>
                   <div className={`flex w-full gap-3 rounded-md px-2 py-1.5 text-left ${active ? "bg-secondary" : ""}`}>
-                    <Button variant="ghost" onClick={() => seek(s.start)} aria-label={`Play from ${fmtDuration(s.start)}`} className="h-auto w-10 shrink-0 p-0 font-mono text-xs text-muted-foreground">
+                    <Button variant="ghost" onClick={() => seek(s.start)} aria-label={t("Play from {time}", { time: fmtDuration(s.start) })} className="h-auto w-10 shrink-0 p-0 font-mono text-xs text-muted-foreground">
                       {fmtDuration(s.start)}
                     </Button>
                     <span className="leading-relaxed"><TranscriptWords entry={entry} segment={i} /></span>
@@ -211,16 +211,15 @@ function EntryPage() {
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="ghost" className="text-destructive">
-              <Trash2 /> Delete entry
-            </Button>
+              <Trash2 /> {t("Delete entry")}</Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete this entry?</AlertDialogTitle>
-              <AlertDialogDescription>The recording and transcript will be gone for good.</AlertDialogDescription>
+              <AlertDialogTitle>{t("Delete this entry?")}</AlertDialogTitle>
+              <AlertDialogDescription>{t("The recording and transcript will be gone for good.")}</AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Keep</AlertDialogCancel>
+              <AlertDialogCancel>{t("Keep")}</AlertDialogCancel>
               <AlertDialogAction
                 onClick={async () => {
                   await deleteEntry(entry.id);
@@ -228,8 +227,7 @@ function EntryPage() {
                   nav({ to: "/" });
                 }}
               >
-                Delete
-              </AlertDialogAction>
+                {t("Delete")}</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

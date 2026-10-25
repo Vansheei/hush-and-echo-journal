@@ -1,6 +1,7 @@
+import { t, useLanguage, format } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { format, isToday, isYesterday } from "date-fns";
+import { isToday, isYesterday } from "date-fns";
 import { Plus, AlertCircle, ArrowDownUp } from "lucide-react";
 import { BookIndex, SECTIONS } from "@/components/diary/BookIndex";
 import { TurnableBook } from "@/components/diary/TurnableBook";
@@ -29,14 +30,15 @@ export const Route = createFileRoute("/")({
 
 type IndexItemLike = { label: string; onSelect: () => void };
 
-function dayLabel(t: number) {
-  const d = new Date(t);
-  if (isToday(d)) return "Today";
-  if (isYesterday(d)) return "Yesterday";
+function dayLabel(timestamp: number) {
+  const d = new Date(timestamp);
+  if (isToday(d)) return t("Today");
+  if (isYesterday(d)) return t("Yesterday");
   return format(d, "EEEE, d MMMM yyyy");
 }
 
 function Timeline() {
+  useLanguage();
   const { key, version, progress } = useVault();
   const [entries, setEntries] = useState<Entry[] | null>(null);
   const [onlyRibbon, setOnlyRibbon] = useState(false);
@@ -72,10 +74,10 @@ function Timeline() {
             <span className="text-muted-foreground">{fmtDuration(e.durationSec)}</span>
           </div>
           <p className="mt-0.5 line-clamp-2 text-muted-foreground">
-            {e.status === "done" && (snippet || "No speech detected")}
-            {e.status === "pending" && "Waiting to transcribe…"}
-            {e.status === "transcribing" && (p?.phase === "download" ? `Downloading speech model ${Math.round(p.pct)}%` : `Transcribing ${p?.pct ?? 0}%`)}
-            {e.status === "error" && <span className="inline-flex items-center gap-1 text-destructive"><AlertCircle className="size-3" /> Transcription failed</span>}
+            {e.status === "done" && (snippet || t("No speech detected"))}
+            {e.status === "pending" && t("Waiting to transcribe…")}
+            {e.status === "transcribing" && (p?.phase === "download" ? t("Downloading speech model {percent}%", { percent: Math.round(p.pct) }) : t("Transcribing {percent}%", { percent: p?.pct ?? 0 }))}
+            {e.status === "error" && <span className="inline-flex items-center gap-1 text-destructive"><AlertCircle className="size-3" /> {t("Transcription failed")}</span>}
           </p>
         </div>
       </Link>
@@ -93,36 +95,35 @@ function Timeline() {
   const chaptersPage = (
     <section className="space-y-3">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="day-label">{onlyRibbon ? "The Keepsakes" : "Chapters"}</h2>
+        <h2 className="day-label">{onlyRibbon ? t("The Keepsakes") : t("Chapters")}</h2>
         <button type="button" onClick={() => setNewestFirst((v) => !v)} className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-0.5 text-sm">
-          <ArrowDownUp className="size-3.5" /> {newestFirst ? "Latest tea first" : "Oldest tea first"}
+          <ArrowDownUp className="size-3.5" /> {newestFirst ? t("Latest tea first") : t("Oldest tea first")}
         </button>
       </div>
       {groups.map(([label, list]) => (
         <div key={label} className="space-y-2">
-          <h3 className="font-display text-2xl">{label} <span className="font-sans text-sm text-muted-foreground">{format(list[0]!.createdAt, "d MMMM yyyy")}</span></h3>
+          <h3 className="font-display text-2xl">{t(label)} <span className="font-sans text-sm text-muted-foreground">{format(list[0]?.createdAt ?? Date.now(), "d MMMM yyyy")}</span></h3>
           {list.map(renderEntry)}
         </div>
       ))}
     </section>
   );
   const empty = entries && (entries.length === 0
-    ? <p className="pt-16 text-center text-muted-foreground">No chapters yet. Tap Begin a Chapter when you're ready.</p>
-    : onlyRibbon && groups.length === 0 ? <p className="pt-12 text-center text-muted-foreground">No keepsakes yet. Open an entry and tap the ribbon to keep it.</p> : null);
+    ? <p className="pt-16 text-center text-muted-foreground">{t("No chapters yet. Tap Begin a Chapter when you're ready.")}</p>
+    : onlyRibbon && groups.length === 0 ? <p className="pt-12 text-center text-muted-foreground">{t("No keepsakes yet. Open an entry and tap the ribbon to keep it.")}</p> : null);
   const pages = [indexPage, groups.length ? chaptersPage : (empty ?? chaptersPage)];
 
   return (
     <div className="app-shell">
-      <AppHeader title="Vanshika’s Diary" />
+      <AppHeader title={t("Vanshika’s Diary")} />
       <div className="relative z-[1] flex justify-end px-4 pb-3">
         <button aria-pressed={onlyRibbon} onClick={() => { setOnlyRibbon((v) => !v); setPage(0); }} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-0.5 text-sm ${onlyRibbon ? "border-ribbon bg-accent text-ribbon" : "border-border"}`}>
-          <RibbonMark className="w-2.5" /> The Keepsakes
-        </button>
+          <RibbonMark className="w-2.5" /> {t("The Keepsakes")}</button>
       </div>
       <main className="relative z-[1] px-4 pb-32">
         <TurnableBook pages={pages} page={Math.min(page, pages.length - 1)} onPage={setPage} />
       </main>
-      <Link to="/record" className="record-fab" aria-label="Begin a Chapter">
+      <Link to="/record" className="record-fab" aria-label={t("Begin a Chapter")}>
         <Plus className="size-7" />
       </Link>
     </div>

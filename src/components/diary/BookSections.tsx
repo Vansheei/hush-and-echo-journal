@@ -1,8 +1,10 @@
+import { t, useLanguage } from "@/lib/i18n";
 import { Link } from "@tanstack/react-router";
 import { BookHeart, CalendarDays, CloudRain, Feather, ListTodo, Mail, Mic, Search, Sparkles, Users } from "lucide-react";
 
 /** The featured Companion spot: a little moonlit window into the cover. */
 export function CompanionCard() {
+  useLanguage();
   return (
     <Link to="/companion" className="companion-card relative mx-4 mb-5 block overflow-hidden rounded-[1.6rem_1.6rem_0.6rem_0.6rem] p-5 pt-6 text-gold transition-transform active:scale-[0.99]">
       <svg viewBox="0 0 320 140" className="pointer-events-none absolute inset-0 size-full" preserveAspectRatio="xMidYMid slice" aria-hidden>
@@ -20,8 +22,8 @@ export function CompanionCard() {
       <div className="relative flex items-center gap-4">
         <span className="companion-orb flex size-14 shrink-0 items-center justify-center rounded-full border border-gold"><Mic className="size-6" /></span>
         <span>
-          <span className="block font-display text-4xl leading-tight text-gold-bright">Night Companion</span>
-          <span className="block text-sm text-gold/80">tap once and just talk</span>
+          <span className="block font-display text-4xl leading-tight text-gold-bright">{t("Night Companion")}</span>
+          <span className="block text-sm text-gold/80">{t("tap once and just talk")}</span>
         </span>
       </div>
     </Link>
@@ -42,12 +44,13 @@ const TABS = [
 
 /** Silk ribbon bookmarks: two columns on a phone, three on wider screens. */
 export function RibbonTabs() {
+  useLanguage();
   return (
-    <nav aria-label="Sections" className="relative z-[1] grid grid-cols-2 gap-x-3 gap-y-2.5 px-4 pb-5 sm:grid-cols-3">
+    <nav aria-label={t("Sections")} className="relative z-[1] grid grid-cols-2 gap-x-3 gap-y-2.5 px-4 pb-5 sm:grid-cols-3">
       {TABS.map(({ to, label, Icon, tone }) => (
         <Link key={to} to={to} className={`ribbon-tab ${tone}`}>
           <Icon className="size-4 shrink-0 text-gold-bright" />
-          <span className="line-clamp-2">{label}</span>
+          <span className="line-clamp-2">{t(label)}</span>
         </Link>
       ))}
     </nav>
