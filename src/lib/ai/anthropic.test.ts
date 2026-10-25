@@ -22,3 +22,15 @@ it("never falls back after a rejected model", async () => {
   if (!call) throw new Error("Expected one request");
   expect(JSON.parse(call[1].body).model).toBe("claude-haiku-5-5");
 });
+it("sends confirmed glossary and ambiguity instructions on reflection without saving suggestions", async () => {
+  const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ content: [{ type: "text", text: JSON.stringify({ text: "Who do you mean by Mama?", meanings: [], people: [{ mention: "Mama", question: "Your mum or maternal uncle?" }] }) }] }) });
+  vi.stubGlobal("fetch", fetcher);
+  const result = await requestReflection({ ...input, context: "koot dungi: I'll beat you (Punjabi)" });
+  const body = JSON.parse(fetcher.mock.calls[0]?.[1].body);
+  expect(body.system).toContain("koot dungi"); expect(body.system).toContain("80 percent"); expect(body.system).toContain("Swearing"); expect(body.system).toContain("never assume or create people");
+  expect(result.suggestions?.people[0]?.question).toBe("Your mum or maternal uncle?"); expect(fetcher).toHaveBeenCalledTimes(1);
+});
+it("stops on an empty refusal without retrying", async () => {
+  const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ stop_reason: "refusal", content: [] }) }); vi.stubGlobal("fetch", fetcher);
+  await expect(requestReflection(input)).rejects.toThrow("declined"); expect(fetcher).toHaveBeenCalledTimes(1);
+});

@@ -71,14 +71,13 @@ function SettingsPage() {
       <main className="space-y-6 px-4 pb-16">
         <section className="settings-card">
           <h2>Cover</h2>
-          <p className="text-sm text-muted-foreground">{look.coverChosen ? "The other colour is used for the ribbon and glows." : "Choose your cover. The other colour becomes the ribbon and glows."}</p>
-          <div className="grid grid-cols-2 gap-3">
-            {(["green", "plum"] as Cover[]).map((c) => (
-              <button key={c} data-cover={c} aria-pressed={look.cover === c} onClick={() => setAppearance({ cover: c, coverChosen: true })}
-                className={`space-y-2 rounded-md p-2 text-center ${look.cover === c ? "ring-2 ring-gold" : ""}`}>
-                <div className="pointer-events-none origin-top scale-100"><BookCover /></div>
-                <span className="text-sm">{c === "green" ? "Bottle green" : "Plum"}</span>
-              </button>
+          <div className="grid grid-cols-3 gap-3">
+            {(["green", "plum", "ocean"] as Cover[]).map((c) => (
+              <Button variant="ghost" key={c} data-cover={c} aria-pressed={look.cover === c} onClick={() => setAppearance({ cover: c, coverChosen: true })}
+                className={`h-auto flex-col whitespace-normal p-2 text-center ${look.cover === c ? "ring-2 ring-gold" : ""}`}>
+                <div className="pointer-events-none w-full origin-top scale-100"><BookCover /></div>
+                <span className="text-sm">{c === "green" ? "Bottle green" : c === "plum" ? "Plum" : "Dark ocean blue"}</span>
+              </Button>
             ))}
           </div>
         </section>
@@ -127,11 +126,11 @@ function SettingsPage() {
         </section>
         <section className="settings-card">
           <h2 className="font-medium">Transcription model</h2>
-          <p className="text-sm text-muted-foreground">Runs on this phone. Downloaded once, then works offline.</p>
+          <p className="text-sm text-muted-foreground">Multilingual · automatic language detection · no translation. Model files stay on this phone unless browser storage is cleared or evicted.</p>
           {(
             [
-              ["base", "Base", "Faster, ~80 MB"],
-              ["small", "Small", "More accurate, ~250 MB"],
+              ["base", "Multilingual base", "Lighter download"],
+              ["small", "Multilingual small", "Default · more accurate"],
             ] as [WhisperModel, string, string][]
           ).map(([v, l, d]) => (
             <label key={v} className="flex items-center gap-3 py-1">
@@ -161,7 +160,7 @@ function SettingsPage() {
               </Button>
             ))}
           </div>
-          <p className="text-sm text-muted-foreground">The diary also locks when you leave the app.</p>
+          <p className="text-sm text-muted-foreground">Locking when switching apps is paused for testing.</p>
           <Button variant="secondary" onClick={lock}>
             Lock now
           </Button>
@@ -178,7 +177,7 @@ function SettingsPage() {
         </section>
 
         <p className="text-center text-sm text-muted-foreground">
-          Companion chat and Google Drive sync arrive in later phases.
+          Google Drive sync and a natural cloud voice are reserved for later.
         </p>
       </main>
     </div>

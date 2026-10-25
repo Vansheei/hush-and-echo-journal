@@ -62,7 +62,8 @@ export async function transcribe(
   onProgress: (p: TranscribeProgress) => void,
 ): Promise<Segment[]> {
   const audio = await decodeToMono16k(blob);
-  return transcribeAudio(audio, model, onProgress);
+  try { return await transcribeAudio(audio, model, onProgress); }
+  finally { audio.fill(0); }
 }
 
 export async function transcribeAudio(audio: Float32Array, model: WhisperModel, onProgress: (p: TranscribeProgress) => void): Promise<Segment[]> {
@@ -87,7 +88,7 @@ export async function transcribeAudio(audio: Float32Array, model: WhisperModel, 
     }
     onProgress({ phase: "transcribe", pct: Math.round(((i + 1) / n) * 100) });
   }
-  audio.fill(0);
-  if (!handlers.size) { worker?.terminate(); worker = null; }
+  // Caller owns decoded audio and wipes it after tone analysis. Keep the speech-only
+  // worker/model alive across locking; it contains no vault key or diary history.
   return segments;
 }

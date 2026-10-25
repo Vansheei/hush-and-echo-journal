@@ -18,7 +18,7 @@ export function decodeBackupValue(v: unknown): unknown {
 }
 export async function exportBackup(): Promise<Blob> {
   const database = await db();
-  const names = ["meta", "entries", "media", "items"];
+  const names = Array.from(database.objectStoreNames);
   const tx = database.transaction(names, "readonly");
   const stores = await Promise.all(names.map(async (name) => {
     const store = tx.objectStore(name);

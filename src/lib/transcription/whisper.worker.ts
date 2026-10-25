@@ -1,7 +1,11 @@
 /// <reference lib="webworker" />
 import { pipeline, env } from "@huggingface/transformers";
+import { cachedModelFiles, durableModelCache } from "./model-cache";
 
 env.allowLocalModels = false;
+env.useBrowserCache = false;
+env.useCustomCache = true;
+env.customCache = durableModelCache();
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let pipe: any = null;
@@ -42,11 +46,14 @@ self.onmessage = async (e: MessageEvent) => {
   const { id, model, audio } = e.data as { id: number; model: string; audio: Float32Array };
   try {
     const p = await getPipe(model, (x) => {
-      if (x.status === "progress") self.postMessage({ id, type: "download", progress: x.progress ?? 0 });
+      const file = "file" in x && typeof x.file === "string" ? x.file : "";
+      if (x.status === "progress" && !cachedModelFiles.has(file)) self.postMessage({ id, type: "download", progress: x.progress ?? 0 });
     });
     const out = await p(audio, { return_timestamps: true, task: "transcribe" });
+    audio.fill(0);
     self.postMessage({ id, type: "result", out });
   } catch (err) {
+    audio.fill(0);
     self.postMessage({ id, type: "error", message: err instanceof Error ? err.message : String(err) });
   }
 };

@@ -2,7 +2,7 @@
 // cover must render (and sounds may play) while the diary is locked. No diary content here.
 import { useSyncExternalStore } from "react";
 
-export type Cover = "green" | "plum";
+export type Cover = "green" | "plum" | "ocean";
 type Prefs = { cover: Cover; coverChosen: boolean; sounds: boolean };
 const KEY = "diary-appearance";
 const DEFAULTS: Prefs = { cover: "green", coverChosen: false, sounds: true };
@@ -13,7 +13,7 @@ function read(): Prefs {
   if (cache) return cache;
   try { cache = { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY) ?? "{}") }; }
   catch { cache = DEFAULTS; }
-  return cache!;
+  return cache ?? DEFAULTS;
 }
 export function getAppearance() { return read(); }
 export function setAppearance(p: Partial<Prefs>) {
