@@ -23,7 +23,7 @@ export function setAppearance(p: Partial<Prefs>) {
   listeners.forEach((l) => l());
 }
 export function applyCover() {
-  document.documentElement.dataset.cover = read().cover;
+  document.documentElement.dataset["cover"] = read().cover;
 }
 export function useAppearance() {
   return useSyncExternalStore((l) => { listeners.add(l); return () => listeners.delete(l); }, read, () => DEFAULTS);
