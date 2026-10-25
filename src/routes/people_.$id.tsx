@@ -6,7 +6,7 @@ import { useVault } from "@/lib/vault-context";
 import { listEntries, type Entry } from "@/lib/storage/db";
 import { getPersonal, type Person } from "@/lib/storage/personal";
 
-export const Route = createFileRoute("/people/$id")({ ssr: false, head: () => ({ meta: [
+export const Route = createFileRoute("/people_/$id")({ ssr: false, head: () => ({ meta: [
   { title: "Diary — Person" }, { name: "description", content: "Entries and moments for a confirmed person." }, { property: "og:title", content: "Diary — Person" }, { property: "og:description", content: "Moments with a person you confirmed, found locally." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
 ] }), component: PersonPage });
 
