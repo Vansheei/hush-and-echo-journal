@@ -3,7 +3,7 @@
 - [x] Diagnose GitHub APK failures using the latest job log; replace retired Android SDK `tools` default with explicit supported packages.
 - [x] Fix run #5 failure: speech plugin crashed start-page rendering in the web bundle step; lazy import + server stub, clean-copy build/sync verified.
 - [x] Workflow: save full logs of each build step and upload them as an artifact when the APK build fails.
-- [ ] Run #7 still fails in the web bundle step on GitHub only (passes on a fresh GitHub clone here with Node 20/22 and CI=true); read the uploaded logs once available.
+- [x] Run #7 cause: build output lands in .output/public on GitHub; script now detects either folder into android-web.
 - [ ] Confirm a successful GitHub APK run and download (blocked until the corrected workflow reaches GitHub and runs).
 
 - [x] Reorganize Settings into seven heading-only linked sections; all section/back navigation and saved sound preferences verified on mobile and desktop.
