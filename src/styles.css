@@ -83,14 +83,16 @@
 /* ---- Antique book theme. Cover colour is swapped by [data-cover] on <html>. ---- */
 :root {
   --radius: 0.5rem;
-  --font-sans-family: "EB Garamond", Georgia, serif;
-  --font-display-family: "Pinyon Script", "EB Garamond", cursive;
-  --font-hand-family: "Caveat", "EB Garamond", cursive;
+  --font-sans-family: "IM Fell English", Georgia, serif;
+  --font-display-family: "Pinyon Script", cursive;
+  --font-hand-family: "IM Fell English", Georgia, serif;
 
   --bottle: oklch(0.3 0.06 162);
   --bottle-deep: oklch(0.22 0.045 162);
   --plum: oklch(0.29 0.075 345);
   --plum-deep: oklch(0.21 0.055 345);
+  --ocean: oklch(0.3 0.055 225);
+  --ocean-deep: oklch(0.21 0.04 225);
   --cover: var(--bottle);
   --cover-deep: var(--bottle-deep);
   --ribbon: var(--plum);
@@ -155,6 +157,12 @@
   --cover-deep: var(--plum-deep);
   --ribbon: var(--bottle);
   --glow: oklch(0.6 0.1 162);
+}
+[data-cover="ocean"] {
+  --cover: var(--ocean);
+  --cover-deep: var(--ocean-deep);
+  --ribbon: var(--plum);
+  --glow: var(--gold-dim);
 }
 
 @layer base {

@@ -6,7 +6,7 @@ import type { Reflection } from "@/lib/ai/anthropic";
 let dbp: Promise<IDBPDatabase> | null = null;
 export function db() {
   if (!dbp)
-    dbp = openDB("diary", 2, {
+     dbp = openDB("diary", 3, {
       upgrade(d, oldVersion) {
         if (oldVersion < 1) {
           d.createObjectStore("meta");
@@ -14,6 +14,7 @@ export function db() {
           d.createObjectStore("media", { keyPath: "id" }).createIndex("entryId", "entryId");
         }
         if (oldVersion < 2) d.createObjectStore("items", { keyPath: "id" });
+        if (oldVersion < 3) d.createObjectStore("private", { keyPath: "id" });
       },
     });
   return dbp;
@@ -25,12 +26,16 @@ export const putVaultMeta = async (m: VaultMeta) => (await db()).put("meta", m, 
 // ---- Settings (encrypted) ----
 export type WhisperModel = "base" | "small";
 export type Settings = { autoLockMin: number; whisperModel: WhisperModel; mode: "listen" | "reflect"; models: Record<Feature, ModelChoice> };
-export const DEFAULT_SETTINGS: Settings = { autoLockMin: 5, whisperModel: "base", mode: "listen", models: MODEL_DEFAULTS };
+export const DEFAULT_SETTINGS: Settings = { autoLockMin: 5, whisperModel: "small", mode: "listen", models: MODEL_DEFAULTS };
 
 export async function getSettings(key: CryptoKey): Promise<Settings> {
   const e = (await (await db()).get("meta", "settings")) as Enc | undefined;
   const saved = e ? await decryptJSON<Partial<Settings>>(key, e) : {};
-  return { ...DEFAULT_SETTINGS, ...saved, models: { ...MODEL_DEFAULTS, ...saved.models } };
+  // Upgrade the former default once; later explicit base choices remain respected.
+  const migrated = await (await db()).get("meta", "multilingualSmallDefault");
+  const result = { ...DEFAULT_SETTINGS, ...saved, whisperModel: migrated ? saved.whisperModel ?? "small" : "small", models: { ...MODEL_DEFAULTS, ...saved.models } } as Settings;
+  if (!migrated) { await putSettings(key, result); await (await db()).put("meta", true, "multilingualSmallDefault"); }
+  return result;
 }
 export async function putSettings(key: CryptoKey, s: Settings) {
   await (await db()).put("meta", await encryptJSON(key, s), "settings");

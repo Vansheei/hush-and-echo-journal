@@ -87,7 +87,7 @@ export async function transcribeAudio(audio: Float32Array, model: WhisperModel, 
     }
     onProgress({ phase: "transcribe", pct: Math.round(((i + 1) / n) * 100) });
   }
-  audio.fill(0);
-  if (!handlers.size) { worker?.terminate(); worker = null; }
+  // Caller owns decoded audio and wipes it after tone analysis. Keep the speech-only
+  // worker/model alive across locking; it contains no vault key or diary history.
   return segments;
 }
