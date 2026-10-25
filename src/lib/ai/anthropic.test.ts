@@ -1,0 +1,22 @@
+import { afterEach, expect, it, vi } from "vitest";
+import { requestReflection } from "./anthropic";
+import { MODEL_DEFAULTS, MODELS } from "./models";
+afterEach(() => vi.unstubAllGlobals());
+const input = { confirmed: true, mode: "reflect" as const, apiKey: "test-key", text: "My text", model: "haiku" as const, signal: new AbortController().signal };
+it("Listen is silent even with confirmation", async () => {
+  const fetcher = vi.fn(); vi.stubGlobal("fetch", fetcher);
+  await expect(requestReflection({ ...input, mode: "listen" })).rejects.toThrow(); expect(fetcher).not.toHaveBeenCalled();
+});
+it("requires explicit confirmation", async () => {
+  const fetcher = vi.fn(); vi.stubGlobal("fetch", fetcher);
+  await expect(requestReflection({ ...input, confirmed: false })).rejects.toThrow(); expect(fetcher).not.toHaveBeenCalled();
+});
+it("uses the exact 5.5 IDs and feature routing", () => {
+  expect(MODELS.haiku.id).toBe("claude-haiku-5-5"); expect(MODELS.sonnet.id).toBe("claude-sonnet-5-5");
+  expect(MODEL_DEFAULTS).toEqual({ extraction: "haiku", tagging: "haiku", notebook: "haiku", reflection: "haiku", companion: "sonnet", recap: "sonnet", drafts: "sonnet" });
+});
+it("never falls back after a rejected model", async () => {
+  const fetcher = vi.fn().mockResolvedValue({ ok: false, status: 404, json: async () => ({ error: { message: "Model rejected" } }) }); vi.stubGlobal("fetch", fetcher);
+  await expect(requestReflection(input)).rejects.toThrow("Model rejected"); expect(fetcher).toHaveBeenCalledTimes(1);
+  expect(JSON.parse(fetcher.mock.calls[0][1].body).model).toBe("claude-haiku-5-5");
+});

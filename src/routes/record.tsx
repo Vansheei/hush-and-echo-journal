@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useBlocker, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Mic, Pause, Play, RefreshCw, Square, Video, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,9 @@ function RecordPage() {
   const streamRef = useRef<MediaStream | null>(null);
   const recRef = useRef<MediaRecorder | null>(null);
   const preview = useRef<HTMLVideoElement>(null);
+  const saved = useRef(false);
+  const reviewUrl = useRef<string | null>(null);
+  useBlocker({ shouldBlockFn: () => state !== "idle" && !saved.current, enableBeforeUnload: state !== "idle" && !saved.current });
 
   const stopStream = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -45,6 +48,9 @@ function RecordPage() {
   // Stable callback avoids stopping the stream whenever the provider renders.
   useEffect(() => {
     return () => {
+      const recorder = recRef.current;
+      if (recorder) { recorder.onstop = null; recorder.ondataavailable = null; if (recorder.state !== "inactive") recorder.stop(); }
+      if (reviewUrl.current) URL.revokeObjectURL(reviewUrl.current);
       stopStream();
       setBusy(false);
     };
@@ -96,7 +102,8 @@ function RecordPage() {
     rec.ondataavailable = (e) => e.data.size && parts.push(e.data);
     rec.onstop = () => {
       const blob = new Blob(parts, { type: rec.mimeType || mimeType });
-      setResult({ blob, url: URL.createObjectURL(blob) });
+      const url = URL.createObjectURL(blob); reviewUrl.current = url;
+      setResult({ blob, url });
       stopStream();
       setState("review");
     };
@@ -122,6 +129,7 @@ function RecordPage() {
       durationSec: Math.max(1, secs),
     });
     URL.revokeObjectURL(result.url);
+    saved.current = true;
     bump();
       await nav({ to: "/" });
     } catch {
