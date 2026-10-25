@@ -96,10 +96,10 @@
   --gold: oklch(0.79 0.115 84);
   --gold-bright: oklch(0.92 0.12 92);
   --gold-dim: oklch(0.6 0.08 80);
-  --paper: oklch(0.95 0.022 84);
-  --paper-edge: oklch(0.83 0.045 72);
-  --paper-mark: oklch(0.7 0.05 65 / 12%);
-  --ink: oklch(0.26 0.03 45);
+  --paper: oklch(0.94 0.03 88);
+  --paper-edge: oklch(0.78 0.055 80);
+  --paper-mark: oklch(0.62 0.05 78 / 14%);
+  --ink: oklch(0.26 0.03 65);
 
   --tape-1: oklch(0.42 0.13 20);
   --tape-2: oklch(0.6 0.15 50);
@@ -108,22 +108,22 @@
 
   --background: var(--paper);
   --foreground: var(--ink);
-  --card: oklch(0.975 0.015 86);
+  --card: oklch(0.965 0.022 90);
   --card-foreground: var(--ink);
   --popover: var(--paper);
   --popover-foreground: var(--ink);
   --primary: var(--cover);
   --primary-foreground: var(--paper);
-  --secondary: oklch(0.9 0.03 80);
+  --secondary: oklch(0.89 0.035 86);
   --secondary-foreground: var(--ink);
-  --muted: oklch(0.91 0.025 82);
-  --muted-foreground: oklch(0.46 0.03 55);
+  --muted: oklch(0.9 0.03 86);
+  --muted-foreground: oklch(0.45 0.035 75);
   --accent: color-mix(in oklab, var(--ribbon) 14%, var(--paper));
   --accent-foreground: var(--ribbon);
   --destructive: oklch(0.5 0.17 28);
   --destructive-foreground: var(--paper);
-  --border: oklch(0.84 0.03 75);
-  --input: oklch(0.8 0.035 75);
+  --border: oklch(0.82 0.04 82);
+  --input: oklch(0.78 0.045 82);
   --ring: var(--gold-dim);
   --stage: oklch(0.2 0.02 50);
   --stage-muted: oklch(0.28 0.02 50);
