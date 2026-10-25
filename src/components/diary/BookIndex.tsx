@@ -10,6 +10,7 @@ export const SECTIONS: IndexItem[] = [
   { label: "Unfinished Chapters", to: "/loose-ends" },
   { label: "Quiet Garden", to: "/worry-parking" },
   { label: "Side Characters", to: "/people" },
+  { label: "Settings", to: "/settings" },
   { label: "Lexicon", to: "/glossary" },
   { label: "Unsent Letters", to: "/drafts" },
   { label: "Archive", to: "/search" },

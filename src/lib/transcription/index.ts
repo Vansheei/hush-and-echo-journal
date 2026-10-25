@@ -43,6 +43,9 @@ export async function decodeToMono16k(blob: Blob): Promise<Float32Array> {
   const ctx = new AudioContext({ sampleRate: 16000 });
   try {
     const buf = await ctx.decodeAudioData(await blob.arrayBuffer());
+    if (buf.sampleRate !== 16000) {
+      throw new Error(`Expected 16000 Hz decoded audio; received ${buf.sampleRate} Hz. Transcription stopped to avoid incorrect speech speed.`);
+    }
     const out = new Float32Array(buf.length);
     for (let c = 0; c < buf.numberOfChannels; c++) {
       const ch = buf.getChannelData(c);

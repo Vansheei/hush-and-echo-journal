@@ -87,6 +87,10 @@
 /* ---- Antique book theme. Cover colour is swapped by [data-cover] on <html>. ---- */
 :root {
   --radius: 0.5rem;
+  --safe-top: max(env(safe-area-inset-top, 0px), var(--native-safe-top, 0px));
+  --safe-bottom: max(env(safe-area-inset-bottom, 0px), var(--native-safe-bottom, 0px));
+  --safe-left: max(env(safe-area-inset-left, 0px), var(--native-safe-left, 0px));
+  --safe-right: max(env(safe-area-inset-right, 0px), var(--native-safe-right, 0px));
   --font-sans-family: "IM Fell English", Georgia, serif;
   --font-display-family: "Pinyon Script", cursive;
   --font-hand-family: "IM Fell English", Georgia, serif;
@@ -215,14 +219,17 @@
   min-height: 100dvh;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
+  padding: calc(1.5rem + var(--safe-top)) calc(1.5rem + var(--safe-right)) calc(1.5rem + var(--safe-bottom)) calc(1.5rem + var(--safe-left));
 }
 @utility app-shell {
   position: relative;
   margin-inline: auto;
   max-width: 40rem;
   min-height: 100dvh;
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
   background-color: var(--paper);
   background-image:
     linear-gradient(var(--page-fade), var(--page-fade)),
@@ -254,7 +261,7 @@
 @utility record-fab {
   position: fixed;
   left: 50%;
-  bottom: calc(1.5rem + env(safe-area-inset-bottom));
+  bottom: calc(1.5rem + var(--safe-bottom));
   transform: translateX(-50%);
   display: grid;
   place-items: center;
@@ -312,6 +319,13 @@
   background: none;
   padding: 0 0 1.25rem;
   border-bottom: 1px solid var(--border);
+}
+[role="dialog"] {
+  top: calc(50% + (var(--safe-top) - var(--safe-bottom)) / 2);
+  left: calc(50% + (var(--safe-left) - var(--safe-right)) / 2);
+  max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - 2rem);
+  max-width: calc(100vw - var(--safe-left) - var(--safe-right) - 2rem);
+  overflow-y: auto;
 }
 @utility journal-page {
   font-family: var(--font-hand-family);

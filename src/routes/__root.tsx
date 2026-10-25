@@ -17,11 +17,12 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { VaultProvider } from "@/lib/vault-context";
 import { Gate } from "@/components/diary/Gate";
 import { NativeBack } from "@/components/diary/NativeBack";
+import { NativeInsets } from "@/components/diary/NativeInsets";
 
 function NotFoundComponent() {
   useLanguage();
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="screen-center bg-background">
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">{t("Page not found")}</h2>
@@ -48,7 +49,7 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="screen-center bg-background">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
           {t("This page didn't load")}</h1>
@@ -116,6 +117,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ClientOnly fallback={<div className="screen-center text-paper/70">…</div>}>
+        <NativeInsets />
         <VaultProvider>
           <NativeBack />
           <Gate>
