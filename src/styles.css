@@ -75,6 +75,9 @@
   --color-tape-2: var(--tape-2);
   --color-tape-3: var(--tape-3);
   --color-tape-4: var(--tape-4);
+  --color-leaf-1: var(--leaf-1);
+  --color-leaf-2: var(--leaf-2);
+  --color-leaf-3: var(--leaf-3);
 }
 
 /* ---- Antique book theme. Cover colour is swapped by [data-cover] on <html>. ---- */
@@ -96,34 +99,37 @@
   --gold: oklch(0.79 0.115 84);
   --gold-bright: oklch(0.92 0.12 92);
   --gold-dim: oklch(0.6 0.08 80);
-  --paper: oklch(0.95 0.022 84);
-  --paper-edge: oklch(0.83 0.045 72);
-  --paper-mark: oklch(0.7 0.05 65 / 12%);
-  --ink: oklch(0.26 0.03 45);
+  --paper: oklch(0.94 0.03 88);
+  --paper-edge: oklch(0.78 0.055 80);
+  --paper-mark: oklch(0.62 0.05 78 / 14%);
+  --ink: oklch(0.26 0.03 65);
 
   --tape-1: oklch(0.42 0.13 20);
   --tape-2: oklch(0.6 0.15 50);
   --tape-3: oklch(0.5 0.08 195);
   --tape-4: oklch(0.74 0.13 88);
+  --leaf-1: oklch(0.82 0.1 62);
+  --leaf-2: oklch(0.7 0.17 50);
+  --leaf-3: oklch(0.58 0.19 33);
 
   --background: var(--paper);
   --foreground: var(--ink);
-  --card: oklch(0.975 0.015 86);
+  --card: oklch(0.965 0.022 90);
   --card-foreground: var(--ink);
   --popover: var(--paper);
   --popover-foreground: var(--ink);
   --primary: var(--cover);
   --primary-foreground: var(--paper);
-  --secondary: oklch(0.9 0.03 80);
+  --secondary: oklch(0.89 0.035 86);
   --secondary-foreground: var(--ink);
-  --muted: oklch(0.91 0.025 82);
-  --muted-foreground: oklch(0.46 0.03 55);
+  --muted: oklch(0.9 0.03 86);
+  --muted-foreground: oklch(0.45 0.035 75);
   --accent: color-mix(in oklab, var(--ribbon) 14%, var(--paper));
   --accent-foreground: var(--ribbon);
   --destructive: oklch(0.5 0.17 28);
   --destructive-foreground: var(--paper);
-  --border: oklch(0.84 0.03 75);
-  --input: oklch(0.8 0.035 75);
+  --border: oklch(0.82 0.04 82);
+  --input: oklch(0.78 0.045 82);
   --ring: var(--gold-dim);
   --stage: oklch(0.2 0.02 50);
   --stage-muted: oklch(0.28 0.02 50);
@@ -295,7 +301,7 @@
 @keyframes close-soft { from { transform: perspective(1600px) rotateY(-70deg); opacity: 0.2; } to { transform: none; opacity: 1; } }
 
 /* ---------- Seasons (home only) ---------- */
-.season-leaf { position: absolute; top: -10%; animation: leaf-fall linear infinite; opacity: 0.55; }
+.season-leaf { position: absolute; top: -10%; animation: leaf-fall linear infinite; opacity: 0.6; }
 @keyframes leaf-fall { 0% { transform: translate(0, 0) rotate(0); } 50% { transform: translate(18px, 55vh) rotate(160deg); } 100% { transform: translate(-10px, 110vh) rotate(320deg); } }
 .season-wind { animation: wind 6s ease-in-out infinite alternate; }
 @keyframes wind { to { transform: translateX(12px); } }

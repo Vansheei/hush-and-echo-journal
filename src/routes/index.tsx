@@ -4,7 +4,7 @@ import { format, isToday, isYesterday } from "date-fns";
 import { Plus, AlertCircle } from "lucide-react";
 import { EntryToken, RibbonMark } from "@/components/diary/EntryToken";
 import { SeasonScene } from "@/components/diary/SeasonScene";
-import { cassetteClick, pageTurn } from "@/lib/sounds";
+import { cassetteClick } from "@/lib/sounds";
 import { AppHeader, fmtDuration } from "@/components/diary/AppHeader";
 import { listEntries, type Entry } from "@/lib/storage/db";
 import { useVault } from "@/lib/vault-context";
@@ -81,7 +81,7 @@ function Timeline() {
                   key={e.id}
                   to="/entry/$id"
                   params={{ id: e.id }}
-                  onClick={() => (e.kind === "audio" ? cassetteClick() : pageTurn())}
+                  onClick={() => { if (e.kind === "audio") cassetteClick(); }}
                   className="relative flex items-center gap-3 rounded-md border border-border/70 bg-card p-3 transition-transform active:scale-[0.99]"
                 >
                   {e.ribbon && <RibbonMark className="absolute -top-1 right-16" />}
