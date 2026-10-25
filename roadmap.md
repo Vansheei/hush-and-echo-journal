@@ -1,5 +1,7 @@
 # Diary roadmap
 
+- [ ] Android native upgrades: biometric-protected diary key, local TTS at 1.15x, encrypted file sharing, back gesture navigation, native base-model default; tests and phone checklist before Phase 5.
+
 - [x] Security group, optional PIN, recovery passphrase reset, clearer fingerprint refusal guidance, warm 40%-faded writing sheet; 36 tests and browser PIN/reset/save flow passed.
 - [x] Audit Phase 4 and APK readiness before Phase 5: features present, live Claude/phone tests remain unverified, people matching approximate, no Android build project.
 - [ ] Native Android contacts and notification permission requests (blocked: no Android package/permission bridge exists; browser cannot grant them).
