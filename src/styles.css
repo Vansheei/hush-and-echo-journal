@@ -75,6 +75,9 @@
   --color-tape-2: var(--tape-2);
   --color-tape-3: var(--tape-3);
   --color-tape-4: var(--tape-4);
+  --color-leaf-1: var(--leaf-1);
+  --color-leaf-2: var(--leaf-2);
+  --color-leaf-3: var(--leaf-3);
 }
 
 /* ---- Antique book theme. Cover colour is swapped by [data-cover] on <html>. ---- */
@@ -105,6 +108,9 @@
   --tape-2: oklch(0.6 0.15 50);
   --tape-3: oklch(0.5 0.08 195);
   --tape-4: oklch(0.74 0.13 88);
+  --leaf-1: oklch(0.82 0.1 62);
+  --leaf-2: oklch(0.7 0.17 50);
+  --leaf-3: oklch(0.58 0.19 33);
 
   --background: var(--paper);
   --foreground: var(--ink);
