@@ -18,5 +18,7 @@ it("uses the exact 5.5 IDs and feature routing", () => {
 it("never falls back after a rejected model", async () => {
   const fetcher = vi.fn().mockResolvedValue({ ok: false, status: 404, json: async () => ({ error: { message: "Model rejected" } }) }); vi.stubGlobal("fetch", fetcher);
   await expect(requestReflection(input)).rejects.toThrow("Model rejected"); expect(fetcher).toHaveBeenCalledTimes(1);
-  expect(JSON.parse(fetcher.mock.calls[0][1].body).model).toBe("claude-haiku-5-5");
+  const call = fetcher.mock.calls[0];
+  if (!call) throw new Error("Expected one request");
+  expect(JSON.parse(call[1].body).model).toBe("claude-haiku-5-5");
 });
