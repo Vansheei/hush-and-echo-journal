@@ -106,7 +106,7 @@
   --tape-3: oklch(0.5 0.08 195);
   --tape-4: oklch(0.74 0.13 88);
 
-  --background: var(--cover-deep);
+  --background: var(--paper);
   --foreground: var(--ink);
   --card: oklch(0.975 0.015 86);
   --card-foreground: var(--ink);
@@ -161,7 +161,7 @@
     font-size: 1.0625rem;
     background-image: var(--cloth);
     -webkit-tap-highlight-color: transparent;
-    background-color: var(--color-background);
+    background-color: var(--cover-deep);
     color: var(--color-foreground);
   }
 }
