@@ -12,3 +12,10 @@ it("keeps the existing 1.15x speech default and enabled seasonal scenes", async 
   const appearance = await import("./appearance");
   expect(appearance.getAppearance()).toMatchObject({ companionVoiceSpeed: 1.15, seasonalScene: true, readRepliesAloud: true });
 });
+it("retains Hindi interface language after reload without touching encrypted settings", async () => {
+  const appearance = await import("./appearance");
+  appearance.setAppearance({ language: "hi" });
+  vi.resetModules();
+  expect((await import("./appearance")).getAppearance().language).toBe("hi");
+  expect(localStorage.length).toBe(1);
+});
