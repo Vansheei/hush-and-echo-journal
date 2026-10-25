@@ -7,10 +7,21 @@ on:
 jobs:
   build:
     runs-on: ubuntu-24.04
+    defaults:
+      run:
+        # Explicit bash enables pipefail, so a failing step still fails when its output is saved with tee.
+        shell: bash
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
       - uses: oven-sh/setup-bun@v2
+        with:
+          # Same version the build is verified with, so GitHub does not silently use a different one.
+          bun-version: "1.4.4"
 
       - uses: actions/setup-java@v4
         with:
@@ -23,20 +34,38 @@ jobs:
           packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
           log-accepted-android-sdk-licenses: false
 
+      - name: Record tool versions
+        run: |
+          mkdir -p build-logs
+          { echo "node $(node --version)"; echo "bun $(bun --version)"; java -version 2>&1; uname -a; } | tee build-logs/0-versions.log
+
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: bun install --frozen-lockfile 2>&1 | tee build-logs/1-install.log
 
       - name: Build offline web bundle and sync Android
-        run: bun run build:android
+        run: bun run build:android 2>&1 | tee build-logs/2-web-bundle-and-sync.log
 
       - name: Build debug APK
         working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee ../build-logs/3-gradle-apk.log
 
       - uses: actions/upload-artifact@v4
         with:
           name: app-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+
+      # Only on failure: the full output of every step that ran, plus Gradle's own reports.
+      - name: Upload build logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: |
+            build-logs/
+            android/build/reports/
+            android/app/build/reports/
+          if-no-files-found: warn
+          retention-days: 14
