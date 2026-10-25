@@ -59,6 +59,10 @@ function Timeline() {
         <Link to="/loose-ends">Loose ends</Link>
         <Link to="/worry-parking">Worry parking</Link>
         <Link to="/people">People</Link>
+        <Link to="/glossary">Glossary</Link>
+        <Link to="/search">Search</Link>
+        <Link to="/notebook">Notebook</Link>
+        <Link to="/companion">Companion</Link>
         <button aria-pressed={onlyRibbon} onClick={() => setOnlyRibbon((v) => !v)} className={`ml-auto inline-flex items-center gap-1.5 rounded-full border px-3 py-0.5 text-sm ${onlyRibbon ? "border-ribbon bg-accent text-ribbon" : "border-border"}`}>
           <RibbonMark className="w-2.5" /> Ribboned
         </button>

@@ -62,7 +62,8 @@ export async function transcribe(
   onProgress: (p: TranscribeProgress) => void,
 ): Promise<Segment[]> {
   const audio = await decodeToMono16k(blob);
-  return transcribeAudio(audio, model, onProgress);
+  try { return await transcribeAudio(audio, model, onProgress); }
+  finally { audio.fill(0); }
 }
 
 export async function transcribeAudio(audio: Float32Array, model: WhisperModel, onProgress: (p: TranscribeProgress) => void): Promise<Segment[]> {

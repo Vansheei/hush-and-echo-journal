@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppHeader } from "@/components/diary/AppHeader";
-import { EntryToken } from "@/components/diary/EntryToken";
-import { PeopleTabs, SAMPLE_PEOPLE } from "@/components/diary/PeopleTabs";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useVault } from "@/lib/vault-context";
+import { getPersonal, updatePersonal, type Person } from "@/lib/storage/personal";
 
 export const Route = createFileRoute("/people")({
   ssr: false,
@@ -20,26 +22,19 @@ export const Route = createFileRoute("/people")({
 });
 
 function PeoplePage() {
-  const [active, setActive] = useState(SAMPLE_PEOPLE[0]!.id);
-  const person = SAMPLE_PEOPLE.find((p) => p.id === active)!;
+  const { key, version, bump } = useVault();
+  const [people, setPeople] = useState<Person[]>([]);
+  const [name, setName] = useState(""); const [nicknames, setNicknames] = useState(""); const [edit, setEdit] = useState<string | null>(null); const [error, setError] = useState("");
+  useEffect(() => { let active = true; if (key) getPersonal(key).then(d => { if (active) setPeople(d.people); }); return () => { active = false; }; }, [key, version]);
   return (
     <div className="app-shell">
       <AppHeader back title="People" />
-      <PeopleTabs people={SAMPLE_PEOPLE} active={active} onSelect={setActive} />
-      <main className="space-y-4 px-4 pb-20 pr-10">
-        <p className="rounded-md border border-dashed border-border p-3 text-sm text-muted-foreground">
-          Preview with sample people. Real people and their entries arrive in the people phase.
-        </p>
-        <header className="flex items-center gap-3 border-b border-border pb-2">
-          <span className={`size-3 rounded-full ${person.color}`} />
-          <h2 className="font-display text-4xl">{person.name}</h2>
-        </header>
-        {[1, 2].map((i) => (
-          <div key={i} className="flex items-center gap-3 rounded-md bg-card p-3 opacity-70">
-            <EntryToken kind={i === 1 ? "audio" : "video"} id={person.id + i} />
-            <div className="space-y-1.5"><div className="h-2.5 w-40 rounded bg-muted" /><div className="h-2.5 w-24 rounded bg-muted" /></div>
-          </div>
-        ))}
+      <main className="space-y-4 px-4 pb-20">
+        <Input aria-label="Person name" placeholder="Name" value={name} onChange={e => setName(e.target.value)} />
+        <Input aria-label="Nicknames" placeholder="Nicknames, separated by commas" value={nicknames} onChange={e => setNicknames(e.target.value)} />
+        <div className="flex gap-2"><Button disabled={!name.trim()} onClick={async () => { if (!key) return; try { const person = { id: edit ?? crypto.randomUUID(), name: name.trim(), nicknames: nicknames.split(",").map(s => s.trim()).filter(Boolean) }; await updatePersonal(key, d => ({ ...d, people: [...d.people.filter(p => p.id !== edit), person] })); setName(""); setNicknames(""); setEdit(null); bump(); } catch { setError("Could not save person."); } }}>{edit ? "Save person" : "Confirm new person"}</Button>{edit && <Button variant="ghost" onClick={() => { setEdit(null); setName(""); setNicknames(""); }}>Cancel</Button>}</div>
+        {error && <p role="alert">{error}</p>}
+        {people.map(person => <section key={person.id} className="space-y-2 border-t border-border pt-3"><h2 className="font-display text-3xl">{person.name}</h2><p className="break-words">{person.nicknames.join(", ")}</p><div className="flex gap-2"><Button size="sm" variant="outline" onClick={() => { setEdit(person.id); setName(person.name); setNicknames(person.nicknames.join(", ")); }}>Edit</Button><Button size="sm" variant="ghost" onClick={async () => { if (!key || !window.confirm("Forget this person?")) return; try { await updatePersonal(key, d => ({ ...d, people: d.people.filter(p => p.id !== person.id) })); bump(); } catch { setError("Could not forget person."); } }}>Forget</Button></div></section>)}
       </main>
     </div>
   );
