@@ -51,8 +51,16 @@ export async function decryptJSON<T>(key: CryptoKey, e: Enc): Promise<T> {
   return JSON.parse(td.decode(await decryptBytes(key, e))) as T;
 }
 
-function importDek(raw: Uint8Array) {
-  return crypto.subtle.importKey("raw", raw as BufferSource, "AES-GCM", false, ["encrypt", "decrypt"]);
+const writers = new WeakMap<CryptoKey, CryptoKey>();
+async function importDek(raw: Uint8Array) {
+  const key = await crypto.subtle.importKey("raw", raw as BufferSource, "AES-GCM", false, ["encrypt", "decrypt"]);
+  writers.set(key, await crypto.subtle.importKey("raw", raw as BufferSource, "AES-GCM", false, ["encrypt"]));
+  return key;
+}
+export function encryptionOnlyKey(key: CryptoKey) {
+  const writer = writers.get(key);
+  if (!writer) throw new Error("No encryption-only key available.");
+  return writer;
 }
 
 export const normalizePhrase = (p: string) => p.trim().toLowerCase().split(/\s+/).join(" ");

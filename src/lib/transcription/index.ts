@@ -56,6 +56,10 @@ export async function transcribe(
   onProgress: (p: TranscribeProgress) => void,
 ): Promise<Segment[]> {
   const audio = await decodeToMono16k(blob);
+  return transcribeAudio(audio, model, onProgress);
+}
+
+export async function transcribeAudio(audio: Float32Array, model: WhisperModel, onProgress: (p: TranscribeProgress) => void): Promise<Segment[]> {
   const step = PIECE_SEC * 16000;
   const n = Math.max(1, Math.ceil(audio.length / step));
   const segments: Segment[] = [];
@@ -77,5 +81,6 @@ export async function transcribe(
     }
     onProgress({ phase: "transcribe", pct: Math.round(((i + 1) / n) * 100) });
   }
+  audio.fill(0);
   return segments;
 }
