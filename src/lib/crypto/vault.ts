@@ -118,7 +118,8 @@ export async function changePassphrase(meta: VaultMeta, oldPass: string, newPass
 
 async function deviceWrappingKey(secret: Uint8Array) {
   if (secret.byteLength !== 32) throw new Error("Invalid device encryption secret.");
-  return crypto.subtle.importKey("raw", secret as BufferSource, "AES-GCM", false, ["encrypt", "decrypt"]);
+  const base = await crypto.subtle.importKey("raw", secret as BufferSource, "HKDF", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({ name: "HKDF", hash: "SHA-256", salt: new Uint8Array(32), info: te.encode("diary-device-wrap-v1") }, base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
 }
 
 export async function createDeviceWrap(meta: VaultMeta, pass: string, secret: Uint8Array, id: Uint8Array, salt: Uint8Array): Promise<DeviceWrap> {

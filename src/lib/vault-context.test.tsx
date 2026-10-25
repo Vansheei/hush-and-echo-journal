@@ -10,6 +10,7 @@ vi.mock("@/lib/storage/db", () => ({
   putEntry: mocks.put, completeEntry: mocks.complete, loadMedia: async () => new Blob(),
 }));
 vi.mock("@/lib/transcription", () => ({ decodeToMono16k: mocks.decode, transcribeAudio: mocks.transcribe }));
+vi.mock("@/lib/crypto/device", () => ({ unlockUsingDevice: async () => mocks.key, removeDeviceUnlock: vi.fn() }));
 let vault: ReturnType<typeof useVault> | undefined;
 function Probe() { vault = useVault(); return <span>{vault.status}</span>; }
 beforeEach(() => { vi.clearAllMocks(); mocks.list.mockResolvedValue([]); mocks.decode.mockResolvedValue(new Float32Array([1, 2])); mocks.put.mockResolvedValue("revision"); });
@@ -22,6 +23,14 @@ it("defers locking throughout recording and keeps the busy callback stable", asy
   expect(vault?.status).toBe("unlocked"); expect(vault?.key).toBe(mocks.key); expect(vault?.setBusy).toBe(busy);
   await act(async () => vault?.setBusy(false));
   await waitFor(() => expect(vault?.status).toBe("locked")); expect(vault?.key).toBeNull();
+});
+it("device unlock enters the same vault and releases its key when locked", async () => {
+  render(<VaultProvider><Probe /></VaultProvider>);
+  await waitFor(() => expect(vault?.status).toBe("locked"));
+  await act(async () => vault?.unlockDevice());
+  expect(vault?.status).toBe("unlocked"); expect(vault?.key).toBe(mocks.key);
+  act(() => vault?.lock());
+  expect(vault?.status).toBe("locked"); expect(vault?.key).toBeNull();
 });
 it("finishes current transcription encrypted after lock without starting another job", async () => {
   const entry = { id: "job", status: "pending", segments: [] };

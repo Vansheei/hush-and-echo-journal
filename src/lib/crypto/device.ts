@@ -2,8 +2,7 @@ import { db } from "@/lib/storage/db";
 import { createDeviceWrap, unlockWithDeviceWrap, type DeviceWrap, type VaultMeta } from "./vault";
 
 type PrfOutputs = { prf?: { enabled?: boolean; results?: { first: ArrayBuffer } } };
-type PrfInputs = AuthenticationExtensionsClientInputs & { prf: { eval: { first: Uint8Array } } };
-const extensions = (salt: Uint8Array): PrfInputs => ({ prf: { eval: { first: salt } } });
+const extensions = (salt: Uint8Array): AuthenticationExtensionsClientInputs => ({ prf: { eval: { first: new Uint8Array(salt).buffer } } });
 const random = () => crypto.getRandomValues(new Uint8Array(32));
 const unavailable = "Secure fingerprint unlock is unavailable on this device or browser. Use your passphrase.";
 
