@@ -15,13 +15,13 @@ const fmt = (t: number) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).p
 /** Autocorrelation pitch estimate for one frame (75–400 Hz), or null when unvoiced. */
 export function framePitch(frame: Float32Array, sr: number): number | null {
   let energy = 0;
-  for (let i = 0; i < frame.length; i++) energy += frame[i] * frame[i];
+  for (let i = 0; i < frame.length; i++) energy += frame[i]! * frame[i]!;
   if (Math.sqrt(energy / frame.length) < 0.01) return null;
   const minLag = Math.floor(sr / 400), maxLag = Math.floor(sr / 75);
   let best = 0, bestLag = 0;
   for (let lag = minLag; lag <= maxLag; lag++) {
     let c = 0;
-    for (let i = 0; i + lag < frame.length; i++) c += frame[i] * frame[i + lag];
+    for (let i = 0; i + lag < frame.length; i++) c += frame[i]! * frame[i + lag]!;
     if (c > best) { best = c; bestLag = lag; }
   }
   return bestLag && best / energy > 0.3 ? sr / bestLag : null;
@@ -31,7 +31,7 @@ function segmentStats(audio: Float32Array, sr: number, seg: Segment, prevEnd: nu
   const a = Math.max(0, Math.floor(seg.start * sr)), b = Math.min(audio.length, Math.floor(seg.end * sr));
   const slice = audio.subarray(a, b);
   let sum = 0;
-  for (let i = 0; i < slice.length; i++) sum += slice[i] * slice[i];
+  for (let i = 0; i < slice.length; i++) sum += slice[i]! * slice[i]!;
   const rms = Math.sqrt(sum / Math.max(1, slice.length));
   const frame = Math.floor(sr * 0.04), pitches: number[] = [];
   for (let i = 0; i + frame <= slice.length; i += frame) {
@@ -59,7 +59,7 @@ export const voiceCueAnalyzer: ToneAnalyzer = {
   analyze({ audio, sampleRate, segments }) {
     const segs = segments.filter((s) => s.end > s.start && s.text.trim());
     if (!segs.length) return [];
-    const stats = segs.map((s, i) => segmentStats(audio, sampleRate, s, i ? segs[i - 1].end : s.start));
+    const stats = segs.map((s, i) => segmentStats(audio, sampleRate, s, i ? segs[i - 1]!.end : s.start));
     const rate = median(stats.map((s) => s.rate)), db = median(stats.map((s) => s.db));
     const cvs = stats.map((s) => s.pitchCv).filter((x): x is number => x !== null);
     const cv = median(cvs);
