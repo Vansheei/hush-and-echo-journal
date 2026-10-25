@@ -49,7 +49,11 @@ export function TurnableBook({ pages, page, onPage }: { pages: ReactNode[]; page
           <div className="turn-shade" style={{ opacity: Math.sin((-angle / 180) * Math.PI) * 0.5 }} />
         </div>
       )}
-      <p className="mt-3 text-center text-sm text-muted-foreground">Page {page + 1} of {pages.length} · drag to turn</p>
+      <div className="mt-3 flex items-center justify-between text-sm text-muted-foreground">
+        <button type="button" disabled={page <= 0 || !!turn} onClick={() => finish({ dir: -1, p: 1 })} className="rounded-full border border-border px-3 py-0.5 disabled:opacity-30">‹ Back</button>
+        <span>Page {page + 1} of {pages.length} · drag to turn</span>
+        <button type="button" disabled={page >= pages.length - 1 || !!turn} onClick={() => finish({ dir: 1, p: 1 })} className="rounded-full border border-border px-3 py-0.5 disabled:opacity-30">Next ›</button>
+      </div>
     </div>
   );
 }
