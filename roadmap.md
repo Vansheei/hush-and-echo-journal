@@ -1,5 +1,9 @@
 # Diary roadmap
 
+- [ ] Fix Android status/gesture-bar overlap on every page and verify Settings is reachable.
+- [ ] Add Settings to the alphabetical index while retaining the header gear.
+- [ ] Investigate Android transcription sample rate, model cache and accuracy; report before changing model choices.
+
 - [x] Diagnose GitHub APK failures using the latest job log; replace retired Android SDK `tools` default with explicit supported packages.
 - [x] Fix run #5 failure: speech plugin crashed start-page rendering in the web bundle step; lazy import + server stub, clean-copy build/sync verified.
 - [x] Workflow: save full logs of each build step and upload them as an artifact when the APK build fails.
