@@ -45,7 +45,7 @@ export function SetupScreen() {
   }
 
   return (
-    <div className="screen-center">
+    <div className="screen-center [&>*]:rounded-md [&>*]:bg-paper [&>*]:p-6">
       <div className="w-full max-w-sm space-y-6">
         <header className="space-y-2 text-center">
           <h1 className="font-display text-4xl">Diary</h1>

@@ -90,7 +90,7 @@ function EntryPage() {
     void m.play();
   }
 
-  if (entry === null) return <div className="screen-center text-muted-foreground">Entry not found.</div>;
+  if (entry === null) return <div className="screen-center text-paper">Entry not found.</div>;
   if (!entry) return null;
   const p = progress[entry.id];
 

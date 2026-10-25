@@ -120,7 +120,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ClientOnly fallback={<div className="screen-center text-muted-foreground">…</div>}>
+      <ClientOnly fallback={<div className="screen-center text-paper/70">…</div>}>
         <VaultProvider>
           <Gate>
             <Outlet />
