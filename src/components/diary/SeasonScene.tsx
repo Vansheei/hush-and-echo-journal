@@ -77,7 +77,7 @@ export function SeasonScene({ date = new Date() }: { date?: Date }) {
           {[6, 20, 34, 48, 62, 76, 90].map((left, i) => {
             const Shape = [Leaf, Maple, Leaf, Palm, Maple, Leaf, Palm][i]!;
             const color = ["text-tape-2", "text-leaf-1", "text-tape-1", "text-leaf-3", "text-leaf-2", "text-tape-4", "text-leaf-2"][i];
-            const size = Shape === Leaf ? "w-3" : "w-5";
+            const size = Shape === Leaf ? "w-3" : "w-6 opacity-80";
             return <Shape key={left} className={`season-leaf ${size} ${color}`} style={{ left: `${left}%`, animationDuration: `${14 + (i % 4) * 3}s`, animationDelay: `${i * -3}s` }} />;
           })}
         </div>

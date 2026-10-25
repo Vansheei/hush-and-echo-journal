@@ -301,7 +301,7 @@
 @keyframes close-soft { from { transform: perspective(1600px) rotateY(-70deg); opacity: 0.2; } to { transform: none; opacity: 1; } }
 
 /* ---------- Seasons (home only) ---------- */
-.season-leaf { position: absolute; top: -10%; animation: leaf-fall linear infinite; opacity: 0.55; }
+.season-leaf { position: absolute; top: -10%; animation: leaf-fall linear infinite; opacity: 0.6; }
 @keyframes leaf-fall { 0% { transform: translate(0, 0) rotate(0); } 50% { transform: translate(18px, 55vh) rotate(160deg); } 100% { transform: translate(-10px, 110vh) rotate(320deg); } }
 .season-wind { animation: wind 6s ease-in-out infinite alternate; }
 @keyframes wind { to { transform: translateX(12px); } }
