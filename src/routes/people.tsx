@@ -28,7 +28,7 @@ function PeoplePage() {
   useEffect(() => { let active = true; if (key) getPersonal(key).then(d => { if (active) setPeople(d.people); }); return () => { active = false; }; }, [key, version]);
   return (
     <div className="app-shell">
-      <AppHeader back title="People" />
+      <AppHeader back title="Side Characters" />
       <main className="space-y-4 px-4 pb-20">
         <Input aria-label="Person name" placeholder="Name" value={name} onChange={e => setName(e.target.value)} />
         <Input aria-label="Nicknames" placeholder="Nicknames, separated by commas" value={nicknames} onChange={e => setNicknames(e.target.value)} />

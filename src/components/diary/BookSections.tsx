@@ -20,8 +20,8 @@ export function CompanionCard() {
       <div className="relative flex items-center gap-4">
         <span className="companion-orb flex size-14 shrink-0 items-center justify-center rounded-full border border-gold"><Mic className="size-6" /></span>
         <span>
-          <span className="block font-display text-4xl leading-tight text-gold-bright">Talk to me</span>
-          <span className="block text-sm text-gold/80">Companion · tap once and just talk</span>
+          <span className="block font-display text-4xl leading-tight text-gold-bright">Night Companion</span>
+          <span className="block text-sm text-gold/80">tap once and just talk</span>
         </span>
       </div>
     </Link>

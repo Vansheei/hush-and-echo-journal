@@ -36,7 +36,7 @@ function WritePage() {
   }
   return (
     <div className="app-shell">
-      <AppHeader back title="Write" />
+      <AppHeader back title="Spill the tea" />
       <main className="relative z-[1] space-y-4 px-4 pb-20">
         <div className="writing-sheet">
           <Textarea aria-label="Written entry" autoFocus rows={14} value={text} onChange={(e) => setText(e.target.value)} placeholder="Just write…" className="journal-page writing-script min-h-80 w-full border-0 bg-transparent shadow-none focus-visible:ring-0" />

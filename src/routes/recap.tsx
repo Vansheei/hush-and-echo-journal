@@ -58,17 +58,18 @@ function RecapPage() {
     finally { if (active.current) setBusy(false); controller.current = null; }
   }
 
-  return <div className="app-shell"><AppHeader back title="Weekly recap" /><main className="space-y-5 px-4 pb-20">
+  return <div className="app-shell"><AppHeader back title="The Week’s Tale" /><main className="space-y-5 px-4 pb-20">
     <p className="text-sm text-muted-foreground">{entries.length ? `${entries.length} ${entries.length === 1 ? "entry" : "entries"} from the last 7 days. Nothing is sent unless you ask.` : "No finished entries from the last 7 days yet."}</p>
-    <Button disabled={!entries.length || busy} onClick={prepare}>{busy ? "Waiting for Claude…" : "Request weekly recap"}</Button>
-    {recap && <section className="space-y-4 border-t border-border pt-5">
+    <Button disabled={!entries.length || busy} onClick={prepare}>{busy ? "Waiting for Claude…" : "Ask for The Week’s Tale"}</Button>
+    {recap && <section className="scroll-letter"><div className="scroll-rod" /><div className="scroll-body space-y-4">
+      <p className="font-display text-3xl">My dearest Vanshi,</p>
       <p className="whitespace-pre-wrap break-words">{recap.text}</p>
       <Clarifications suggestions={recap.suggestions} />
       <div className="space-y-1">
         <h2 className="font-medium">Entries used</h2>
         <ul className="space-y-1">{entries.map(e => <li key={e.id}><Link to="/entry/$id" params={{ id: e.id }} search={{}} className="text-primary underline">{format(e.createdAt, "EEE d MMM, HH:mm")}{e.durationSec ? ` · ${fmtDuration(e.durationSec)}` : ""}</Link></li>)}</ul>
       </div>
-    </section>}
+    </div><div className="scroll-rod bottom" /></section>}
     {!open && error && <p role="alert" className="text-sm text-destructive">{error}</p>}
   </main>
   <Dialog open={open} onOpenChange={v => { if (!v) controller.current?.abort(); setOpen(v); }}>
