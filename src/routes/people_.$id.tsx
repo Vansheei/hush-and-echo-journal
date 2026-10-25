@@ -1,7 +1,6 @@
-import { t, useLanguage } from "@/lib/i18n";
+import { t, useLanguage, format } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { format } from "date-fns";
 import { AppHeader, fmtDuration } from "@/components/diary/AppHeader";
 import { useVault } from "@/lib/vault-context";
 import { listEntries, type Entry } from "@/lib/storage/db";

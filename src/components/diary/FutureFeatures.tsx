@@ -21,7 +21,7 @@ export function FutureFeatures() {
     <h2>{t("Coming later")}</h2>
     <ul className="divide-y divide-border">{features.map(({ icon: Icon, name, detail }) => <li key={name} className="flex gap-3 py-3">
       <Icon className="mt-1 size-5 shrink-0 text-muted-foreground" aria-hidden />
-      <div className="min-w-0"><h3 className="text-base">{name}</h3><span className="text-xs text-muted-foreground">{t("Coming later")}</span><p className="text-sm text-muted-foreground">{detail}</p></div>
+      <div className="min-w-0"><h3 className="text-base">{t(name)}</h3><span className="text-xs text-muted-foreground">{t("Coming later")}</span><p className="text-sm text-muted-foreground">{t(detail)}</p></div>
     </li>)}</ul>
   </section></>;
 }

@@ -22,9 +22,9 @@ export function CompanionSettings() {
         </section>
         <section className="settings-card">
           <h2 className="font-medium">{t("Claude models")}</h2>
-          {FEATURES.map((feature) => <label key={t(feature)} className="flex items-center justify-between gap-3 text-sm"><span className="capitalize">{t(feature)}</span>
+          {FEATURES.map((feature) => <label key={feature} className="flex flex-wrap items-center justify-between gap-3 text-sm"><span className="capitalize">{t(feature)}</span>
             <Select value={settings.models[feature]} onValueChange={(v) => updateSettings({ models: { ...settings.models, [feature]: v as ModelChoice } })}>
-              <SelectTrigger className="w-48" aria-label={`${feature} model`}><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-48" aria-label={`${t(feature)} · ${t("Claude models")}`}><SelectValue /></SelectTrigger>
               <SelectContent>{Object.entries(MODELS).map(([v, m]) => <SelectItem key={v} value={v}>{m.label}</SelectItem>)}</SelectContent>
             </Select>
           </label>)}

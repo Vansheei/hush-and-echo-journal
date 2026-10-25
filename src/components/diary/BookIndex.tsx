@@ -21,19 +21,19 @@ const sortKey = (s: string) => s.replace(/^The\s+/i, "").toLowerCase();
 
 /** Page one: an alphabetical index in a 16th-century hand, plain ink, no colours. */
 export function BookIndex({ items, days }: { items: IndexItem[]; days: { label: string; onSelect: () => void }[] }) {
-  useLanguage();
-  const sorted = [...items].sort((a, b) => sortKey(a.label).localeCompare(sortKey(b.label)));
+  const language = useLanguage();
+  const sorted = [...items].sort((a, b) => sortKey(t(a.label)).localeCompare(sortKey(t(b.label)), language));
   let letter = "";
   return (
     <div className="book-index">
       <h2 className="mb-3 text-center text-5xl">{t("Index")}</h2>
       <ul>
         {sorted.map((it) => {
-          const l = sortKey(it.label)[0]!.toUpperCase();
+          const l = (sortKey(t(it.label))[0] ?? "").toUpperCase();
           const head = l !== letter; letter = l;
           return (
-            <li key={t(it.label)}>
-              {head && <span className="index-letter">{t(l)}</span>}
+            <li key={it.label}>
+              {head && <span className="index-letter">{l}</span>}
               {it.to
                 ? <Link to={it.to} className="index-row"><span>{t(it.label)}</span><span className="index-dots" /></Link>
                 : <button type="button" onClick={it.onSelect} className="index-row w-full text-left"><span>{t(it.label)}</span><span className="index-dots" /></button>}

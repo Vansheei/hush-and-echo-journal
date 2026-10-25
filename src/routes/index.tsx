@@ -1,7 +1,7 @@
-import { t, useLanguage } from "@/lib/i18n";
+import { t, useLanguage, format } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { format, isToday, isYesterday } from "date-fns";
+import { isToday, isYesterday } from "date-fns";
 import { Plus, AlertCircle, ArrowDownUp } from "lucide-react";
 import { BookIndex, SECTIONS } from "@/components/diary/BookIndex";
 import { TurnableBook } from "@/components/diary/TurnableBook";
@@ -32,8 +32,8 @@ type IndexItemLike = { label: string; onSelect: () => void };
 
 function dayLabel(t: number) {
   const d = new Date(t);
-  if (isToday(d)) return "Today";
-  if (isYesterday(d)) return "Yesterday";
+  if (isToday(d)) return t("Today");
+  if (isYesterday(d)) return t("Yesterday");
   return format(d, "EEEE, d MMMM yyyy");
 }
 
@@ -76,7 +76,7 @@ function Timeline() {
           <p className="mt-0.5 line-clamp-2 text-muted-foreground">
             {e.status === "done" && (snippet || t("No speech detected"))}
             {e.status === "pending" && t("Waiting to transcribe…")}
-            {e.status === "transcribing" && (p?.phase === "download" ? `Downloading speech model ${Math.round(p.pct)}%` : `Transcribing ${p?.pct ?? 0}%`)}
+            {e.status === "transcribing" && (p?.phase === "download" ? t("Downloading speech model {percent}%", { percent: Math.round(p.pct) }) : t("Transcribing {percent}%", { percent: p?.pct ?? 0 }))}
             {e.status === "error" && <span className="inline-flex items-center gap-1 text-destructive"><AlertCircle className="size-3" /> {t("Transcription failed")}</span>}
           </p>
         </div>

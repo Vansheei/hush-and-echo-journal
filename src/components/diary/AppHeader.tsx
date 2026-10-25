@@ -66,7 +66,7 @@ export function AppHeader({ title, back, backTo }: { title: ReactNode; back?: bo
           <Button variant="ghost" size="icon" className="icon-btn" aria-label={t("Lock now")} onClick={lock}><Lock className="size-5" /></Button>
         </div>
         <div className="-mt-3 mb-2 flex items-center gap-1">
-          <ScrollBanner>{title}</ScrollBanner>
+          <ScrollBanner>{typeof title === "string" ? t(title) : title}</ScrollBanner>
           <Link to="/companion" className="lantern-link grid h-14 w-12 shrink-0 place-items-center" aria-label={t("Night Companion")} title={t("Night Companion")}><Lantern /></Link>
         </div>
       </header>

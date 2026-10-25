@@ -1,7 +1,6 @@
-import { t, useLanguage } from "@/lib/i18n";
+import { t, useLanguage, format } from "@/lib/i18n";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { format } from "date-fns";
 import { Trash2 } from "lucide-react";
 import { AppHeader, fmtDuration } from "@/components/diary/AppHeader";
 import { Button } from "@/components/ui/button";
@@ -46,7 +45,7 @@ export const Route = createFileRoute("/entry/$id")({
 function EntryPage() {
   useLanguage();
   const { id } = Route.useParams();
-  const { t } = Route.useSearch();
+  const { t: startTime } = Route.useSearch();
   const { key, version, progress, bump } = useVault();
   const nav = useNavigate();
   const [entry, setEntry] = useState<Entry | null | undefined>(undefined);
@@ -84,19 +83,19 @@ function EntryPage() {
     if (m && !Number.isFinite(m.duration)) {
       const back = () => {
         m.removeEventListener("durationchange", back);
-        m.currentTime = t ?? 0;
+        m.currentTime = startTime ?? 0;
       };
       m.addEventListener("durationchange", back);
       m.currentTime = 1e101;
-    } else if (m && t !== undefined) {
-      m.currentTime = t;
+    } else if (m && startTime !== undefined) {
+      m.currentTime = startTime;
     }
   }
 
-  function seek(t: number) {
+  function seek(time: number) {
     const m = media.current;
     if (!m) return;
-    m.currentTime = t;
+    m.currentTime = time;
     void m.play();
   }
 
@@ -165,9 +164,9 @@ function EntryPage() {
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">
                 {p?.phase === "download" ? t("Downloading speech model (first time only)") : t("Transcribing on this phone")}…{" "}
-                {Math.round(p?.pct ?? 0)}%
+                {Math.round(p?.pcstartTime ?? 0)}%
               </p>
-              <Progress value={p?.pct ?? 0} />
+              <Progress value={p?.pcstartTime ?? 0} />
             </div>
           )}
           {entry.status === "error" && (

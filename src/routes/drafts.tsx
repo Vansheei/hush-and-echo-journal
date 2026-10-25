@@ -1,7 +1,6 @@
-import { t, useLanguage } from "@/lib/i18n";
+import { t, useLanguage, format } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { format } from "date-fns";
 import { Copy, Trash2 } from "lucide-react";
 import { AppHeader } from "@/components/diary/AppHeader";
 import { Button } from "@/components/ui/button";
