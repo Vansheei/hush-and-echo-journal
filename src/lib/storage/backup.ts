@@ -1,8 +1,8 @@
 import { db } from "./db";
 
 const encode = (v: unknown): unknown => {
-  if (v instanceof ArrayBuffer) return { binary: Array.from(new Uint8Array(v)) };
-  if (v instanceof Uint8Array) return { bytes: Array.from(v) };
+  if (Object.prototype.toString.call(v) === "[object ArrayBuffer]") return { binary: Array.from(new Uint8Array(v as ArrayBuffer)) };
+  if (ArrayBuffer.isView(v)) return { bytes: Array.from(new Uint8Array(v.buffer, v.byteOffset, v.byteLength)) };
   if (Array.isArray(v)) return v.map(encode);
   if (v && typeof v === "object") return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, encode(x)]));
   return v;
