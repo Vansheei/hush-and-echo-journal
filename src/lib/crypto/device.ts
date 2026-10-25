@@ -1,5 +1,7 @@
 import { db } from "@/lib/storage/db";
 import { createDeviceWrap, unlockWithDeviceWrap, type DeviceWrap, type VaultMeta } from "./vault";
+import { isNativeAndroid } from "@/lib/native/platform";
+import { DiaryBiometric, enableNativeUnlock, getNativeWrap, removeNativeUnlock, unlockNative } from "@/lib/native/biometric";
 
 type PrfOutputs = { prf?: { enabled?: boolean; results?: { first: ArrayBuffer } } };
 const extensions = (salt: Uint8Array): AuthenticationExtensionsClientInputs => ({ prf: { eval: { first: new Uint8Array(salt).buffer } } });
@@ -8,15 +10,20 @@ const unavailable = "Secure fingerprint unlock is unavailable on this device or 
 
 export async function deviceUnlockAvailable() {
   try {
+    if (isNativeAndroid()) return (await DiaryBiometric.available()).available;
     return window.isSecureContext && typeof PublicKeyCredential !== "undefined" &&
       await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
   } catch { return false; }
 }
 
 export async function getDeviceWrap(): Promise<DeviceWrap | undefined> {
+  if (isNativeAndroid()) return getNativeWrap();
   return (await db()).get("meta", "deviceUnlock");
 }
-export async function removeDeviceUnlock() { await (await db()).delete("meta", "deviceUnlock"); }
+export async function removeDeviceUnlock() {
+  if (isNativeAndroid()) await removeNativeUnlock();
+  await (await db()).delete("meta", "deviceUnlock");
+}
 
 function credential(value: Credential | null): PublicKeyCredential {
   if (!(value instanceof PublicKeyCredential)) throw new Error("Device unlock was cancelled.");
@@ -34,6 +41,7 @@ async function readSecret(id: Uint8Array, salt: Uint8Array) {
 }
 
 export async function enableDeviceUnlock(meta: VaultMeta, passphrase: string) {
+  if (isNativeAndroid()) return enableNativeUnlock(meta, passphrase);
   if (!await deviceUnlockAvailable()) throw new Error(unavailable);
   // Verify the passphrase before asking the owner to create a credential.
   const { unlockWithPassphrase } = await import("./vault");
@@ -58,6 +66,7 @@ export async function enableDeviceUnlock(meta: VaultMeta, passphrase: string) {
 }
 
 export async function unlockUsingDevice() {
+  if (isNativeAndroid()) return unlockNative();
   const wrap = await getDeviceWrap();
   if (!wrap) throw new Error("Open with your passphrase and enable fingerprint unlock in Settings first.");
   const secret = await readSecret(wrap.id, wrap.salt);
