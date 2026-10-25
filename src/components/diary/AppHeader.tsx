@@ -1,3 +1,4 @@
+import { t, useLanguage } from "@/lib/i18n";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Lock, Settings } from "lucide-react";
 import type { ReactNode } from "react";
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/button";
 
 /** Curled parchment scroll banner holding a page title. */
 export function ScrollBanner({ children }: { children: ReactNode }) {
+  useLanguage();
   return (
     <div className="title-scroll relative mx-auto w-full max-w-[24rem] [container-type:inline-size]">
       <svg viewBox="0 0 320 90" className="block w-full" aria-hidden>
@@ -35,6 +37,7 @@ export function ScrollBanner({ children }: { children: ReactNode }) {
 
 /** A small hanging lantern drawn in plain ink. */
 function Lantern() {
+  useLanguage();
   return (
     <svg viewBox="0 0 24 32" className="h-12 w-9" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" aria-hidden>
       <ellipse cx="12" cy="17" rx="7" ry="10" className="lantern-glass" stroke="none" />
@@ -48,6 +51,7 @@ function Lantern() {
 }
 
 export function AppHeader({ title, back, backTo }: { title: ReactNode; back?: boolean; backTo?: "/settings" }) {
+  useLanguage();
   const { lock } = useVault();
   return (
     <>
@@ -55,15 +59,15 @@ export function AppHeader({ title, back, backTo }: { title: ReactNode; back?: bo
       <header className="relative z-10 px-4 pt-3">
         <div className="flex items-center gap-1 text-frame">
           {back || backTo ? (
-            <Link to={backTo ?? "/"} className="icon-btn" aria-label="Back"><ArrowLeft className="size-5" /></Link>
+            <Link to={backTo ?? "/"} className="icon-btn" aria-label={t("Back")}><ArrowLeft className="size-5" /></Link>
           ) : <span className="size-10" />}
           <span className="flex-1" />
-          <Link to="/settings" className="icon-btn" aria-label="Settings"><Settings className="size-5" /></Link>
-          <Button variant="ghost" size="icon" className="icon-btn" aria-label="Lock now" onClick={lock}><Lock className="size-5" /></Button>
+          <Link to="/settings" className="icon-btn" aria-label={t("Settings")}><Settings className="size-5" /></Link>
+          <Button variant="ghost" size="icon" className="icon-btn" aria-label={t("Lock now")} onClick={lock}><Lock className="size-5" /></Button>
         </div>
         <div className="-mt-3 mb-2 flex items-center gap-1">
           <ScrollBanner>{title}</ScrollBanner>
-          <Link to="/companion" className="lantern-link grid h-14 w-12 shrink-0 place-items-center" aria-label="Night Companion" title="Night Companion"><Lantern /></Link>
+          <Link to="/companion" className="lantern-link grid h-14 w-12 shrink-0 place-items-center" aria-label={t("Night Companion")} title={t("Night Companion")}><Lantern /></Link>
         </div>
       </header>
     </>

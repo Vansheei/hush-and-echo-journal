@@ -1,3 +1,4 @@
+import { t, useLanguage } from "@/lib/i18n";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { pageTurn } from "@/lib/sounds";
 import { registerBackHandler } from "@/lib/native/back";
@@ -6,6 +7,7 @@ type Turn = { dir: 1 | -1; p: number; settling?: boolean; commit?: boolean };
 
 /** Drag with a finger to turn pages forwards or backwards; same animation and sound both ways. */
 export function TurnableBook({ pages, page, onPage }: { pages: ReactNode[]; page: number; onPage: (n: number) => void }) {
+  useLanguage();
   const [turn, setTurn] = useState<Turn | null>(null);
   const ref = useRef<HTMLDivElement>(null);
   const start = useRef<{ x: number; y: number; axis?: "x" | "y"; moved: boolean } | null>(null);
@@ -59,9 +61,9 @@ export function TurnableBook({ pages, page, onPage }: { pages: ReactNode[]; page
         </div>
       )}
       <div className="mt-3 flex items-center justify-between text-sm text-muted-foreground">
-        <button type="button" disabled={page <= 0 || !!turn} onClick={() => finish({ dir: -1, p: 1 })} className="rounded-full border border-border px-3 py-0.5 disabled:opacity-30">‹ Back</button>
-        <span>Page {page + 1} of {pages.length} · drag to turn</span>
-        <button type="button" disabled={page >= pages.length - 1 || !!turn} onClick={() => finish({ dir: 1, p: 1 })} className="rounded-full border border-border px-3 py-0.5 disabled:opacity-30">Next ›</button>
+        <button type="button" disabled={page <= 0 || !!turn} onClick={() => finish({ dir: -1, p: 1 })} className="rounded-full border border-border px-3 py-0.5 disabled:opacity-30">{t("‹ Back")}</button>
+        <span>{t("Page")}{page + 1} {t("of")}{pages.length} {t("· drag to turn")}</span>
+        <button type="button" disabled={page >= pages.length - 1 || !!turn} onClick={() => finish({ dir: 1, p: 1 })} className="rounded-full border border-border px-3 py-0.5 disabled:opacity-30">{t("Next ›")}</button>
       </div>
     </div>
   );

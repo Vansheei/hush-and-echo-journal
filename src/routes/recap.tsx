@@ -1,3 +1,4 @@
+import { t, useLanguage } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { format } from "date-fns";
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/recap")({ ssr: false, head: () => ({ meta
 const WEEK = 7 * 24 * 60 * 60 * 1000;
 
 function RecapPage() {
+  useLanguage();
   const { key, settings, version } = useVault();
   const [entries, setEntries] = useState<Entry[]>([]);
   const [open, setOpen] = useState(false);
@@ -58,26 +60,26 @@ function RecapPage() {
     finally { if (active.current) setBusy(false); controller.current = null; }
   }
 
-  return <div className="app-shell"><AppHeader back title="The Week’s Tale" /><main className="space-y-5 px-4 pb-20">
-    <p className="text-sm text-muted-foreground">{entries.length ? `${entries.length} ${entries.length === 1 ? "entry" : "entries"} from the last 7 days. Nothing is sent unless you ask.` : "No finished entries from the last 7 days yet."}</p>
-    <Button disabled={!entries.length || busy} onClick={prepare}>{busy ? "Waiting for Claude…" : "Ask for The Week’s Tale"}</Button>
+  return <div className="app-shell"><AppHeader back title={t("The Week’s Tale")} /><main className="space-y-5 px-4 pb-20">
+    <p className="text-sm text-muted-foreground">{entries.length ? `${entries.length} ${entries.length === 1 ? "entry" : "entries"} from the last 7 days. Nothing is sent unless you ask.` : t("No finished entries from the last 7 days yet.")}</p>
+    <Button disabled={!entries.length || busy} onClick={prepare}>{busy ? t("Waiting for Claude…") : t("Ask for The Week’s Tale")}</Button>
     {recap && <section className="scroll-letter"><div className="scroll-rod" /><div className="scroll-body space-y-4">
-      <p className="font-display text-3xl">My dearest Vanshi,</p>
+      <p className="font-display text-3xl">{t("My dearest Vanshi,")}</p>
       <p className="whitespace-pre-wrap break-words">{recap.text}</p>
       <Clarifications suggestions={recap.suggestions} />
       <div className="space-y-1">
-        <h2 className="font-medium">Entries used</h2>
+        <h2 className="font-medium">{t("Entries used")}</h2>
         <ul className="space-y-1">{entries.map(e => <li key={e.id}><Link to="/entry/$id" params={{ id: e.id }} search={{}} className="text-primary underline">{format(e.createdAt, "EEE d MMM, HH:mm")}{e.durationSec ? ` · ${fmtDuration(e.durationSec)}` : ""}</Link></li>)}</ul>
       </div>
     </div><div className="scroll-rod bottom" /></section>}
-    {!open && error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+    {!open && error && <p role="alert" className="text-sm text-destructive">{t(error)}</p>}
   </main>
   <Dialog open={open} onOpenChange={v => { if (!v) controller.current?.abort(); setOpen(v); }}>
     <DialogContent className="max-h-[85dvh] overflow-y-auto">
-      <DialogHeader><DialogTitle>Send this week's transcripts to Claude?</DialogTitle><DialogDescription>Only the text below leaves this device, and only this once. No audio or video is sent.</DialogDescription></DialogHeader>
+      <DialogHeader><DialogTitle>{t("Send this week's transcripts to Claude?")}</DialogTitle><DialogDescription>{t("Only the text below leaves this device, and only this once. No audio or video is sent.")}</DialogDescription></DialogHeader>
       <pre className="max-h-72 overflow-y-auto whitespace-pre-wrap break-words bg-muted p-3 text-sm">{preview}</pre>
-      {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-      <div className="flex gap-2"><Button disabled={busy} onClick={run}>{busy ? "Waiting for Claude…" : "Confirm and send"}</Button><Button variant="outline" onClick={() => { controller.current?.abort(); setOpen(false); }}>Cancel</Button></div>
+      {error && <p role="alert" className="text-sm text-destructive">{t(error)}</p>}
+      <div className="flex gap-2"><Button disabled={busy} onClick={run}>{busy ? t("Waiting for Claude…") : t("Confirm and send")}</Button><Button variant="outline" onClick={() => { controller.current?.abort(); setOpen(false); }}>{t("Cancel")}</Button></div>
     </DialogContent>
   </Dialog></div>;
 }

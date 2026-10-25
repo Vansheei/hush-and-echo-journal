@@ -1,3 +1,4 @@
+import { t, useLanguage } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import { Fingerprint } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { useVault } from "@/lib/vault-context";
 import { isNativeAndroid } from "@/lib/native/platform";
 
 export function DeviceUnlockSettings() {
+  useLanguage();
   const { setBusy, version } = useVault();
   const [available, setAvailable] = useState<boolean | null>(null);
   const [enabled, setEnabled] = useState(false);
@@ -29,17 +31,17 @@ export function DeviceUnlockSettings() {
     } finally { setPass(""); setWorking(false); setBusy(false); }
   }
   return <div className="space-y-3 border-t border-border pt-4">
-    <h3 className="flex items-center gap-2 font-display text-3xl"><Fingerprint className="size-5" />Fingerprint unlock</h3>
-    <p className="text-sm text-muted-foreground">{isNativeAndroid() ? "Android checks your enrolled fingerprint and releases the encrypted diary key. The diary never receives fingerprint data. Adding or changing fingerprints may require enabling this again. Passphrase and diary PIN remain available." : "Your device verifies you; the diary never receives your fingerprint. It may offer face recognition or your device PIN instead. Available only in supported browsers on this device and site."}</p>
-    <p role="status" className="text-sm">{enabled ? "Enabled" : available === null ? "Checking device…" : available ? "Not enabled" : "Unavailable here — use your passphrase."}</p>
+    <h3 className="flex items-center gap-2 font-display text-3xl"><Fingerprint className="size-5" />{t("Fingerprint unlock")}</h3>
+    <p className="text-sm text-muted-foreground">{isNativeAndroid() ? t("Android checks your enrolled fingerprint and releases the encrypted diary key. The diary never receives fingerprint data. Adding or changing fingerprints may require enabling this again. Passphrase and diary PIN remain available.") : t("Your device verifies you; the diary never receives your fingerprint. It may offer face recognition or your device PIN instead. Available only in supported browsers on this device and site.")}</p>
+    <p role="status" className="text-sm">{enabled ? t("Enabled") : available === null ? t("Checking device…") : available ? t("Not enabled") : t("Unavailable here — use your passphrase.")}</p>
     {!enabled && available && <>
-      <Input type="password" autoComplete="off" aria-label="Passphrase for fingerprint setup" placeholder="Current passphrase" value={pass} onChange={(e) => setPass(e.target.value)} />
-      <Button disabled={working || !pass} onClick={() => void enable()}><Fingerprint />{working ? "Waiting for device…" : "Enable fingerprint unlock"}</Button>
+      <Input type="password" autoComplete="off" aria-label={t("Passphrase for fingerprint setup")} placeholder={t("Current passphrase")} value={pass} onChange={(e) => setPass(e.target.value)} />
+      <Button disabled={working || !pass} onClick={() => void enable()}><Fingerprint />{working ? t("Waiting for device…") : t("Enable fingerprint unlock")}</Button>
     </>}
     {enabled && <Button variant="outline" disabled={working} onClick={async () => {
       try { await removeDeviceUnlock(); setEnabled(false); setMessage(isNativeAndroid() ? "Fingerprint diary key removed." : "Diary device unlock removed. You can remove its passkey in your device settings too."); }
       catch { setMessage("Could not remove fingerprint unlock. Please try again."); }
-    }}>Disable fingerprint unlock</Button>}
-    {message && <p role="status" className="text-sm text-muted-foreground">{message}</p>}
+    }}>{t("Disable fingerprint unlock")}</Button>}
+    {message && <p role="status" className="text-sm text-muted-foreground">{t(message)}</p>}
   </div>;
 }

@@ -1,3 +1,4 @@
+import { t, useLanguage } from "@/lib/i18n";
 import type { CSSProperties, ReactNode } from "react";
 import { useAppearance, type Cover } from "@/lib/appearance";
 
@@ -5,6 +6,7 @@ const COVER_ART = { green: "/art/cover-green.webp", plum: "/art/cover-burgundy.w
 
 /** A single feathery dandelion seed: a fine stalk with a soft tuft. */
 function Seed() {
+  useLanguage();
   return (
     <svg viewBox="-10 -12 20 24" className="size-full" aria-hidden>
       <path d="M0 -4 L0 10" stroke="oklch(0.95 0.03 90)" strokeWidth="0.5" />
@@ -25,11 +27,12 @@ const SEEDS = HEADS.flatMap(([x, y], h) => [0, 1, 2, 3, 4].map((i) => ({
 const DAFFS: [number, number][] = [[9, 86], [14, 88], [92, 85], [88, 91]];
 
 export function BookCover({ children, lit = false, variant }: { children?: ReactNode; lit?: boolean; variant?: Cover }) {
+  useLanguage();
   const chosen = useAppearance().cover;
   const cover = variant ?? chosen;
   return (
     <div className="book-cover [container-type:inline-size]">
-      <img src={COVER_ART[cover] ?? COVER_ART.green} alt="Vanshika’s Diary" className={`absolute inset-0 size-full object-cover ${lit ? "cover-art-lit" : ""}`} draggable={false} />
+      <img src={COVER_ART[cover] ?? COVER_ART.green} alt={t("Vanshika’s Diary")} className={`absolute inset-0 size-full object-cover ${lit ? "cover-art-lit" : ""}`} draggable={false} />
       {lit && DAFFS.map(([x, y], i) => (
         <span key={`d${i}`} className="daffodil-glow" style={{ left: `${x}%`, top: `${y}%`, "--d": `${0.3 + i * 0.2}s` } as CSSProperties} />
       ))}

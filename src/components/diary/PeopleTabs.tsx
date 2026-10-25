@@ -1,3 +1,4 @@
+import { t, useLanguage } from "@/lib/i18n";
 import { Link } from "@tanstack/react-router";
 
 export type PersonTab = { id: string; name: string; color: string };
@@ -12,8 +13,9 @@ export const SAMPLE_PEOPLE: PersonTab[] = [
 
 /** Thumb-index tabs sticking out of the book's right edge. */
 export function PeopleTabs({ people, active, onSelect }: { people: PersonTab[]; active?: string; onSelect: (id: string) => void }) {
+  useLanguage();
   return (
-    <nav aria-label="People" className="absolute right-0 top-28 z-10 flex flex-col gap-1.5">
+    <nav aria-label={t("People")} className="absolute right-0 top-28 z-10 flex flex-col gap-1.5">
       {people.map((p) => (
         <button
           key={p.id}
@@ -29,5 +31,6 @@ export function PeopleTabs({ people, active, onSelect }: { people: PersonTab[]; 
 }
 
 export function PeopleLink() {
-  return <Link to="/people">People</Link>;
+  useLanguage();
+  return <Link to="/people">{t("People")}</Link>;
 }

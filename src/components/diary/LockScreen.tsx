@@ -1,3 +1,4 @@
+import { t, useLanguage } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import { Fingerprint } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { getDeviceWrap } from "@/lib/crypto/device";
 import { hasPin } from "@/lib/crypto/pin";
 
 export function LockScreen({ closing = false }: { closing?: boolean }) {
+  useLanguage();
   const { unlock, unlockDevice, unlockPin, recover } = useVault();
   const [pinEnabled, setPinEnabled] = useState(false);
   const [usePin, setUsePin] = useState(false);
@@ -41,7 +43,7 @@ export function LockScreen({ closing = false }: { closing?: boolean }) {
 
   return (
     <div className="screen-center flex-col gap-5" onPointerDown={mark}>
-      <h1 className="sr-only">Diary is locked</h1>
+      <h1 className="sr-only">{t("Diary is locked")}</h1>
       {mode === "pass" ? (
         <>
           <div className={closing ? "cover-closing w-full flex justify-center" : "w-full flex justify-center"}>
@@ -57,30 +59,28 @@ export function LockScreen({ closing = false }: { closing?: boolean }) {
                   type="password"
                   autoFocus
                   inputMode={usePin ? "numeric" : "text"}
-                  aria-label={usePin ? "Diary PIN" : "Passphrase"}
-                  placeholder={usePin ? "Diary PIN" : "Passphrase"}
+                  aria-label={usePin ? t("Diary PIN") : t("Passphrase")}
+                  placeholder={usePin ? t("Diary PIN") : t("Passphrase")}
                   value={pass}
                   onChange={(e) => setPass(e.target.value)}
                   className="border-gold/60 bg-cover text-center text-gold placeholder:text-gold/60"
                 />
-                {err && <p className="text-center text-sm text-gold">{err}</p>}
+                {err && <p className="text-center text-sm text-gold">{t(err)}</p>}
                 <Button className="w-full border border-gold bg-transparent text-gold hover:bg-gold/10" disabled={busy || !pass}>
-                  {busy ? "Opening…" : "Open"}
+                  {busy ? t("Opening…") : t("Open")}
                 </Button>
               </form>
             </BookCover>
           </div>
           <div className="flex flex-col items-center gap-2 text-gold/80">
-            {pinEnabled && <Button variant="ghost" disabled={busy} onClick={() => { setUsePin(!usePin); setPass(""); setErr(""); }}>{usePin ? "Use passphrase" : "Use diary PIN"}</Button>}
+            {pinEnabled && <Button variant="ghost" disabled={busy} onClick={() => { setUsePin(!usePin); setPass(""); setErr(""); }}>{usePin ? t("Use passphrase") : t("Use diary PIN")}</Button>}
             <Button type="button" variant="ghost" className="text-gold/70" disabled={busy} onClick={() => {
               if (deviceEnabled) void run(unlockDevice);
               else setErr("Open with your passphrase, then enable fingerprint unlock in Settings.");
             }}>
-              <Fingerprint /> Fingerprint unlock
-            </Button>
+              <Fingerprint /> {t("Fingerprint unlock")}</Button>
             <button type="button" className="text-sm underline" onClick={() => setMode("recover")}>
-              Forgot passphrase?
-            </button>
+              {t("Forgot passphrase?")}</button>
           </div>
         </>
       ) : (
@@ -93,17 +93,16 @@ export function LockScreen({ closing = false }: { closing?: boolean }) {
             void run(() => recover(phrase, n1));
           }}
         >
-          <h2 className="font-display text-3xl">Recover your diary</h2>
-          <Textarea rows={3} autoCapitalize="none" placeholder="Your 12-word recovery phrase" value={phrase} onChange={(e) => setPhrase(e.target.value)} />
-          <Input type="password" placeholder="New passphrase" value={n1} onChange={(e) => setN1(e.target.value)} />
-          <Input type="password" placeholder="Repeat new passphrase" value={n2} onChange={(e) => setN2(e.target.value)} />
-          {err && <p className="text-sm text-destructive">{err}</p>}
+          <h2 className="font-display text-3xl">{t("Recover your diary")}</h2>
+          <Textarea rows={3} autoCapitalize="none" placeholder={t("Your 12-word recovery phrase")} value={phrase} onChange={(e) => setPhrase(e.target.value)} />
+          <Input type="password" placeholder={t("New passphrase")} value={n1} onChange={(e) => setN1(e.target.value)} />
+          <Input type="password" placeholder={t("Repeat new passphrase")} value={n2} onChange={(e) => setN2(e.target.value)} />
+          {err && <p className="text-sm text-destructive">{t(err)}</p>}
           <Button className="w-full" size="lg" disabled={busy}>
-            {busy ? "Checking…" : "Unlock and set passphrase"}
+            {busy ? t("Checking…") : t("Unlock and set passphrase")}
           </Button>
           <button type="button" className="w-full text-sm text-muted-foreground underline" onClick={() => setMode("pass")}>
-            Back
-          </button>
+            {t("Back")}</button>
         </form>
       )}
     </div>

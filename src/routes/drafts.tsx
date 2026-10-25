@@ -1,3 +1,4 @@
+import { t, useLanguage } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { format } from "date-fns";
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/drafts")({ ssr: false, head: () => ({ met
 ] }), component: DraftsPage });
 
 function DraftsPage() {
+  useLanguage();
   const { key, settings, version, bump } = useVault();
   const [entries, setEntries] = useState<Entry[]>([]);
   const [drafts, setDrafts] = useState<Draft[]>([]);
@@ -70,37 +72,37 @@ function DraftsPage() {
     finally { if (active.current) setBusy(false); controller.current = null; }
   }
 
-  return <div className="app-shell"><AppHeader back title="Unsent Letters" /><main className="space-y-5 px-4 pb-20">
-    <p className="text-sm text-muted-foreground">Claude writes a text or email from an entry or your conversation. It never sends anything — you copy it yourself.</p>
+  return <div className="app-shell"><AppHeader back title={t("Unsent Letters")} /><main className="space-y-5 px-4 pb-20">
+    <p className="text-sm text-muted-foreground">{t("Claude writes a text or email from an entry or your conversation. It never sends anything — you copy it yourself.")}</p>
     <Select value={source} onValueChange={setSource}>
-      <SelectTrigger aria-label="Draft source"><SelectValue /></SelectTrigger>
+      <SelectTrigger aria-label={t("Draft source")}><SelectValue /></SelectTrigger>
       <SelectContent>
-        <SelectItem value="chat">From our conversation</SelectItem>
-        {entries.map(e => <SelectItem key={e.id} value={e.id}>Entry · {format(e.createdAt, "d MMM, HH:mm")}</SelectItem>)}
+        <SelectItem value="chat">{t("From our conversation")}</SelectItem>
+        {entries.map(e => <SelectItem key={e.id} value={e.id}>{t("Entry ·")}{format(e.createdAt, "d MMM, HH:mm")}</SelectItem>)}
       </SelectContent>
     </Select>
-    <Textarea aria-label="What should the draft say?" placeholder="e.g. a firm but kind message to my landlord about the heating" value={instruction} onChange={e => setInstruction(e.target.value)} />
-    <Button disabled={!instruction.trim() || busy} onClick={prepare}>{busy ? "Waiting for Claude…" : "Write draft"}</Button>
-    {!open && error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-    {status && <p role="status" className="text-sm text-muted-foreground">{status}</p>}
+    <Textarea aria-label={t("What should the draft say?")} placeholder={t("e.g. a firm but kind message to my landlord about the heating")} value={instruction} onChange={e => setInstruction(e.target.value)} />
+    <Button disabled={!instruction.trim() || busy} onClick={prepare}>{busy ? t("Waiting for Claude…") : t("Write draft")}</Button>
+    {!open && error && <p role="alert" className="text-sm text-destructive">{t(error)}</p>}
+    {status && <p role="status" className="text-sm text-muted-foreground">{t(status)}</p>}
     <section className="space-y-4 border-t border-border pt-4">
       {drafts.map(d => <article key={d.id} className="space-y-2">
         <p className="whitespace-pre-wrap break-words">{d.text}</p>
         <div className="flex gap-1">
-          <Button size="sm" variant="outline" onClick={async () => { try { await navigator.clipboard.writeText(d.text); setStatus("Copied."); } catch { setStatus("Could not copy; select the text manually."); } }}><Copy /> Copy</Button>
-          <Button size="icon" variant="ghost" aria-label="Delete draft" title="Delete draft" onClick={async () => { if (!key || !window.confirm("Delete this draft?")) return; try { await updatePersonal(key, x => ({ ...x, drafts: x.drafts.filter(y => y.id !== d.id) })); bump(); } catch { setStatus("Could not delete draft."); } }}><Trash2 /></Button>
+          <Button size="sm" variant="outline" onClick={async () => { try { await navigator.clipboard.writeText(d.text); setStatus("Copied."); } catch { setStatus("Could not copy; select the text manually."); } }}><Copy /> {t("Copy")}</Button>
+          <Button size="icon" variant="ghost" aria-label={t("Delete draft")} title={t("Delete draft")} onClick={async () => { if (!key || !window.confirm(t("Delete this draft?"))) return; try { await updatePersonal(key, x => ({ ...x, drafts: x.drafts.filter(y => y.id !== d.id) })); bump(); } catch { setStatus("Could not delete draft."); } }}><Trash2 /></Button>
         </div>
       </article>)}
-      {!drafts.length && <p className="text-sm text-muted-foreground">No drafts yet.</p>}
+      {!drafts.length && <p className="text-sm text-muted-foreground">{t("No drafts yet.")}</p>}
     </section>
-    {source !== "chat" && <p className="text-sm">Source: <Link to="/entry/$id" params={{ id: source }} search={{}} className="text-primary underline">open entry</Link></p>}
+    {source !== "chat" && <p className="text-sm">{t("Source:")}<Link to="/entry/$id" params={{ id: source }} search={{}} className="text-primary underline">{t("open entry")}</Link></p>}
   </main>
   <Dialog open={open} onOpenChange={v => { if (!v) controller.current?.abort(); setOpen(v); }}>
     <DialogContent className="max-h-[85dvh] overflow-y-auto">
-      <DialogHeader><DialogTitle>Send this source text to Claude?</DialogTitle><DialogDescription>Only the text below leaves this device, once, to write the draft. The draft itself is never sent anywhere.</DialogDescription></DialogHeader>
+      <DialogHeader><DialogTitle>{t("Send this source text to Claude?")}</DialogTitle><DialogDescription>{t("Only the text below leaves this device, once, to write the draft. The draft itself is never sent anywhere.")}</DialogDescription></DialogHeader>
       <pre className="max-h-72 overflow-y-auto whitespace-pre-wrap break-words bg-muted p-3 text-sm">{preview}</pre>
-      {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-      <div className="flex gap-2"><Button disabled={busy} onClick={run}>{busy ? "Waiting for Claude…" : "Confirm and send"}</Button><Button variant="outline" onClick={() => { controller.current?.abort(); setOpen(false); }}>Cancel</Button></div>
+      {error && <p role="alert" className="text-sm text-destructive">{t(error)}</p>}
+      <div className="flex gap-2"><Button disabled={busy} onClick={run}>{busy ? t("Waiting for Claude…") : t("Confirm and send")}</Button><Button variant="outline" onClick={() => { controller.current?.abort(); setOpen(false); }}>{t("Cancel")}</Button></div>
     </DialogContent>
   </Dialog></div>;
 }

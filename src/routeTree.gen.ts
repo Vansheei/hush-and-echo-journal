@@ -28,6 +28,7 @@ import { Route as SettingsBackupRouteImport } from './routes/settings_.backup'
 import { Route as SettingsCompanionRouteImport } from './routes/settings_.companion'
 import { Route as SettingsCoverRouteImport } from './routes/settings_.cover'
 import { Route as SettingsFutureRouteImport } from './routes/settings_.future'
+import { Route as SettingsLanguageRouteImport } from './routes/settings_.language'
 import { Route as SettingsSecurityRouteImport } from './routes/settings_.security'
 import { Route as SettingsSoundsRouteImport } from './routes/settings_.sounds'
 
@@ -126,6 +127,11 @@ const SettingsFutureRoute = SettingsFutureRouteImport.update({
   path: '/settings/future',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsLanguageRoute = SettingsLanguageRouteImport.update({
+  id: '/settings_/language',
+  path: '/settings/language',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsSecurityRoute = SettingsSecurityRouteImport.update({
   id: '/settings_/security',
   path: '/settings/security',
@@ -157,6 +163,7 @@ export interface FileRoutesByFullPath {
   '/settings/companion': typeof SettingsCompanionRoute
   '/settings/cover': typeof SettingsCoverRoute
   '/settings/future': typeof SettingsFutureRoute
+  '/settings/language': typeof SettingsLanguageRoute
   '/settings/security': typeof SettingsSecurityRoute
   '/settings/sounds': typeof SettingsSoundsRoute
 }
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/settings/companion': typeof SettingsCompanionRoute
   '/settings/cover': typeof SettingsCoverRoute
   '/settings/future': typeof SettingsFutureRoute
+  '/settings/language': typeof SettingsLanguageRoute
   '/settings/security': typeof SettingsSecurityRoute
   '/settings/sounds': typeof SettingsSoundsRoute
 }
@@ -204,6 +212,7 @@ export interface FileRoutesById {
   '/settings_/companion': typeof SettingsCompanionRoute
   '/settings_/cover': typeof SettingsCoverRoute
   '/settings_/future': typeof SettingsFutureRoute
+  '/settings_/language': typeof SettingsLanguageRoute
   '/settings_/security': typeof SettingsSecurityRoute
   '/settings_/sounds': typeof SettingsSoundsRoute
 }
@@ -229,6 +238,7 @@ export interface FileRouteTypes {
     | '/settings/companion'
     | '/settings/cover'
     | '/settings/future'
+    | '/settings/language'
     | '/settings/security'
     | '/settings/sounds'
   fileRoutesByTo: FileRoutesByTo
@@ -252,6 +262,7 @@ export interface FileRouteTypes {
     | '/settings/companion'
     | '/settings/cover'
     | '/settings/future'
+    | '/settings/language'
     | '/settings/security'
     | '/settings/sounds'
   id:
@@ -275,6 +286,7 @@ export interface FileRouteTypes {
     | '/settings_/companion'
     | '/settings_/cover'
     | '/settings_/future'
+    | '/settings_/language'
     | '/settings_/security'
     | '/settings_/sounds'
   fileRoutesById: FileRoutesById
@@ -299,6 +311,7 @@ export interface RootRouteChildren {
   SettingsCompanionRoute: typeof SettingsCompanionRoute
   SettingsCoverRoute: typeof SettingsCoverRoute
   SettingsFutureRoute: typeof SettingsFutureRoute
+  SettingsLanguageRoute: typeof SettingsLanguageRoute
   SettingsSecurityRoute: typeof SettingsSecurityRoute
   SettingsSoundsRoute: typeof SettingsSoundsRoute
 }
@@ -438,6 +451,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsFutureRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings_/language': {
+      id: '/settings_/language'
+      path: '/settings/language'
+      fullPath: '/settings/language'
+      preLoaderRoute: typeof SettingsLanguageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings_/security': {
       id: '/settings_/security'
       path: '/settings/security'
@@ -475,6 +495,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsCompanionRoute: SettingsCompanionRoute,
   SettingsCoverRoute: SettingsCoverRoute,
   SettingsFutureRoute: SettingsFutureRoute,
+  SettingsLanguageRoute: SettingsLanguageRoute,
   SettingsSecurityRoute: SettingsSecurityRoute,
   SettingsSoundsRoute: SettingsSoundsRoute,
 }

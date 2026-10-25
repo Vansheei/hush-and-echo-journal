@@ -1,3 +1,4 @@
+import { t, useLanguage } from "@/lib/i18n";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
@@ -13,6 +14,7 @@ export const Route = createFileRoute("/people_/$id")({ ssr: false, head: () => (
 type Moment = { entry: Entry; start: number; text: string };
 
 function PersonPage() {
+  useLanguage();
   const { id } = Route.useParams();
   const { key, version } = useVault();
   const [person, setPerson] = useState<Person | null | undefined>(undefined);
@@ -39,15 +41,15 @@ function PersonPage() {
     return () => { active = false; };
   }, [key, id, version]);
 
-  if (person === null) return <div className="screen-center text-paper">Person not found.</div>;
+  if (person === null) return <div className="screen-center text-paper">{t("Person not found.")}</div>;
   if (!person) return null;
   return (
     <div className="app-shell">
       <AppHeader back title={person.name} />
       <main className="space-y-4 px-4 pb-20">
-        {person.nicknames.length > 0 && <p className="text-sm text-muted-foreground">Also: {person.nicknames.join(", ")}</p>}
-        <p className="text-sm text-muted-foreground">Moments found on this phone by your confirmed names only — nothing is tagged automatically.</p>
-        {!moments.length && <p className="text-sm text-muted-foreground">No mentions found in finished transcripts yet.</p>}
+        {person.nicknames.length > 0 && <p className="text-sm text-muted-foreground">{t("Also:")}{person.nicknames.join(", ")}</p>}
+        <p className="text-sm text-muted-foreground">{t("Moments found on this phone by your confirmed names only — nothing is tagged automatically.")}</p>
+        {!moments.length && <p className="text-sm text-muted-foreground">{t("No mentions found in finished transcripts yet.")}</p>}
         <ul className="space-y-3">
           {moments.map((m, i) => (
             <li key={i}>

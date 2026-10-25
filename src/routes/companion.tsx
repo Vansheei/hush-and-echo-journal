@@ -1,3 +1,4 @@
+import { t, useLanguage } from "@/lib/i18n";
 import { createFileRoute, useBlocker, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Mic, Square, Volume2, ThumbsUp, ThumbsDown } from "lucide-react";
@@ -25,6 +26,7 @@ export const Route = createFileRoute("/companion")({ ssr: false, head: () => ({ 
 type Packet = { context: string; sources: Source[]; history: { role: "user" | "assistant"; content: string }[] };
 
 function CompanionPage() {
+  useLanguage();
   const { key, settings, version, bump, setBusy: setVaultBusy } = useVault();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
@@ -207,14 +209,14 @@ function CompanionPage() {
     void deliver(text);
   }
 
-  return <div className="app-shell"><AppHeader back title="Night Companion" /><main className="space-y-5 px-4 pb-20">
+  return <div className="app-shell"><AppHeader back title={t("Night Companion")} /><main className="space-y-5 px-4 pb-20">
     <div className="flex flex-wrap gap-2">{["CBT", "Interpersonal", "Combined"].map(v => <Button size="sm" key={v} variant={approach === v ? "default" : "outline"} onClick={() => setApproach(v)} disabled={busy}>{v}</Button>)}</div>
-    <label className="flex items-center justify-between gap-3">Trust this conversation: skip the send preview until you leave or lock<Switch checked={trust} onCheckedChange={setTrust} /></label>
-    <label className="flex items-center justify-between gap-3">Read replies aloud<Switch checked={speak} onCheckedChange={v => { setAppearance({ readRepliesAloud: v }); if (!v) void stopSpeech().catch(() => {}); }} /></label>
-    {voices.length > 0 && <Select value={voice || voices[0]?.voiceURI || ""} onValueChange={setVoice}><SelectTrigger aria-label="On-device voice"><SelectValue /></SelectTrigger><SelectContent>{voices.map(v => <SelectItem key={v.voiceURI} value={v.voiceURI}>{v.name} · {v.lang}</SelectItem>)}</SelectContent></Select>}
+    <label className="flex items-center justify-between gap-3">{t("Trust this conversation: skip the send preview until you leave or lock")}<Switch checked={trust} onCheckedChange={setTrust} /></label>
+    <label className="flex items-center justify-between gap-3">{t("Read replies aloud")}<Switch checked={speak} onCheckedChange={v => { setAppearance({ readRepliesAloud: v }); if (!v) void stopSpeech().catch(() => {}); }} /></label>
+    {voices.length > 0 && <Select value={voice || voices[0]?.voiceURI || ""} onValueChange={setVoice}><SelectTrigger aria-label={t("On-device voice")}><SelectValue /></SelectTrigger><SelectContent>{voices.map(v => <SelectItem key={v.voiceURI} value={v.voiceURI}>{v.name} · {v.lang}</SelectItem>)}</SelectContent></Select>}
     <div className="flex flex-col items-center gap-2 py-2">
       <button
-        aria-label={convo ? "End conversation" : "Start talking"}
+        aria-label={convo ? t("End conversation") : t("Start talking")}
         aria-pressed={convo}
         onClick={toggleConversation}
         disabled={!convo && busy}
@@ -222,33 +224,33 @@ function CompanionPage() {
       >
         {convo ? <Square className="size-8" /> : <Mic className="size-8" />}
       </button>
-      <p className="text-center text-sm text-muted-foreground">{convo ? listening ? "Listening… it sends when you stop speaking." : busy ? "One moment…" : "Your turn." : "Tap once and just talk. Tap again to end."}</p>
+      <p className="text-center text-sm text-muted-foreground">{convo ? listening ? t("Listening… it sends when you stop speaking.") : busy ? t("One moment…") : t("Your turn.") : t("Tap once and just talk. Tap again to end.")}</p>
     </div>
     <div className="space-y-5">{messages.map(m => <article key={m.id} className={`space-y-2 border-l-2 pl-3 ${m.role === "user" ? "border-ribbon" : "border-gold"}`}>
-      <h2 className="font-display text-2xl">{m.role === "user" ? "You" : "Companion"}</h2>
+      <h2 className="font-display text-2xl">{m.role === "user" ? t("You") : t("Companion")}</h2>
       <p className="whitespace-pre-wrap break-words">{m.text}</p>
       {m.role === "assistant" && <>
-        {(m.sources?.length ?? 0) > 0 && <p className="text-sm text-muted-foreground">Used these moments: {m.sources?.map((s, i) => <Link key={i} to="/entry/$id" params={{ id: s.entryId }} search={{ t: s.start }} className="mr-2 text-primary underline">{fmtDuration(s.start)}</Link>)}</p>}
-        <div className="flex gap-1"><Button size="icon" variant="ghost" aria-label="Read reply" title="Read reply" onClick={() => read(m.text)}><Volume2 /></Button>{(["helpful", "unhelpful"] as const).map(f => <Button key={f} size="icon" variant={m.feedback === f ? "secondary" : "ghost"} aria-label={f === "helpful" ? "Helpful reply" : "Unhelpful reply"} aria-pressed={m.feedback === f} title={f} onClick={async () => { if (!key) return; try { await updatePersonal(key, d => ({ ...d, chat: d.chat.map(x => x.id === m.id ? { ...x, feedback: f } : x) })); bump(); } catch { setStatus("Could not save feedback."); } }}>{f === "helpful" ? <ThumbsUp /> : <ThumbsDown />}</Button>)}</div>
+        {(m.sources?.length ?? 0) > 0 && <p className="text-sm text-muted-foreground">{t("Used these moments:")}{m.sources?.map((s, i) => <Link key={i} to="/entry/$id" params={{ id: s.entryId }} search={{ t: s.start }} className="mr-2 text-primary underline">{fmtDuration(s.start)}</Link>)}</p>}
+        <div className="flex gap-1"><Button size="icon" variant="ghost" aria-label={t("Read reply")} title={t("Read reply")} onClick={() => read(m.text)}><Volume2 /></Button>{(["helpful", "unhelpful"] as const).map(f => <Button key={f} size="icon" variant={m.feedback === f ? "secondary" : "ghost"} aria-label={f === "helpful" ? t("Helpful reply") : t("Unhelpful reply")} aria-pressed={m.feedback === f} title={f} onClick={async () => { if (!key) return; try { await updatePersonal(key, d => ({ ...d, chat: d.chat.map(x => x.id === m.id ? { ...x, feedback: f } : x) })); bump(); } catch { setStatus("Could not save feedback."); } }}>{f === "helpful" ? <ThumbsUp /> : <ThumbsDown />}</Button>)}</div>
         <Clarifications suggestions={m.suggestions} />
       </>}
     </article>)}</div>
-    <Textarea aria-label="Type instead" placeholder="Or type here and press Enter" value={draft}
+    <Textarea aria-label={t("Type instead")} placeholder={t("Or type here and press Enter")} value={draft}
       onChange={e => setDraft(e.target.value)}
       onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); typedSend(); } }}
       onBlur={async () => { if (key) { try { await updatePersonal(key, d => ({ ...d, draft: draftRef.current })); } catch { setStatus("Could not save your draft."); } } }}
       disabled={busy || listening} />
-    {status && <p role="status" className="whitespace-pre-wrap break-words text-sm text-muted-foreground">{status}</p>}
-    <Select disabled><SelectTrigger aria-label="Future cloud voice"><SelectValue placeholder="Natural cloud voice · later" /></SelectTrigger><SelectContent /></Select>
-    {messages.length > 0 && <Button variant="ghost" onClick={async () => { if (!key || !window.confirm("Delete this conversation?")) return; try { await updatePersonal(key, d => ({ ...d, chat: [] })); bump(); } catch { setStatus("Could not delete conversation."); } }}>Clear conversation</Button>}
+    {status && <p role="status" className="whitespace-pre-wrap break-words text-sm text-muted-foreground">{t(status)}</p>}
+    <Select disabled><SelectTrigger aria-label={t("Future cloud voice")}><SelectValue placeholder={t("Natural cloud voice · later")} /></SelectTrigger><SelectContent /></Select>
+    {messages.length > 0 && <Button variant="ghost" onClick={async () => { if (!key || !window.confirm(t("Delete this conversation?"))) return; try { await updatePersonal(key, d => ({ ...d, chat: [] })); bump(); } catch { setStatus("Could not delete conversation."); } }}>{t("Clear conversation")}</Button>}
   </main>
   <Dialog open={confirm} onOpenChange={v => { setConfirm(v); if (!v && convoRef.current) startTurn(); }}>
     <DialogContent className="max-h-[85dvh] overflow-y-auto">
-      <DialogHeader><DialogTitle>Send this to Claude?</DialogTitle><DialogDescription>Text only: your words, past conversation, notebook, confirmed words and people, plus the most relevant past moments found on this phone. No recording is sent. Turn on “Trust this conversation” to skip this preview.</DialogDescription></DialogHeader>
+      <DialogHeader><DialogTitle>{t("Send this to Claude?")}</DialogTitle><DialogDescription>{t("Text only: your words, past conversation, notebook, confirmed words and people, plus the most relevant past moments found on this phone. No recording is sent. Turn on “Trust this conversation” to skip this preview.")}</DialogDescription></DialogHeader>
       <pre className="max-h-72 overflow-y-auto whitespace-pre-wrap break-words bg-muted p-3 text-sm">{pendingPreview}</pre>
       <div className="flex gap-2">
-        <Button disabled={busy} onClick={() => { const packet = packetRef.current; setConfirm(false); void sendTurn(pendingText, packet ?? undefined); }}>{busy ? "Waiting for Claude…" : "Confirm and send"}</Button>
-        <Button variant="outline" onClick={() => setConfirm(false)}>Cancel</Button>
+        <Button disabled={busy} onClick={() => { const packet = packetRef.current; setConfirm(false); void sendTurn(pendingText, packet ?? undefined); }}>{busy ? t("Waiting for Claude…") : t("Confirm and send")}</Button>
+        <Button variant="outline" onClick={() => setConfirm(false)}>{t("Cancel")}</Button>
       </div>
     </DialogContent>
   </Dialog></div>;

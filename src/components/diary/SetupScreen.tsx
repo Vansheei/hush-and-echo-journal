@@ -1,3 +1,4 @@
+import { t, useLanguage } from "@/lib/i18n";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +8,7 @@ import { useVault } from "@/lib/vault-context";
 type Created = Awaited<ReturnType<typeof createVault>>;
 
 export function SetupScreen() {
+  useLanguage();
   const { finishSetup } = useVault();
   const [step, setStep] = useState<"pass" | "phrase" | "confirm">("pass");
   const [p1, setP1] = useState("");
@@ -48,17 +50,17 @@ export function SetupScreen() {
     <div className="screen-center [&>*]:rounded-md [&>*]:bg-paper [&>*]:p-6">
       <div className="w-full max-w-sm space-y-6">
         <header className="space-y-2 text-center">
-          <h1 className="font-display text-4xl">Diary</h1>
-          <p className="text-muted-foreground">Everything stays on this phone, encrypted.</p>
+          <h1 className="font-display text-4xl">{t("Diary")}</h1>
+          <p className="text-muted-foreground">{t("Everything stays on this phone, encrypted.")}</p>
         </header>
 
         {step === "pass" && (
           <div className="space-y-3">
-            <Input type="password" placeholder="Choose a passphrase" value={p1} onChange={(e) => setP1(e.target.value)} />
-            <Input type="password" placeholder="Repeat passphrase" value={p2} onChange={(e) => setP2(e.target.value)} />
-            {err && <p className="text-sm text-destructive">{err}</p>}
+            <Input type="password" placeholder={t("Choose a passphrase")} value={p1} onChange={(e) => setP1(e.target.value)} />
+            <Input type="password" placeholder={t("Repeat passphrase")} value={p2} onChange={(e) => setP2(e.target.value)} />
+            {err && <p className="text-sm text-destructive">{t(err)}</p>}
             <Button className="w-full" size="lg" disabled={busy} onClick={makeVault}>
-              {busy ? "Creating your diary…" : "Continue"}
+              {busy ? t("Creating your diary…") : t("Continue")}
             </Button>
           </div>
         )}
@@ -66,9 +68,7 @@ export function SetupScreen() {
         {step === "phrase" && (
           <div className="space-y-4">
             <p className="text-sm">
-              This is your recovery phrase. Write it down on paper. It's the only way back in if you forget your
-              passphrase, and it will not be shown again.
-            </p>
+              {t("This is your recovery phrase. Write it down on paper. It's the only way back in if you forget your passphrase, and it will not be shown again.")}</p>
             <ol className="grid grid-cols-3 gap-2 rounded-xl bg-card p-4 shadow-soft">
               {words.map((w, i) => (
                 <li key={i} className="text-sm">
@@ -77,17 +77,15 @@ export function SetupScreen() {
               ))}
             </ol>
             <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={wrote} onChange={(e) => setWrote(e.target.checked)} />I wrote it down
-            </label>
+              <input type="checkbox" checked={wrote} onChange={(e) => setWrote(e.target.checked)} />{t("I wrote it down")}</label>
             <Button className="w-full" size="lg" disabled={!wrote} onClick={() => setStep("confirm")}>
-              Next
-            </Button>
+              {t("Next")}</Button>
           </div>
         )}
 
         {step === "confirm" && (
           <div className="space-y-3">
-            <p className="text-sm">Type these words from your phrase to confirm.</p>
+            <p className="text-sm">{t("Type these words from your phrase to confirm.")}</p>
             {checks.map((i) => (
               <Input
                 key={i}
@@ -97,14 +95,12 @@ export function SetupScreen() {
                 onChange={(e) => setAnswers((a) => ({ ...a, [i]: e.target.value }))}
               />
             ))}
-            {err && <p className="text-sm text-destructive">{err}</p>}
+            {err && <p className="text-sm text-destructive">{t(err)}</p>}
             <div className="flex gap-2">
               <Button variant="outline" className="flex-1" onClick={() => setStep("phrase")}>
-                Back
-              </Button>
+                {t("Back")}</Button>
               <Button className="flex-1" disabled={busy} onClick={confirm}>
-                Open diary
-              </Button>
+                {t("Open diary")}</Button>
             </div>
           </div>
         )}
