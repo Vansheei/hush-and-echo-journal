@@ -13,6 +13,7 @@ export function TurnableBook({ pages, page, onPage }: { pages: ReactNode[]; page
     const commit = t.p > 0.3;
     pageTurn();
     setTurn({ ...t, p: commit ? 1 : 0, settling: true, commit });
+    setTimeout(() => { if (commit) onPage(page + t.dir); setTurn(null); }, 560);
   };
 
   const onDown = (e: React.PointerEvent) => { if (!turn?.settling) start.current = { x: e.clientX, y: e.clientY, moved: false }; };
@@ -29,12 +30,6 @@ export function TurnableBook({ pages, page, onPage }: { pages: ReactNode[]; page
   };
   const onUp = () => { const s = start.current; start.current = null; if (s?.moved && turn && !turn.settling) finish(turn); };
 
-  const done = () => {
-    if (!turn?.settling) return;
-    if (turn.commit) onPage(page + turn.dir);
-    setTurn(null);
-  };
-
   const under = turn ? pages[turn.dir === 1 ? page + 1 : page] : null;
   const sheet = turn ? pages[turn.dir === 1 ? page : page - 1] : null;
   const angle = turn ? (turn.dir === 1 ? -180 * turn.p : -180 * (1 - turn.p)) : 0;
@@ -48,7 +43,7 @@ export function TurnableBook({ pages, page, onPage }: { pages: ReactNode[]; page
     >
       <div className="turn-page">{turn ? under : pages[page]}</div>
       {turn && (
-        <div className="turn-sheet" onTransitionEnd={done}
+        <div className="turn-sheet"
           style={{ transform: `rotateY(${angle}deg)`, transition: turn.settling ? "transform 0.55s cubic-bezier(.4,.1,.3,1)" : "none" }}>
           <div className="turn-face">{sheet}</div>
           <div className="turn-shade" style={{ opacity: Math.sin((-angle / 180) * Math.PI) * 0.5 }} />
