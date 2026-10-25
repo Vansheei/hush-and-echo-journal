@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import type React from "react";
 import { encryptionOnlyKey, unlockWithPassphrase, resetPassphrase, type VaultMeta } from "@/lib/crypto/vault";
 import {
   DEFAULT_SETTINGS,
@@ -33,7 +34,9 @@ type Ctx = {
   setBusy: (b: boolean) => void;
 };
 
-const VaultCtx = createContext<Ctx | null>(null);
+// Keep one context object across hot reloads so an already-mounted provider still matches useVault.
+const g = globalThis as { __vaultCtx?: React.Context<Ctx | null> };
+const VaultCtx = (g.__vaultCtx ??= createContext<Ctx | null>(null));
 
 export function useVault() {
   const c = useContext(VaultCtx);
