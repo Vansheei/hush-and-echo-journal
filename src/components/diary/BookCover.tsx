@@ -10,7 +10,7 @@ function Tooling({ className }: { className?: string }) {
       {[[26, 26, 0], [274, 26, 90], [274, 394, 180], [26, 394, 270]].map(([x, y, r]) => (
         <path key={r} d={corner} transform={`translate(${x} ${y}) rotate(${r})`} strokeWidth="0.9" />
       ))}
-      {[70, 350].map((y) => (
+      {[64, 372].map((y) => (
         <g key={y} strokeWidth="0.7">
           <line x1="60" x2="240" y1={y} y2={y} />
           <path d={`M120 ${y} q15 -9 30 0 q15 9 30 0`} />
@@ -42,7 +42,7 @@ export function BookCover({ children, lit = false }: { children?: ReactNode; lit
           <span className="font-display text-[13cqw] leading-tight text-gold">Diary</span>
         </div>
       </div>
-      {children && <div className="absolute inset-x-6 bottom-8">{children}</div>}
+      {children && <div className="absolute inset-x-8 bottom-[17%]">{children}</div>}
     </div>
   );
 }
