@@ -24,6 +24,12 @@ import { Route as WorryParkingRouteImport } from './routes/worry-parking'
 import { Route as WriteRouteImport } from './routes/write'
 import { Route as EntryIdRouteImport } from './routes/entry.$id'
 import { Route as PeopleIdRouteImport } from './routes/people_.$id'
+import { Route as SettingsBackupRouteImport } from './routes/settings_.backup'
+import { Route as SettingsCompanionRouteImport } from './routes/settings_.companion'
+import { Route as SettingsCoverRouteImport } from './routes/settings_.cover'
+import { Route as SettingsFutureRouteImport } from './routes/settings_.future'
+import { Route as SettingsSecurityRouteImport } from './routes/settings_.security'
+import { Route as SettingsSoundsRouteImport } from './routes/settings_.sounds'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -100,6 +106,36 @@ const PeopleIdRoute = PeopleIdRouteImport.update({
   path: '/people/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsBackupRoute = SettingsBackupRouteImport.update({
+  id: '/settings_/backup',
+  path: '/settings/backup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsCompanionRoute = SettingsCompanionRouteImport.update({
+  id: '/settings_/companion',
+  path: '/settings/companion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsCoverRoute = SettingsCoverRouteImport.update({
+  id: '/settings_/cover',
+  path: '/settings/cover',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsFutureRoute = SettingsFutureRouteImport.update({
+  id: '/settings_/future',
+  path: '/settings/future',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsSecurityRoute = SettingsSecurityRouteImport.update({
+  id: '/settings_/security',
+  path: '/settings/security',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsSoundsRoute = SettingsSoundsRouteImport.update({
+  id: '/settings_/sounds',
+  path: '/settings/sounds',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -117,6 +153,12 @@ export interface FileRoutesByFullPath {
   '/write': typeof WriteRoute
   '/entry/$id': typeof EntryIdRoute
   '/people/$id': typeof PeopleIdRoute
+  '/settings/backup': typeof SettingsBackupRoute
+  '/settings/companion': typeof SettingsCompanionRoute
+  '/settings/cover': typeof SettingsCoverRoute
+  '/settings/future': typeof SettingsFutureRoute
+  '/settings/security': typeof SettingsSecurityRoute
+  '/settings/sounds': typeof SettingsSoundsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -134,6 +176,12 @@ export interface FileRoutesByTo {
   '/write': typeof WriteRoute
   '/entry/$id': typeof EntryIdRoute
   '/people/$id': typeof PeopleIdRoute
+  '/settings/backup': typeof SettingsBackupRoute
+  '/settings/companion': typeof SettingsCompanionRoute
+  '/settings/cover': typeof SettingsCoverRoute
+  '/settings/future': typeof SettingsFutureRoute
+  '/settings/security': typeof SettingsSecurityRoute
+  '/settings/sounds': typeof SettingsSoundsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -152,6 +200,12 @@ export interface FileRoutesById {
   '/write': typeof WriteRoute
   '/entry/$id': typeof EntryIdRoute
   '/people_/$id': typeof PeopleIdRoute
+  '/settings_/backup': typeof SettingsBackupRoute
+  '/settings_/companion': typeof SettingsCompanionRoute
+  '/settings_/cover': typeof SettingsCoverRoute
+  '/settings_/future': typeof SettingsFutureRoute
+  '/settings_/security': typeof SettingsSecurityRoute
+  '/settings_/sounds': typeof SettingsSoundsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -171,6 +225,12 @@ export interface FileRouteTypes {
     | '/write'
     | '/entry/$id'
     | '/people/$id'
+    | '/settings/backup'
+    | '/settings/companion'
+    | '/settings/cover'
+    | '/settings/future'
+    | '/settings/security'
+    | '/settings/sounds'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -188,6 +248,12 @@ export interface FileRouteTypes {
     | '/write'
     | '/entry/$id'
     | '/people/$id'
+    | '/settings/backup'
+    | '/settings/companion'
+    | '/settings/cover'
+    | '/settings/future'
+    | '/settings/security'
+    | '/settings/sounds'
   id:
     | '__root__'
     | '/'
@@ -205,6 +271,12 @@ export interface FileRouteTypes {
     | '/write'
     | '/entry/$id'
     | '/people_/$id'
+    | '/settings_/backup'
+    | '/settings_/companion'
+    | '/settings_/cover'
+    | '/settings_/future'
+    | '/settings_/security'
+    | '/settings_/sounds'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -223,6 +295,12 @@ export interface RootRouteChildren {
   WriteRoute: typeof WriteRoute
   EntryIdRoute: typeof EntryIdRoute
   PeopleIdRoute: typeof PeopleIdRoute
+  SettingsBackupRoute: typeof SettingsBackupRoute
+  SettingsCompanionRoute: typeof SettingsCompanionRoute
+  SettingsCoverRoute: typeof SettingsCoverRoute
+  SettingsFutureRoute: typeof SettingsFutureRoute
+  SettingsSecurityRoute: typeof SettingsSecurityRoute
+  SettingsSoundsRoute: typeof SettingsSoundsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -332,6 +410,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PeopleIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings_/backup': {
+      id: '/settings_/backup'
+      path: '/settings/backup'
+      fullPath: '/settings/backup'
+      preLoaderRoute: typeof SettingsBackupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings_/companion': {
+      id: '/settings_/companion'
+      path: '/settings/companion'
+      fullPath: '/settings/companion'
+      preLoaderRoute: typeof SettingsCompanionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings_/cover': {
+      id: '/settings_/cover'
+      path: '/settings/cover'
+      fullPath: '/settings/cover'
+      preLoaderRoute: typeof SettingsCoverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings_/future': {
+      id: '/settings_/future'
+      path: '/settings/future'
+      fullPath: '/settings/future'
+      preLoaderRoute: typeof SettingsFutureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings_/security': {
+      id: '/settings_/security'
+      path: '/settings/security'
+      fullPath: '/settings/security'
+      preLoaderRoute: typeof SettingsSecurityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings_/sounds': {
+      id: '/settings_/sounds'
+      path: '/settings/sounds'
+      fullPath: '/settings/sounds'
+      preLoaderRoute: typeof SettingsSoundsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -351,6 +471,12 @@ const rootRouteChildren: RootRouteChildren = {
   WriteRoute: WriteRoute,
   EntryIdRoute: EntryIdRoute,
   PeopleIdRoute: PeopleIdRoute,
+  SettingsBackupRoute: SettingsBackupRoute,
+  SettingsCompanionRoute: SettingsCompanionRoute,
+  SettingsCoverRoute: SettingsCoverRoute,
+  SettingsFutureRoute: SettingsFutureRoute,
+  SettingsSecurityRoute: SettingsSecurityRoute,
+  SettingsSoundsRoute: SettingsSoundsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { ShieldCheck } from "lucide-react";
 import { DeviceUnlockSettings } from "./DeviceUnlockSettings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +19,6 @@ export function SecuritySettings() {
     finally { setWorking(false); setBusy(false); setPass(""); setPin(""); setRepeat(""); setPhrase(""); setNext(""); setAgain(""); }
   }
   return <section className="settings-card">
-    <h2 className="flex items-center gap-2"><ShieldCheck className="size-5" />Security</h2>
     <DeviceUnlockSettings />
     <div className="space-y-3 border-t border-border pt-4">
       <h3 className="font-display text-3xl">Diary PIN</h3>

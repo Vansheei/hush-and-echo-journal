@@ -47,15 +47,15 @@ function Lantern() {
   );
 }
 
-export function AppHeader({ title, back }: { title: ReactNode; back?: boolean }) {
+export function AppHeader({ title, back, backTo }: { title: ReactNode; back?: boolean; backTo?: "/settings" }) {
   const { lock } = useVault();
   return (
     <>
       <PageFrame />
       <header className="relative z-10 px-4 pt-3">
         <div className="flex items-center gap-1 text-frame">
-          {back ? (
-            <Link to="/" className="icon-btn" aria-label="Back"><ArrowLeft className="size-5" /></Link>
+          {back || backTo ? (
+            <Link to={backTo ?? "/"} className="icon-btn" aria-label="Back"><ArrowLeft className="size-5" /></Link>
           ) : <span className="size-10" />}
           <span className="flex-1" />
           <Link to="/settings" className="icon-btn" aria-label="Settings"><Settings className="size-5" /></Link>

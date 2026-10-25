@@ -16,6 +16,7 @@ import { transcribe } from "@/lib/transcription";
 import { semanticSearch, stopSearch } from "@/lib/search";
 import { localVoices, speakLocal, stopSpeech, type LocalVoice } from "@/lib/native/speech";
 import { registerBackHandler } from "@/lib/native/back";
+import { useAppearance, setAppearance } from "@/lib/appearance";
 
 export const Route = createFileRoute("/companion")({ ssr: false, head: () => ({ meta: [
   { title: "Diary — Companion" }, { name: "description", content: "Your private voice and text diary companion." }, { property: "og:title", content: "Diary — Companion" }, { property: "og:description", content: "An explicitly requested conversation with your diary companion." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
@@ -28,7 +29,8 @@ function CompanionPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
   const [approach, setApproach] = useState("Combined");
-  const [speak, setSpeak] = useState(true);
+  const look = useAppearance();
+  const speak = look.readRepliesAloud;
   const [voices, setVoices] = useState<LocalVoice[]>([]);
   const [voice, setVoice] = useState("");
   const [convo, setConvo] = useState(false);
@@ -73,7 +75,7 @@ function CompanionPage() {
   async function read(text: string) {
     const selected = voices.find(v => v.voiceURI === voice) ?? voices[0];
     if (!selected) { setStatus("No on-device voice is installed. Text replies remain available."); return; }
-    try { await speakLocal(text, selected); }
+    try { await speakLocal(text, selected, look.companionVoiceSpeed); }
     catch { if (alive.current) setStatus("Voice playback failed. Install an offline Android voice or use text replies."); }
   }
 
@@ -208,7 +210,7 @@ function CompanionPage() {
   return <div className="app-shell"><AppHeader back title="Night Companion" /><main className="space-y-5 px-4 pb-20">
     <div className="flex flex-wrap gap-2">{["CBT", "Interpersonal", "Combined"].map(v => <Button size="sm" key={v} variant={approach === v ? "default" : "outline"} onClick={() => setApproach(v)} disabled={busy}>{v}</Button>)}</div>
     <label className="flex items-center justify-between gap-3">Trust this conversation: skip the send preview until you leave or lock<Switch checked={trust} onCheckedChange={setTrust} /></label>
-    <label className="flex items-center justify-between gap-3">Read replies aloud<Switch checked={speak} onCheckedChange={v => { setSpeak(v); if (!v) void stopSpeech().catch(() => {}); }} /></label>
+    <label className="flex items-center justify-between gap-3">Read replies aloud<Switch checked={speak} onCheckedChange={v => { setAppearance({ readRepliesAloud: v }); if (!v) void stopSpeech().catch(() => {}); }} /></label>
     {voices.length > 0 && <Select value={voice || voices[0]?.voiceURI || ""} onValueChange={setVoice}><SelectTrigger aria-label="On-device voice"><SelectValue /></SelectTrigger><SelectContent>{voices.map(v => <SelectItem key={v.voiceURI} value={v.voiceURI}>{v.name} · {v.lang}</SelectItem>)}</SelectContent></Select>}
     <div className="flex flex-col items-center gap-2 py-2">
       <button
