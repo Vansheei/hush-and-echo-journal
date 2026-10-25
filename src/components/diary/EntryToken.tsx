@@ -5,8 +5,8 @@ export function tapeColor(id: string) {
   return TAPES[Math.abs(h) % TAPES.length]!;
 }
 
-/** Audio = little cassette, video = little film reel. Flat, coloured per entry. */
-export function EntryToken({ kind, id }: { kind: "audio" | "video"; id: string }) {
+/** Audio = little cassette, video = little film reel, written = little page. Flat, coloured per entry. */
+export function EntryToken({ kind, id }: { kind: "audio" | "video" | "written"; id: string }) {
   const color = tapeColor(id);
   if (kind === "audio")
     return (
@@ -16,6 +16,14 @@ export function EntryToken({ kind, id }: { kind: "audio" | "video"; id: string }
         <circle cx="18" cy="13" r="4" fill="currentColor" /><circle cx="38" cy="13" r="4" fill="currentColor" />
         <rect x="22" y="11" width="12" height="4" fill="var(--ink)" opacity="0.6" />
         <path d="M14 34 L18 26 H38 L42 34" fill="var(--ink)" opacity="0.25" />
+      </svg>
+    );
+  if (kind === "written")
+    return (
+      <svg viewBox="0 0 40 40" className={`w-11 shrink-0 ${color}`} aria-label="Written entry" role="img">
+        <rect x="6" y="2" width="28" height="36" rx="2" fill="currentColor" />
+        <rect x="10" y="6" width="20" height="28" rx="1" fill="var(--paper)" opacity="0.9" />
+        {[10, 15, 20, 25].map((y) => <rect key={y} x="13" y={y} width="14" height="1.6" fill="var(--ink)" opacity="0.5" />)}
       </svg>
     );
   return (

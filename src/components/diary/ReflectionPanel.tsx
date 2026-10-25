@@ -40,7 +40,8 @@ export function ReflectionPanel({ entry }: { entry: Entry }) {
       if (!active.current || abort.signal.aborted) return;
       const latest = await getEntry(key, entry.id);
       if (!active.current || !latest) return;
-      await putEntry(key, { ...latest, reflection });
+      const flagged = Array.from(new Set([...(latest.flagged ?? []), ...(reflection.suggestions?.meanings ?? []).map(m => m.phrase.toLowerCase())]));
+      await putEntry(key, { ...latest, reflection, flagged });
       bump(); setOpen(false);
     } catch (e) { if (active.current) setError(e instanceof Error ? e.message : "Reflection failed."); }
     finally { if (active.current) setBusy(false); controller.current = null; }

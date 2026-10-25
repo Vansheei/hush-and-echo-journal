@@ -106,7 +106,7 @@ function EntryPage() {
     <div className="app-shell">
       <AppHeader back title={format(entry.createdAt, "d MMM, HH:mm")} />
       <main className="space-y-5 px-4 pb-16">
-        <div className="overflow-hidden rounded-2xl bg-stage">
+        <div className={`overflow-hidden rounded-2xl bg-stage ${entry.kind === "written" ? "hidden" : ""}`}>
           {url &&
             (entry.kind === "video" ? (
               <video
