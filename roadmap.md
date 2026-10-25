@@ -1,5 +1,6 @@
 # Diary roadmap
 
-- [ ] Implement and verify the four Phase 1 safeguards from the updated plan (awaiting plan approval).
-- [ ] Implement and verify Phase 2 only (awaiting plan approval; live Claude verification also requires the owner's key and accepted model IDs).
-- [ ] Stop after Phase 2 and provide the phone test checklist.
+- [x] Implement the four Phase 1 safeguards; verify recording through background lock, playback, ciphertext backup round-trip and lock lifecycle tests.
+- [x] Implement Phase 2 local tone notes, explicit reflection confirmation, exact 5.5 routing, encrypted key settings, loose ends and worry parking; verify item edits and persistence in the app.
+- [ ] Verify a live Claude reflection (blocked: owner's Anthropic key has not been entered; no older-model substitution).
+- [x] Stop after Phase 2; phone checklist is in the approved plan.

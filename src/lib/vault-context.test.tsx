@@ -20,8 +20,8 @@ it("defers locking throughout recording and keeps the busy callback stable", asy
   const busy = vault?.setBusy;
   act(() => { vault?.setBusy(true); vault?.lock(); vault?.bump(); });
   expect(vault?.status).toBe("unlocked"); expect(vault?.key).toBe(mocks.key); expect(vault?.setBusy).toBe(busy);
-  act(() => vault?.setBusy(false));
-  expect(vault?.status).toBe("locked"); expect(vault?.key).toBeNull();
+  await act(async () => vault?.setBusy(false));
+  await waitFor(() => expect(vault?.status).toBe("locked")); expect(vault?.key).toBeNull();
 });
 it("finishes current transcription encrypted after lock without starting another job", async () => {
   const entry = { id: "job", status: "pending", segments: [] };
