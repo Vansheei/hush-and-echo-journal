@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 import { pipeline, env } from "@huggingface/transformers";
-import { durableModelCache } from "./model-cache";
+import { cachedModelFiles, durableModelCache } from "./model-cache";
 
 env.allowLocalModels = false;
 env.useBrowserCache = false;
@@ -46,7 +46,8 @@ self.onmessage = async (e: MessageEvent) => {
   const { id, model, audio } = e.data as { id: number; model: string; audio: Float32Array };
   try {
     const p = await getPipe(model, (x) => {
-      if (x.status === "progress") self.postMessage({ id, type: "download", progress: x.progress ?? 0 });
+      const file = "file" in x && typeof x.file === "string" ? x.file : "";
+      if (x.status === "progress" && !cachedModelFiles.has(file)) self.postMessage({ id, type: "download", progress: x.progress ?? 0 });
     });
     const out = await p(audio, { return_timestamps: true, task: "transcribe" });
     audio.fill(0);
