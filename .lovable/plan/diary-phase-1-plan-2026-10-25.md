@@ -45,10 +45,10 @@ Simple, calm, mobile-first layout. All colours, fonts, radii and spacing live in
 - **Transcription**: `@huggingface/transformers` in a Web Worker, WebGPU with WASM fallback, `return_timestamps: true`, chunked long audio. Audio decoded to 16 kHz mono via Web Audio, decrypted in memory only. Queue resumes pending jobs on next unlock.
 - **Modules with clear interfaces** for later phases: `crypto/`, `storage/`, `recorder/`, `transcription/` (a `tone/` slot reserved for Phase 2).
 - **Privacy**: no analytics or external scripts; only network use is the one-time Whisper model download from Hugging Face. Remove default Lovable meta/branding.
-   - **Tests**: unit tests for encrypt/decrypt round-trip, wrong passphrase rejection, recovery-phrase unlock, and passphrase change keeping data readable.
+   - **Tests**: unit tests for encrypt/decrypt round-trip, wrong passphrase rejection, recovery-phrase unlock, and passphrase change keeping data readable; add coverage for persistent-storage denial, uninterrupted recording, encrypted transcription completion after locking, key-reference cleanup and backup ciphertext round-trip.
 
 ## Note for Phase 2
-The model names in your brief (claude-haiku-5-5, claude-sonnet-5-5) don't match current Anthropic IDs; I'll map them to the current Haiku/Sonnet models then, with the per-feature override you asked for.
+Preserve the owner's requested names `claude-haiku 5.5` and `sonne 5.5`. Do not replace them with older versions. Verify callable IDs against official documentation before claiming live AI calls work; surface unsupported-model errors without fallback.
 
 ## Phase 1 test checklist (on your phone, Chrome)
 1. Set a passphrase, write down the recovery phrase, confirm the words.
@@ -57,3 +57,7 @@ The model names in your brief (claude-haiku-5-5, claude-sonnet-5-5) don't match 
 4. Wait for auto-lock (or "Lock now"), unlock with passphrase; try a wrong passphrase.
 5. Use "Forgot passphrase" with the recovery phrase, set a new one, confirm entries are still there.
 6. Check your gallery: no recordings should appear there.
+7. Check storage protection in Settings; if it was refused, export a backup anyway.
+8. Keep recording beyond the auto-lock time, pause and resume, then save; confirm the whole recording remains playable.
+9. Lock during transcription, unlock after it finishes, and confirm the transcript was saved.
+10. Export an encrypted backup and keep it outside the browser; validate its contents with a decrypting round-trip test before treating export as complete.
