@@ -3,8 +3,7 @@ import { useEffect, useState } from "react";
 import { AppHeader } from "@/components/diary/AppHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { changePassphrase } from "@/lib/crypto/vault";
-import { getApiKey, putApiKey, getVaultMeta, putVaultMeta, type WhisperModel } from "@/lib/storage/db";
+import { getApiKey, putApiKey, type WhisperModel } from "@/lib/storage/db";
 import { useVault } from "@/lib/vault-context";
 import { exportBackup } from "@/lib/storage/backup";
 import { persistenceGranted, requestPersistence } from "@/lib/storage/persistence";
@@ -13,7 +12,7 @@ import { useAppearance, setAppearance, type Cover } from "@/lib/appearance";
 import { BookCover } from "@/components/diary/BookCover";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DeviceUnlockSettings } from "@/components/diary/DeviceUnlockSettings";
+import { SecuritySettings } from "@/components/diary/SecuritySettings";
 import { FutureFeatures } from "@/components/diary/FutureFeatures";
 
 export const Route = createFileRoute("/settings")({
@@ -48,30 +47,12 @@ function SettingsPage() {
     if (key) getApiKey(key).then((v) => { if (active) setHasKey(!!v); });
     return () => { active = false; };
   }, [key]);
-  const [oldP, setOldP] = useState("");
-  const [newP, setNewP] = useState("");
-  const [msg, setMsg] = useState("");
-
-  async function change() {
-    setMsg("");
-    if (newP.length < 8) return setMsg("Use at least 8 characters.");
-    const meta = await getVaultMeta();
-    if (!meta) return;
-    try {
-      await putVaultMeta(await changePassphrase(meta, oldP, newP));
-      setOldP("");
-      setNewP("");
-      setMsg("Passphrase changed.");
-    } catch {
-      setMsg("Current passphrase is wrong.");
-    }
-  }
 
   return (
     <div className="app-shell">
       <AppHeader back title="Settings" />
       <main className="space-y-6 px-4 pb-16">
-        <DeviceUnlockSettings />
+        <SecuritySettings />
         <section className="settings-card">
           <h2>Cover</h2>
           <div className="grid grid-cols-3 gap-3">
@@ -166,16 +147,6 @@ function SettingsPage() {
           <p className="text-sm text-muted-foreground">Locking when switching apps is paused for testing.</p>
           <Button variant="secondary" onClick={lock}>
             Lock now
-          </Button>
-        </section>
-
-        <section className="settings-card">
-          <h2 className="font-medium">Change passphrase</h2>
-          <Input type="password" placeholder="Current passphrase" value={oldP} onChange={(e) => setOldP(e.target.value)} />
-          <Input type="password" placeholder="New passphrase" value={newP} onChange={(e) => setNewP(e.target.value)} />
-          {msg && <p className="text-sm text-muted-foreground">{msg}</p>}
-          <Button onClick={change} disabled={!oldP || !newP}>
-            Change
           </Button>
         </section>
 

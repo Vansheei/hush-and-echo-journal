@@ -11,6 +11,7 @@ vi.mock("@/lib/storage/db", () => ({
 }));
 vi.mock("@/lib/transcription", () => ({ decodeToMono16k: mocks.decode, transcribeAudio: mocks.transcribe }));
 vi.mock("@/lib/crypto/device", () => ({ unlockUsingDevice: async () => mocks.key, removeDeviceUnlock: vi.fn() }));
+vi.mock("@/lib/crypto/pin", () => ({ unlockUsingPin: async () => mocks.key, removePin: vi.fn() }));
 let vault: ReturnType<typeof useVault> | undefined;
 function Probe() { vault = useVault(); return <span>{vault.status}</span>; }
 beforeEach(() => { vi.clearAllMocks(); mocks.list.mockResolvedValue([]); mocks.decode.mockResolvedValue(new Float32Array([1, 2])); mocks.put.mockResolvedValue("revision"); });
