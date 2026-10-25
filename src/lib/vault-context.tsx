@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import type React from "react";
 import { encryptionOnlyKey, unlockWithPassphrase, resetPassphrase, type VaultMeta } from "@/lib/crypto/vault";
 import {
   DEFAULT_SETTINGS,
