@@ -14,8 +14,5 @@
 - [x] Phase 4: weekly recap (Sonnet, on request, linked entries), drafts from entry/conversation (never sent), per-person pages from confirmed people only.
 - [ ] Verify Phase 4 live: companion conversation loop, recap, drafts and people pages with the owner's key and phone.
 
-## Design backlog (not built yet)
-- Overall design feels too minimal; the whimsy is missing.
-- Main page links look too plain.
-- Writing page: burnt paper animation with a page-style text box.
-- Companion spot should look special, not just placed.
+- [x] Design pass 2: celestial-forest cover with vines/moons and rising-gold bloom unlock, scroll-banner headings, art-nouveau page frame with swan and faint butterflies, featured Companion card, ribbon bookmark sections, burnt-paper writing page in script.
+- [ ] Owner phone check of the new design and softer page sound.
