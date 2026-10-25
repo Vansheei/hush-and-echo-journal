@@ -13,9 +13,9 @@ The Phase 1 plan now includes all four requested additions. Implement and verify
 
 ### Settings and model choices
 - An Anthropic key field with save, replace and remove; keep the key encrypted on this device and mask it after saving. Never send it to Lovable Cloud or store it in source code.
-- Keep the requested model names exactly: `claude-haiku 5.5` and `sonne 5.5`. No automatic substitution with older versions.
+- Keep your requested 5.5 models; no substitution with older versions. The [official model documentation](https://docs.claude.com/en/docs/about-claude/models) confirms callable IDs `claude-haiku-5-5` and `claude-sonnet-5-5`. Preserve your written names `claude-haiku 5.5` and `sonne 5.5` as labels, using the documented IDs for requests.
 - Per-feature model choices: requested Haiku for extraction, tagging, Notebook preparation and short reflections; requested Sonnet for companion, recap and drafts. Future-phase features have settings only, not their full experience yet.
-- If Anthropic rejects a requested model name, show the error and leave the selected name unchanged. Do not claim a model works until a real call succeeds.
+- If Anthropic rejects a requested 5.5 model, show the error and leave the selected model unchanged. Do not claim a live call works until one succeeds.
 
 ### Listening and reflection
 - A **Listen / Reflect** choice, defaulting to **Listen**. Listen saves and transcribes without contacting Claude.
@@ -38,6 +38,7 @@ The Phase 1 plan now includes all four requested additions. Implement and verify
 - Use stable recording lifecycle guards rather than blocking locking merely because the recording page is open. Guard asynchronous reads so they cannot recreate decrypted media after locking.
 - Export all encrypted stores in one consistent IndexedDB read transaction, with explicit binary encoding and format version. Test reconstructing and decrypting the exported records without altering the user's live diary. A restore screen is not part of this request.
 - Add browser-only Anthropic and swappable tone modules. Requests require explicit confirmation, have no model fallback, and are cancelled on lock. Never persist the key or outgoing text in plaintext.
+- Browser-direct requests necessarily expose the key to the running browser while in use; encrypted storage protects it at rest, not from a compromised device or malicious script. Explain this at key entry and require acknowledgement before saving it.
 - Add encrypted stores/types for Phase 2 items with a versioned IndexedDB upgrade; preserve existing Phase 1 entries. New pages receive their own Diary titles and descriptions.
 - Record the module and key-lifecycle decisions in the project's architecture notes.
 

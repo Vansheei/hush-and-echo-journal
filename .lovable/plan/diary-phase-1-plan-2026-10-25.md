@@ -48,7 +48,7 @@ Simple, calm, mobile-first layout. All colours, fonts, radii and spacing live in
    - **Tests**: unit tests for encrypt/decrypt round-trip, wrong passphrase rejection, recovery-phrase unlock, and passphrase change keeping data readable; add coverage for persistent-storage denial, uninterrupted recording, encrypted transcription completion after locking, key-reference cleanup and backup ciphertext round-trip.
 
 ## Note for Phase 2
-Preserve the owner's requested names `claude-haiku 5.5` and `sonne 5.5`. Do not replace them with older versions. Verify callable IDs against official documentation before claiming live AI calls work; surface unsupported-model errors without fallback.
+Preserve the owner's requested 5.5 models and written labels `claude-haiku 5.5` and `sonne 5.5`. Official documentation confirms API IDs `claude-haiku-5-5` and `claude-sonnet-5-5`; use these IDs without substituting older versions. Surface unsupported-model errors without fallback; live calls still need verification.
 
 ## Phase 1 test checklist (on your phone, Chrome)
 1. Set a passphrase, write down the recovery phrase, confirm the words.
