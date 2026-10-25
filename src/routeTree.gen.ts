@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LooseEndsRouteImport } from './routes/loose-ends'
+import { Route as PeopleRouteImport } from './routes/people'
 import { Route as RecordRouteImport } from './routes/record'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as WorryParkingRouteImport } from './routes/worry-parking'
@@ -24,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
 const LooseEndsRoute = LooseEndsRouteImport.update({
   id: '/loose-ends',
   path: '/loose-ends',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeopleRoute = PeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RecordRoute = RecordRouteImport.update({
@@ -50,6 +56,7 @@ const EntryIdRoute = EntryIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/loose-ends': typeof LooseEndsRoute
+  '/people': typeof PeopleRoute
   '/record': typeof RecordRoute
   '/settings': typeof SettingsRoute
   '/worry-parking': typeof WorryParkingRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/loose-ends': typeof LooseEndsRoute
+  '/people': typeof PeopleRoute
   '/record': typeof RecordRoute
   '/settings': typeof SettingsRoute
   '/worry-parking': typeof WorryParkingRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/loose-ends': typeof LooseEndsRoute
+  '/people': typeof PeopleRoute
   '/record': typeof RecordRoute
   '/settings': typeof SettingsRoute
   '/worry-parking': typeof WorryParkingRoute
@@ -77,6 +86,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/loose-ends'
+    | '/people'
     | '/record'
     | '/settings'
     | '/worry-parking'
@@ -85,6 +95,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/loose-ends'
+    | '/people'
     | '/record'
     | '/settings'
     | '/worry-parking'
@@ -93,6 +104,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/loose-ends'
+    | '/people'
     | '/record'
     | '/settings'
     | '/worry-parking'
@@ -102,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LooseEndsRoute: typeof LooseEndsRoute
+  PeopleRoute: typeof PeopleRoute
   RecordRoute: typeof RecordRoute
   SettingsRoute: typeof SettingsRoute
   WorryParkingRoute: typeof WorryParkingRoute
@@ -122,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/loose-ends'
       fullPath: '/loose-ends'
       preLoaderRoute: typeof LooseEndsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/people': {
+      id: '/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof PeopleRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/record': {
@@ -158,6 +178,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LooseEndsRoute: LooseEndsRoute,
+  PeopleRoute: PeopleRoute,
   RecordRoute: RecordRoute,
   SettingsRoute: SettingsRoute,
   WorryParkingRoute: WorryParkingRoute,

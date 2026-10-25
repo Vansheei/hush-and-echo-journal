@@ -1,4 +1,5 @@
 import { CloudSun, Coffee, IceCreamCone, Shirt, Sun, Car, Utensils, Tent, Flower2, Wind, Sunrise } from "lucide-react";
+import type React from "react";
 import type { ReactNode } from "react";
 
 export type Season = "spring" | "summer" | "autumn" | "winter";
@@ -15,8 +16,8 @@ export function seasonFor(date: Date, _tempC?: number): Season {
   return "winter";
 }
 
-function Leaf({ className }: { className?: string }) {
-  return <svg viewBox="0 0 20 20" className={className} aria-hidden><path d="M2 18 C 2 8, 8 2, 18 2 C 18 12, 12 18, 2 18 Z M2 18 L 12 8" fill="currentColor" stroke="var(--paper)" strokeWidth="0.8" /></svg>;
+function Leaf({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return <svg viewBox="0 0 20 20" className={className} style={style} aria-hidden><path d="M2 18 C 2 8, 8 2, 18 2 C 18 12, 12 18, 2 18 Z M2 18 L 12 8" fill="currentColor" stroke="var(--paper)" strokeWidth="0.8" /></svg>;
 }
 function Snowman({ className }: { className?: string }) {
   return <svg viewBox="0 0 20 28" className={className} fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden><circle cx="10" cy="7" r="4" /><circle cx="10" cy="19" r="7" /><path d="M6 11 h8" strokeWidth="2.2" /></svg>;
@@ -53,7 +54,7 @@ export function SeasonScene({ date = new Date() }: { date?: Date }) {
       {season === "autumn" && (
         <div className="pointer-events-none fixed inset-x-0 top-0 z-0 mx-auto h-0 max-w-[40rem]" aria-hidden>
           {[8, 30, 55, 74, 90].map((left, i) => (
-            <Leaf key={left} className={`season-leaf w-3 ${["text-tape-2", "text-tape-1", "text-tape-4"][i % 3]}`} {...{ style: { left: `${left}%`, animationDuration: `${14 + i * 3}s`, animationDelay: `${i * -4}s` } }} />
+            <Leaf key={left} className={`season-leaf w-3 ${["text-tape-2", "text-tape-1", "text-tape-4"][i % 3]}`} style={{ left: `${left}%`, animationDuration: `${14 + i * 3}s`, animationDelay: `${i * -4}s` }} />
           ))}
         </div>
       )}
