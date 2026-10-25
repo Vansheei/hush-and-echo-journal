@@ -1,8 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
-import { unlockWithPassphrase, resetPassphrase, type VaultMeta } from "@/lib/crypto/vault";
+import { encryptionOnlyKey, unlockWithPassphrase, resetPassphrase, type VaultMeta } from "@/lib/crypto/vault";
 import {
   DEFAULT_SETTINGS,
-  getEntry,
+  completeEntry,
   getSettings,
   getVaultMeta,
   listEntries,
@@ -12,7 +12,9 @@ import {
   putVaultMeta,
   type Settings,
 } from "@/lib/storage/db";
-import { transcribe, type TranscribeProgress } from "@/lib/transcription";
+import { decodeToMono16k, transcribeAudio, type TranscribeProgress } from "@/lib/transcription";
+import { requestPersistence } from "@/lib/storage/persistence";
+import { textCueAnalyzer } from "@/lib/tone";
 
 type Status = "loading" | "setup" | "locked" | "unlocked";
 
@@ -49,6 +51,8 @@ export function VaultProvider({ children }: { children: ReactNode }) {
   const busy = useRef(false);
   const lastActive = useRef(Date.now());
   const running = useRef(false);
+  const pendingLock = useRef(false);
+  const preparing = useRef(false);
 
   const bump = useCallback(() => setVersion((v) => v + 1), []);
 
@@ -66,11 +70,18 @@ export function VaultProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const lock = useCallback(() => {
+    if (busy.current || preparing.current) { pendingLock.current = true; return; }
+    pendingLock.current = false;
     keyRef.current = null;
     setKey(null);
     setProgress({});
     setStatus("locked");
   }, []);
+
+  const setBusy = useCallback((b: boolean) => {
+    busy.current = b;
+    if (!b && pendingLock.current) lock();
+  }, [lock]);
 
   const unlock = useCallback(
     async (pass: string) => {
@@ -96,6 +107,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
     async (meta: VaultMeta, k: CryptoKey) => {
       await putVaultMeta(meta);
       await putSettings(k, DEFAULT_SETTINGS);
+      await requestPersistence();
       await openWith(k);
     },
     [openWith],
@@ -119,16 +131,12 @@ export function VaultProvider({ children }: { children: ReactNode }) {
       lastActive.current = Date.now();
     };
     const onVis = () => {
-      if (document.visibilityState === "hidden" && !busy.current) lock();
+      if (document.visibilityState === "hidden") lock();
     };
     const evs = ["pointerdown", "keydown", "scroll", "touchstart"] as const;
     evs.forEach((e) => window.addEventListener(e, touch, { passive: true }));
     document.addEventListener("visibilitychange", onVis);
     const t = window.setInterval(() => {
-      if (busy.current) {
-        touch();
-        return;
-      }
       if (Date.now() - lastActive.current > settings.autoLockMin * 60_000) lock();
     }, 5000);
     return () => {
@@ -141,44 +149,53 @@ export function VaultProvider({ children }: { children: ReactNode }) {
   // Background transcription queue.
   useEffect(() => {
     if (status !== "unlocked" || running.current) return;
-    const k = keyRef.current;
-    if (!k) return;
     running.current = true;
+    async function prepare() {
+      const k = keyRef.current;
+      if (!k) return null;
+      preparing.current = true;
+      try {
+        const next = (await listEntries(k)).reverse().find((e) => e.status === "pending" || e.status === "transcribing");
+        if (!next) return null;
+        const entry = { ...next, status: "transcribing" as const };
+        const revision = await putEntry(k, entry);
+        const audio = await decodeToMono16k(await loadMedia(k, next));
+        return { entry, revision, audio, writer: encryptionOnlyKey(k) };
+      } finally {
+        preparing.current = false;
+        if (pendingLock.current) lock();
+      }
+    }
     (async () => {
       try {
         for (;;) {
-          if (keyRef.current !== k) return;
-          const next = (await listEntries(k))
-            .reverse()
-            .find((e) => e.status === "pending" || e.status === "transcribing");
-          if (!next) return;
-          await putEntry(k, { ...next, status: "transcribing" });
+          const job = await prepare();
+          if (!job) return;
           setVersion((v) => v + 1);
           try {
-            const blob = await loadMedia(k, next);
-            const segments = await transcribe(blob, settings.whisperModel, (p) =>
-              setProgress((m) => ({ ...m, [next.id]: p })),
+            const segments = await transcribeAudio(job.audio, settings.whisperModel, (p) =>
+              { if (keyRef.current) setProgress((m) => ({ ...m, [job.entry.id]: p })); },
             );
-            if (keyRef.current !== k) return;
-            const cur = await getEntry(k, next.id);
-            if (cur) await putEntry(k, { ...cur, status: "done", segments, error: undefined });
+            await completeEntry(job.writer, { ...job.entry, status: "done", segments, error: undefined,
+              toneNotes: textCueAnalyzer.analyze(segments.map((s) => s.text).join(" ")) }, job.revision);
           } catch (err) {
-            if (keyRef.current !== k) return;
-            const cur = await getEntry(k, next.id);
-            if (cur)
-              await putEntry(k, { ...cur, status: "error", error: err instanceof Error ? err.message : String(err) });
+            await completeEntry(job.writer, { ...job.entry, status: "error", error: err instanceof Error ? err.message : String(err) }, job.revision);
+          } finally {
+            job.audio.fill(0);
           }
           setProgress((m) => {
-            const { [next.id]: _, ...rest } = m;
+            const { [job.entry.id]: _, ...rest } = m;
             return rest;
           });
           setVersion((v) => v + 1);
         }
+      } catch {
+        // Storage/decode failures leave the queued entry retryable on next unlock.
       } finally {
         running.current = false;
       }
     })();
-  }, [status, version, settings.whisperModel]);
+  }, [status, version, settings.whisperModel, lock]);
 
   return (
     <VaultCtx.Provider
@@ -194,7 +211,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
         recover,
         finishSetup,
         updateSettings,
-        setBusy: (b) => (busy.current = b),
+        setBusy,
       }}
     >
       {children}

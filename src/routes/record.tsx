@@ -42,14 +42,14 @@ function RecordPage() {
     streamRef.current = null;
   }, []);
 
-  // Keep app from auto-locking while this screen is open.
+  // Stable callback avoids stopping the stream whenever the provider renders.
   useEffect(() => {
-    setBusy(true);
     return () => {
-      setBusy(false);
       stopStream();
+      setBusy(false);
     };
   }, [setBusy, stopStream]);
+  useEffect(() => { setBusy(state !== "idle" || saving); }, [state, saving, setBusy]);
 
   useEffect(() => {
     if (state !== "idle") return;
@@ -92,6 +92,7 @@ function RecordPage() {
       audioBitsPerSecond: 96_000,
     });
     const parts: Blob[] = [];
+    setBusy(true);
     rec.ondataavailable = (e) => e.data.size && parts.push(e.data);
     rec.onstop = () => {
       const blob = new Blob(parts, { type: rec.mimeType || mimeType });
@@ -114,22 +115,27 @@ function RecordPage() {
   async function save() {
     if (!key || !result) return;
     setSaving(true);
-    await saveEntry(key, result.blob, {
+    try {
+      await saveEntry(key, result.blob, {
       kind,
       mimeType: result.blob.type,
       durationSec: Math.max(1, secs),
     });
     URL.revokeObjectURL(result.url);
     bump();
-    nav({ to: "/" });
+      await nav({ to: "/" });
+    } catch {
+      setErr("Could not save. Your recording is still here; try again.");
+      setSaving(false);
+    }
   }
 
   return (
     <div className="app-shell flex min-h-dvh flex-col bg-stage text-stage-foreground">
       <div className="flex items-center justify-between p-4">
-        <button className="icon-btn" aria-label="Close" onClick={() => nav({ to: "/" })}>
+        <Button variant="ghost" size="icon" className="icon-btn" aria-label="Close" disabled={state !== "idle" || saving} onClick={() => nav({ to: "/" })}>
           <X className="size-5" />
-        </button>
+        </Button>
         <span className="font-mono text-lg tabular-nums">{fmtDuration(secs)}</span>
         {kind === "video" && state === "idle" ? (
           <button
