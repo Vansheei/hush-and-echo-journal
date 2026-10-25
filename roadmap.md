@@ -1,7 +1,7 @@
 # Diary roadmap
 
-- [ ] Reorganize Settings into seven heading-only linked sections, preserve controls and verify navigation and saved preferences.
-- [ ] Add English/Hindi/German interface language for all app text; leave Claude replies, diary writing and automatic transcription language untouched.
+- [x] Reorganize Settings into seven heading-only linked sections; all section/back navigation and saved sound preferences verified on mobile and desktop.
+- [x] Add offline English/Hindi/German interface labels, buttons, section names and dates; encrypted writing preservation tested, AI/transcription language remains independent.
 
 - [x] Android native upgrades: biometric-protected diary key, local TTS at 1.15x, encrypted file sharing, back gesture navigation, native base-model default; 42 automated tests and browser fallback flow verified. Phase 5 not started.
 - [ ] Nothing Phone 2a native checks: enable/lock/fingerprint and PIN fallback; hear a reply with an installed offline voice; export/save backup via share sheet; back from chapters to index and from other pages; confirm base selected. Blocked on an installed APK and physical phone.
