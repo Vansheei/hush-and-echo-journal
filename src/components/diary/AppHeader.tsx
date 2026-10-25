@@ -57,12 +57,12 @@ export function AppHeader({ title, back }: { title: ReactNode; back?: boolean })
           ) : <span className="size-10" />}
           <span className="flex-1" />
           <Link to="/settings" className="icon-btn" aria-label="Settings"><Settings className="size-5" /></Link>
-          <div className="flex flex-col items-center">
+          <div className="relative">
             <button className="icon-btn" aria-label="Lock now" onClick={lock}><Lock className="size-5" /></button>
-            <Link to="/companion" className="icon-btn !size-12" aria-label="Night Companion" title="Night Companion"><Lantern /></Link>
+            <Link to="/companion" className="icon-btn absolute right-0 top-full z-20 !size-10" aria-label="Night Companion" title="Night Companion"><Lantern /></Link>
           </div>
         </div>
-        <div className="-mt-14 mb-2"><ScrollBanner>{title}</ScrollBanner></div>
+        <div className="-mt-3 mb-2"><ScrollBanner>{title}</ScrollBanner></div>
       </header>
     </>
   );
