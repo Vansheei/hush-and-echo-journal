@@ -58,7 +58,7 @@ function RecapPage() {
     finally { if (active.current) setBusy(false); controller.current = null; }
   }
 
-  return <div className="app-shell"><AppHeader back title="Weekly recap" /><main className="space-y-5 px-4 pb-20">
+  return <div className="app-shell"><AppHeader back title="The Week’s Tale" /><main className="space-y-5 px-4 pb-20">
     <p className="text-sm text-muted-foreground">{entries.length ? `${entries.length} ${entries.length === 1 ? "entry" : "entries"} from the last 7 days. Nothing is sent unless you ask.` : "No finished entries from the last 7 days yet."}</p>
     <Button disabled={!entries.length || busy} onClick={prepare}>{busy ? "Waiting for Claude…" : "Request weekly recap"}</Button>
     {recap && <section className="space-y-4 border-t border-border pt-5">

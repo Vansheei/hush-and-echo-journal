@@ -2,7 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { format, isToday, isYesterday } from "date-fns";
 import { Plus, AlertCircle } from "lucide-react";
-import { CompanionCard, RibbonTabs } from "@/components/diary/BookSections";
+import { CompanionCard } from "@/components/diary/BookSections";
+import { BookIndex, SECTIONS } from "@/components/diary/BookIndex";
+import { TurnableBook } from "@/components/diary/TurnableBook";
 import { EntryToken, RibbonMark } from "@/components/diary/EntryToken";
 import { SeasonScene } from "@/components/diary/SeasonScene";
 import { cassetteClick } from "@/lib/sounds";
@@ -26,6 +28,8 @@ export const Route = createFileRoute("/")({
   component: Timeline,
 });
 
+type IndexItemLike = { label: string; onSelect: () => void };
+
 function dayLabel(t: number) {
   const d = new Date(t);
   if (isToday(d)) return "Today";
@@ -37,6 +41,7 @@ function Timeline() {
   const { key, version, progress } = useVault();
   const [entries, setEntries] = useState<Entry[] | null>(null);
   const [onlyRibbon, setOnlyRibbon] = useState(false);
+  const [page, setPage] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -52,66 +57,60 @@ function Timeline() {
     else groups.push([l, [e]]);
   }
 
+  const renderEntry = (e: Entry) => {
+    const p = progress[e.id];
+    const snippet = e.segments.map((s) => s.text).join(" ");
+    return (
+      <Link key={e.id} to="/entry/$id" params={{ id: e.id }} onClick={() => { if (e.kind === "audio") cassetteClick(); }}
+        className="relative flex items-center gap-3 rounded-md border border-border/70 bg-card p-3">
+        {e.ribbon && <RibbonMark className="absolute -top-1 right-16" />}
+        <EntryToken kind={e.kind} id={e.id} />
+        <div className="min-w-0 flex-1">
+          <div className="flex justify-between text-sm">
+            <span className="font-medium text-base">{format(e.createdAt, "HH:mm")}</span>
+            <span className="text-muted-foreground">{fmtDuration(e.durationSec)}</span>
+          </div>
+          <p className="mt-0.5 line-clamp-2 text-muted-foreground">
+            {e.status === "done" && (snippet || "No speech detected")}
+            {e.status === "pending" && "Waiting to transcribe…"}
+            {e.status === "transcribing" && (p?.phase === "download" ? `Downloading speech model ${Math.round(p.pct)}%` : `Transcribing ${p?.pct ?? 0}%`)}
+            {e.status === "error" && <span className="inline-flex items-center gap-1 text-destructive"><AlertCircle className="size-3" /> Transcription failed</span>}
+          </p>
+        </div>
+      </Link>
+    );
+  };
+
+  const keepsakes: IndexItemLike = { label: "The Keepsakes", onSelect: () => { setOnlyRibbon(true); setPage(1); } };
+  const indexPage = (
+    <BookIndex items={[...SECTIONS, keepsakes]} days={groups.map(([label], i) => ({ label, onSelect: () => setPage(i + 1) }))} />
+  );
+  const dayPages = groups.map(([label, list]) => (
+    <section key={label} className="space-y-2">
+      <h2 className="day-label">{label}</h2>
+      <p className="-mt-1 text-sm text-muted-foreground">{format(list[0]!.createdAt, "d MMMM yyyy")}</p>
+      {list.map(renderEntry)}
+    </section>
+  ));
+  const empty = entries && (entries.length === 0
+    ? <p className="pt-16 text-center text-muted-foreground">No chapters yet. Tap Begin a Chapter when you're ready.</p>
+    : onlyRibbon && groups.length === 0 ? <p className="pt-12 text-center text-muted-foreground">No keepsakes yet. Open an entry and tap the ribbon to keep it.</p> : null);
+  const pages = [indexPage, ...(dayPages.length ? dayPages : empty ? [empty] : [])];
+
   return (
     <div className="app-shell">
-      <AppHeader title="Diary" />
+      <AppHeader title="Vanshi’s Diary" />
       <SeasonScene />
       <CompanionCard />
-      <RibbonTabs />
-      <div className="relative z-[1] flex justify-end px-4 pb-4">
-        <button aria-pressed={onlyRibbon} onClick={() => setOnlyRibbon((v) => !v)} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-0.5 text-sm ${onlyRibbon ? "border-ribbon bg-accent text-ribbon" : "border-border"}`}>
-          <RibbonMark className="w-2.5" /> Ribboned
+      <div className="relative z-[1] flex justify-end px-4 pb-3">
+        <button aria-pressed={onlyRibbon} onClick={() => { setOnlyRibbon((v) => !v); setPage(0); }} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-0.5 text-sm ${onlyRibbon ? "border-ribbon bg-accent text-ribbon" : "border-border"}`}>
+          <RibbonMark className="w-2.5" /> The Keepsakes
         </button>
       </div>
-      <main className="space-y-6 px-4 pb-32">
-        {entries && entries.length === 0 && (
-          <p className="pt-20 text-center text-muted-foreground">No entries yet. Tap record when you're ready.</p>
-        )}
-        {entries && entries.length > 0 && onlyRibbon && groups.length === 0 && (
-          <p className="pt-12 text-center text-muted-foreground">No ribboned entries yet. Open an entry and tap the ribbon to mark it.</p>
-        )}
-        {groups.map(([label, list]) => (
-          <section key={label} className="space-y-2">
-            <h2 className="day-label">{label}</h2>
-            {list.map((e) => {
-              const p = progress[e.id];
-              const snippet = e.segments.map((s) => s.text).join(" ");
-              return (
-                <Link
-                  key={e.id}
-                  to="/entry/$id"
-                  params={{ id: e.id }}
-                  onClick={() => { if (e.kind === "audio") cassetteClick(); }}
-                  className="relative flex items-center gap-3 rounded-md border border-border/70 bg-card p-3 transition-transform active:scale-[0.99]"
-                >
-                  {e.ribbon && <RibbonMark className="absolute -top-1 right-16" />}
-                  <EntryToken kind={e.kind} id={e.id} />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex justify-between text-sm">
-                      <span className="font-medium text-base">{format(e.createdAt, "HH:mm")}</span>
-                      <span className="text-muted-foreground">{fmtDuration(e.durationSec)}</span>
-                    </div>
-                    <p className="mt-0.5 line-clamp-2 text-muted-foreground">
-                      {e.status === "done" && (snippet || "No speech detected")}
-                      {e.status === "pending" && "Waiting to transcribe…"}
-                      {e.status === "transcribing" &&
-                        (p?.phase === "download"
-                          ? `Downloading speech model ${Math.round(p.pct)}%`
-                          : `Transcribing ${p?.pct ?? 0}%`)}
-                      {e.status === "error" && (
-                        <span className="inline-flex items-center gap-1 text-destructive">
-                          <AlertCircle className="size-3" /> Transcription failed
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                </Link>
-              );
-            })}
-          </section>
-        ))}
+      <main className="relative z-[1] px-4 pb-32">
+        <TurnableBook pages={pages} page={Math.min(page, pages.length - 1)} onPage={setPage} />
       </main>
-      <Link to="/record" className="record-fab" aria-label="Record">
+      <Link to="/record" className="record-fab" aria-label="Begin a Chapter">
         <Plus className="size-7" />
       </Link>
     </div>

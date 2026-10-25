@@ -70,7 +70,7 @@ function DraftsPage() {
     finally { if (active.current) setBusy(false); controller.current = null; }
   }
 
-  return <div className="app-shell"><AppHeader back title="Drafts" /><main className="space-y-5 px-4 pb-20">
+  return <div className="app-shell"><AppHeader back title="Unsent Letters" /><main className="space-y-5 px-4 pb-20">
     <p className="text-sm text-muted-foreground">Claude writes a text or email from an entry or your conversation. It never sends anything — you copy it yourself.</p>
     <Select value={source} onValueChange={setSource}>
       <SelectTrigger aria-label="Draft source"><SelectValue /></SelectTrigger>

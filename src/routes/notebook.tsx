@@ -13,7 +13,7 @@ function NotebookPage() {
   const { key, version, bump } = useVault(); const [notes, setNotes] = useState<NotebookNote[]>([]); const [edit, setEdit] = useState<string | null>(null); const [text, setText] = useState(""); const [error, setError] = useState("");
   useEffect(() => { let active = true; if (key) getPersonal(key).then(d => { if (active) setNotes(d.notebook); }); return () => { active = false; }; }, [key, version]);
   async function save() { if (!key || !edit || !text.trim()) return; try { await updatePersonal(key, d => ({ ...d, notebook: d.notebook.map(n => n.id === edit ? { ...n, text: text.trim() } : n) })); setEdit(null); setText(""); bump(); } catch { setError("Could not save note."); } }
-  return <div className="app-shell"><AppHeader back title="What I know about you" /><main className="space-y-5 px-4 pb-20">
+  return <div className="app-shell"><AppHeader back title="Inner Universe" /><main className="space-y-5 px-4 pb-20">
     <p className="text-sm text-muted-foreground">Notes your companion suggests after reflections and conversations. Nothing lands here unless you accept it; thumbs steer future replies.</p>
     {edit && <div className="space-y-2"><Textarea aria-label="Edit note" value={text} onChange={e => setText(e.target.value)} /><div className="flex gap-2"><Button disabled={!text.trim()} onClick={save}>Save changes</Button><Button variant="ghost" onClick={() => { setEdit(null); setText(""); }}>Cancel</Button></div></div>}
     {error && <p role="alert">{error}</p>}
