@@ -7,9 +7,13 @@ import { useVault } from "@/lib/vault-context";
 import { touchPoint } from "@/lib/appearance";
 import { BookCover } from "./BookCover";
 import { getDeviceWrap } from "@/lib/crypto/device";
+import { hasPin } from "@/lib/crypto/pin";
 
 export function LockScreen({ closing = false }: { closing?: boolean }) {
-  const { unlock, unlockDevice, recover } = useVault();
+  const { unlock, unlockDevice, unlockPin, recover } = useVault();
+  const [pinEnabled, setPinEnabled] = useState(false);
+  const [usePin, setUsePin] = useState(false);
+  useEffect(() => { let active = true; hasPin().then(v => { if (active) setPinEnabled(v); }); return () => { active = false; }; }, []);
   const [deviceEnabled, setDeviceEnabled] = useState(false);
   useEffect(() => { let active = true; getDeviceWrap().then((wrap) => { if (active) setDeviceEnabled(!!wrap); }); return () => { active = false; }; }, []);
   const [mode, setMode] = useState<"pass" | "recover">("pass");
@@ -46,14 +50,15 @@ export function LockScreen({ closing = false }: { closing?: boolean }) {
                 className="space-y-2"
                 onSubmit={(e) => {
                   e.preventDefault();
-                  void run(() => unlock(pass));
+                  void run(() => usePin ? unlockPin(pass) : unlock(pass));
                 }}
               >
                 <Input
                   type="password"
                   autoFocus
-                  aria-label="Passphrase"
-                  placeholder="Passphrase"
+                  inputMode={usePin ? "numeric" : "text"}
+                  aria-label={usePin ? "Diary PIN" : "Passphrase"}
+                  placeholder={usePin ? "Diary PIN" : "Passphrase"}
                   value={pass}
                   onChange={(e) => setPass(e.target.value)}
                   className="border-gold/60 bg-cover text-center text-gold placeholder:text-gold/60"
@@ -66,6 +71,7 @@ export function LockScreen({ closing = false }: { closing?: boolean }) {
             </BookCover>
           </div>
           <div className="flex flex-col items-center gap-2 text-gold/80">
+            {pinEnabled && <Button variant="ghost" disabled={busy} onClick={() => { setUsePin(!usePin); setPass(""); setErr(""); }}>{usePin ? "Use passphrase" : "Use diary PIN"}</Button>}
             <Button type="button" variant="ghost" className="text-gold/70" disabled={busy} onClick={() => {
               if (deviceEnabled) void run(unlockDevice);
               else setErr("Open with your passphrase, then enable fingerprint unlock in Settings.");

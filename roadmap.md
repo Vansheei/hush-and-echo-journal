@@ -1,5 +1,7 @@
 # Diary roadmap
 
+- [ ] Security group, optional PIN, recovery passphrase reset, fingerprint refusal diagnosis, warmer 40%-faded writing sheet; audit Phase 4 and APK readiness before Phase 5.
+
 - [x] Add secure device unlock with passphrase fallback and six coming-later interfaces; 34 tests pass, simulated PRF setup/lock/unlock/removal verified.
 - [ ] Verify fingerprint unlock on the owner's device (physical biometrics and browser PRF support cannot be tested here).
 

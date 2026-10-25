@@ -17,6 +17,7 @@ import { decodeToMono16k, transcribeAudio, type TranscribeProgress } from "@/lib
 import { requestPersistence } from "@/lib/storage/persistence";
 import { defaultToneAnalyzer } from "@/lib/tone";
 import { unlockUsingDevice, removeDeviceUnlock } from "@/lib/crypto/device";
+import { unlockUsingPin, removePin } from "@/lib/crypto/pin";
 
 type Status = "loading" | "setup" | "locked" | "unlocked";
 
@@ -30,6 +31,7 @@ type Ctx = {
   lock: () => void;
   unlock: (pass: string) => Promise<void>;
   unlockDevice: () => Promise<void>;
+  unlockPin: (pin: string) => Promise<void>;
   recover: (phrase: string, newPass: string) => Promise<void>;
   finishSetup: (meta: VaultMeta, key: CryptoKey) => Promise<void>;
   updateSettings: (s: Partial<Settings>) => Promise<void>;
@@ -105,6 +107,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
       const r = await resetPassphrase(meta, phrase, newPass);
       await putVaultMeta(r.meta);
       await removeDeviceUnlock();
+      await removePin();
       await openWith(r.key);
     },
     [openWith],
@@ -217,6 +220,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
         lock,
         unlock,
         unlockDevice: async () => { await openWith(await unlockUsingDevice()); },
+        unlockPin: async (pin) => { await openWith(await unlockUsingPin(pin)); },
         recover,
         finishSetup,
         updateSettings,
