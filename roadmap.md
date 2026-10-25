@@ -1,5 +1,8 @@
 # Diary roadmap
 
+- [x] Diagnose GitHub APK failures using the latest job log; replace retired Android SDK `tools` default with explicit supported packages.
+- [ ] Confirm a successful GitHub APK run and download (blocked until the corrected workflow reaches GitHub and runs).
+
 - [x] Reorganize Settings into seven heading-only linked sections; all section/back navigation and saved sound preferences verified on mobile and desktop.
 - [x] Add offline English/Hindi/German interface labels, buttons, section names and dates; encrypted writing preservation tested, AI/transcription language remains independent.
 
