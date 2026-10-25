@@ -14,7 +14,11 @@ export async function requestReflection(input: {
     method: "POST", signal: input.signal,
     headers: { "content-type": "application/json", "x-api-key": input.apiKey,
       "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
-    body: JSON.stringify({ model: MODELS[input.model].id, max_tokens: 900,
+    body: JSON.stringify({ model: MODELS[input.model].id, max_tokens: 4096,
+      // These exact 5.5 models think by default. Reserve the allowance for the
+      // requested reply, not an up-front thinking pass (no tools are offered).
+      thinking: { type: input.model === "sonnet" ? "between_tools" : "disabled" },
+      output_config: { effort: "low" },
       system: `${PERSONALITY}\nApproach: ${input.approach ?? "brief reflection"}. Return only JSON: {"text":"reply", "looseEnds":[], "worries":[], "meanings":[{"phrase":"unclear phrase","meaning":"tentative meaning","language":"language"}], "people":[{"mention":"name","question":"clarifying question"}], "notes":[{"kind":"fact","text":"something learned about the owner, fact or interpretation"}]}. Suggest notes only when you genuinely learned something about the owner; leave suggestions empty unless needed.\n${input.context ?? ""}`,
       messages: [...(input.conversation ?? []), { role: "user", content: input.text }] }),
   });
@@ -24,7 +28,12 @@ export async function requestReflection(input: {
   }
   const data = await response.json();
   if (data.stop_reason === "refusal") throw new Error("Claude declined this request. Nothing else was sent.");
-  const text = (data.content ?? []).filter((c: { type: string }) => c.type === "text").map((c: { text: string }) => c.text).join("\n");
+  if (data.stop_reason === "max_tokens") throw new Error("Claude reached the reply limit before finishing. Please ask again; nothing was resent automatically.");
+  const blocks: unknown[] = Array.isArray(data.content) ? data.content : [];
+  const text = blocks.flatMap((block) => {
+    if (!block || typeof block !== "object" || !("type" in block) || block.type !== "text" || !("text" in block) || typeof block.text !== "string") return [];
+    return [block.text];
+  }).join("\n");
   if (!text.trim()) throw new Error("Claude returned no text. The request has stopped.");
   let result: unknown;
   try { result = JSON.parse(text.replace(/^```(?:json)?\s*|\s*```$/g, "")); }
@@ -32,6 +41,7 @@ export async function requestReflection(input: {
   if (!result || typeof result !== "object" || !("text" in result) || typeof result.text !== "string") {
     return { text, looseEnds: [], worries: [] };
   }
+  if (!result.text.trim()) throw new Error("Claude returned an empty reply. Please ask again; nothing was resent automatically.");
   const list = (v: unknown) => Array.isArray(v) ? v.filter((s): s is string => typeof s === "string").slice(0, 8) : [];
   const meanings = "meanings" in result && Array.isArray(result.meanings) ? result.meanings.filter((v): v is Suggestions["meanings"][number] => v && typeof v.phrase === "string" && typeof v.meaning === "string" && typeof v.language === "string").slice(0, 8) : [];
   const people = "people" in result && Array.isArray(result.people) ? result.people.filter((v): v is Suggestions["people"][number] => v && typeof v.mention === "string" && typeof v.question === "string").slice(0, 8) : [];

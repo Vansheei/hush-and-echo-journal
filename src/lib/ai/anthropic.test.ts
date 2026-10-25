@@ -40,3 +40,25 @@ it("stops on an empty refusal without retrying", async () => {
   const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ stop_reason: "refusal", content: [] }) }); vi.stubGlobal("fetch", fetcher);
   await expect(requestReflection(input)).rejects.toThrow("declined"); expect(fetcher).toHaveBeenCalledTimes(1);
 });
+it.each(["haiku", "sonnet"] as const)("reserves tokens for the %s reply instead of default up-front thinking", async (model) => {
+  const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ stop_reason: "end_turn", content: [{ type: "text", text: '{"text":"Your week","looseEnds":[],"worries":[]}' }] }) });
+  vi.stubGlobal("fetch", fetcher);
+  expect((await requestReflection({ ...input, model })).text).toBe("Your week");
+  const body = JSON.parse(fetcher.mock.calls[0]?.[1].body);
+  expect(body.max_tokens).toBe(4096);
+  expect(body.thinking.type).toBe(model === "sonnet" ? "between_tools" : "disabled");
+  expect(body.output_config.effort).toBe("low");
+  expect(fetcher).toHaveBeenCalledTimes(1);
+});
+it("reports an exhausted thinking budget without displaying thinking or retrying", async () => {
+  const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ stop_reason: "max_tokens", content: [{ type: "thinking", thinking: "not a final reply" }] }) });
+  vi.stubGlobal("fetch", fetcher);
+  await expect(requestReflection({ ...input, model: "sonnet" })).rejects.toThrow("reply limit");
+  expect(fetcher).toHaveBeenCalledTimes(1);
+});
+it("rejects an empty structured reply instead of showing a blank scroll", async () => {
+  const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ content: [{ type: "text", text: '{"text":" "}' }] }) });
+  vi.stubGlobal("fetch", fetcher);
+  await expect(requestReflection(input)).rejects.toThrow("empty reply");
+  expect(fetcher).toHaveBeenCalledTimes(1);
+});
