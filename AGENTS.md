@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Architecture rules
+- Android overlays bars with backgrounds only; shared safe tokens combine CSS env() and native system-bar/cutout dimensions; disable automatic WebView margins. Why: older WebViews return zero CSS insets and controls must stay reachable without double padding.
 - Settings sections use independent un-nested routes and a shared name registry in `src/lib/settings-sections.ts`; non-sensitive seasonal/audio preferences share the appearance store. Why: headings can be renamed together and preferences apply consistently in Settings and Companion without extra navigation nesting.
 - Interface language uses offline catalogs and render-time subscriptions, never translated diary data, AI prompts or model output. Why: switching labels must not remount the vault or affect the owner's spoken/written language.
 - Optional diary PIN uses a PBKDF2-wrapped DEK in metadata (never a saved PIN); recovery deletes both PIN and device wraps. Why: PIN unlock must release the same encrypted diary key without retaining plaintext credentials.
@@ -26,10 +27,10 @@
 - Speech and multilingual embeddings have separate workers and a shared public-weights Cache API adapter; retain the speech worker across locks and stop semantic work on unmount. Why: reusing model weights must not retain vault keys or search plaintext while locked.
 - Companion uses local Whisper and only localService voices through native Capacitor TTS on Android or browser speech on web; wait for reply completion before listening, cancel on stop/unmount, and retain outgoing-text consent/text fallback. Why: private speech must stay on device without recording its own reply.
 - Browser Claude requests explicitly configure model-supported reply-only thinking, and reject exhausted or empty replies without retrying. Why: default thinking can consume the reply allowance, and resending personal text requires fresh consent.
-- Android uses Capacitor loading `android-web` (copied from the build output by `scripts/capacitor-shell.mjs`) from the APK (no `server.url`); `bun run build:android` builds SPA mode (`CAPACITOR=1`). App art and fonts live in `public/art` and `public/fonts`, never remote URLs. Why: the diary must work fully offline in the Android WebView.
+- Android loads bundled `android-web` assets, art and fonts locally; never set `server.url`. Why: the APK must start offline.
 - Capacitor plugins that touch `window` at import time are lazily imported and stubbed outside the client bundle (see `vite.config.ts`). Why: the server bundle merges Capacitor plugins into one chunk, so one browser-only import crashes start-page rendering and the APK build.
 - The Android debug build signs with the committed `android/app/diary-debug.keystore`. Why: updates must install over the old APK without uninstalling and wiping the on-device diary.
-- Android CI pins Node/Bun, selects explicit SDK packages (not setup-android's retired `tools`) on a fixed Ubuntu image, tees step output and uploads `build-logs` on failure. Why: environment drift must not break builds silently, and logs are only readable by repo admins otherwise.
+- Android CI pins tools/SDK packages and uploads failed step logs. Why: prevent environment drift and expose failures to the owner.
 - Android encrypted backups write UTF-8 ciphertext to Filesystem Cache and pass its URI to Share; native Keystore secrets never enter backups. Why: WebView downloads fail and restored device wraps must not unlock on another device.
 - Native App back events offer active conversation/book handlers first, then router history/home, exiting only at the root with no history. Why: Android back must respect page turns and active work rather than close the diary prematurely.
 - New native settings default to the smaller multilingual model; browser defaults and explicit saved selections remain intact. Why: improve Android transcription speed without overriding the owner's chosen accuracy.
