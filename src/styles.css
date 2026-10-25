@@ -217,6 +217,7 @@
   padding-bottom: env(safe-area-inset-bottom);
   background-color: var(--paper);
   background-image:
+    url("/__l5e/assets-v1/b8c20370-7a81-4141-8bb0-d3125d9e8b72/vintage-page.png"),
     repeating-linear-gradient(to bottom, oklch(0.5 0.04 70 / 4%) 0 1px, transparent 1px 4px),
     radial-gradient(ellipse 30% 14% at 92% 8%, oklch(0.6 0.07 65 / 18%), transparent 70%),
     radial-gradient(ellipse 22% 18% at 4% 55%, oklch(0.6 0.07 65 / 14%), transparent 70%),
@@ -399,14 +400,16 @@
 /* ---------- Cover art + daffodils ---------- */
 .cover-art-lit { animation: art-lit 1.4s ease 0.4s forwards; }
 @keyframes art-lit { to { filter: brightness(1.18) saturate(1.1); } }
-.daffodil-fly { position: absolute; width: 7cqw; height: 7cqw; margin: -3.5cqw 0 0 -3.5cqw; opacity: 0; pointer-events: none; filter: drop-shadow(0 0 4px var(--gold-bright)); animation: daff-fly 1.9s cubic-bezier(.35,.1,.3,1) var(--d) forwards; }
-@keyframes daff-fly {
-  0% { opacity: 0; transform: translate(0, 0) rotate(0) scale(0.6); }
+.seed-fly { position: absolute; width: 4cqw; height: 5cqw; margin: -2.5cqw 0 0 -2cqw; opacity: 0; pointer-events: none; filter: drop-shadow(0 0 2px oklch(0.95 0.05 90 / 70%)); animation: seed-fly 2.6s ease-out var(--d) forwards; }
+@keyframes seed-fly {
+  0% { opacity: 0; transform: translate(0, 0) rotate(0); }
   15% { opacity: 1; }
-  50% { transform: translate(calc(var(--tx) * 0.4 + 3cqw), calc(var(--ty) * 0.5)) rotate(140deg) scale(0.9); }
-  85% { opacity: 0.9; }
-  100% { opacity: 0; transform: translate(var(--tx), var(--ty)) rotate(320deg) scale(0.3); }
+  45% { transform: translate(calc(var(--tx) * 0.5 + 1.5cqw), calc(var(--ty) * 0.45)) rotate(-12deg); }
+  75% { opacity: 0.85; transform: translate(calc(var(--tx) * 0.8 - 1cqw), calc(var(--ty) * 0.8)) rotate(10deg); }
+  100% { opacity: 0; transform: translate(var(--tx), var(--ty)) rotate(-6deg); }
 }
+.daffodil-glow { position: absolute; width: 10cqw; height: 10cqw; margin: -5cqw 0 0 -5cqw; border-radius: 9999px; pointer-events: none; opacity: 0; background: radial-gradient(circle, oklch(0.95 0.14 95 / 75%), oklch(0.85 0.14 85 / 25%) 45%, transparent 70%); mix-blend-mode: screen; animation: daff-glow 2.4s ease-in-out var(--d) forwards; }
+@keyframes daff-glow { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0.7; } }
 
 /* ---------- Index (page one) ---------- */
 .book-index { font-family: var(--font-index); color: var(--ink); padding: 0.5rem 0.75rem 1rem; }
@@ -417,7 +420,7 @@
 
 /* ---------- Turnable book ---------- */
 .turn-book { position: relative; perspective: 1800px; touch-action: pan-y; user-select: none; }
-.turn-page, .turn-face { min-height: 60dvh; background: var(--card); border-radius: 2px 8px 8px 2px; padding: 1rem; box-shadow: inset 8px 0 14px -10px var(--paper-edge), 0 10px 24px -16px oklch(0.3 0.04 50 / 50%); }
+.turn-page, .turn-face { min-height: 60dvh; background: var(--card) url("/__l5e/assets-v1/b8c20370-7a81-4141-8bb0-d3125d9e8b72/vintage-page.png") center / cover; border-radius: 2px 8px 8px 2px; padding: 1rem; box-shadow: inset 8px 0 14px -10px var(--paper-edge), 0 10px 24px -16px oklch(0.3 0.04 50 / 50%); }
 .turn-sheet { position: absolute; inset: 0 0 auto 0; transform-origin: left center; transform-style: preserve-3d; z-index: 2; }
 .turn-face { backface-visibility: hidden; height: 100%; overflow: hidden; }
 .turn-shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to left, oklch(0.25 0.03 50 / 60%), transparent 70%); border-radius: inherit; }
@@ -425,10 +428,10 @@
 /* ---------- The Week's Tale scroll letter ---------- */
 .scroll-letter { position: relative; margin: 0.5rem auto; max-width: 34rem; }
 .scroll-rod { height: 1.4rem; border-radius: 9999px; background: linear-gradient(to bottom, var(--scroll-edge), var(--scroll-light) 40%, var(--scroll-edge)); box-shadow: 0 2px 4px oklch(0.3 0.04 50 / 40%); position: relative; z-index: 1; }
-.scroll-body { overflow: hidden; margin: -0.5rem 0.6rem; padding: 1.4rem 1.2rem; background: var(--scroll-light); background-image: radial-gradient(ellipse at 0% 50%, var(--scroll-edge), transparent 20%), radial-gradient(ellipse at 100% 50%, var(--scroll-edge), transparent 20%); color: var(--ink); clip-path: inset(0 0 100% 0); animation: unroll 1.8s cubic-bezier(.45,.05,.3,1) 0.2s forwards; }
+.scroll-body { overflow: hidden; margin: -0.5rem 0.6rem; padding: 1.4rem 1.2rem; background: var(--scroll-light) url("/__l5e/assets-v1/59358ee5-4ff6-45ed-8c3d-35122b4727c0/scroll-letter.png") center / cover; box-shadow: inset 0 0 0 100vmax oklch(0.93 0.04 80 / 55%); color: var(--ink); clip-path: inset(0 0 100% 0); animation: unroll 1.8s cubic-bezier(.45,.05,.3,1) 0.2s forwards; }
 .scroll-letter .scroll-rod.bottom { animation: rod-drop 1.8s cubic-bezier(.45,.05,.3,1) 0.2s both; }
 @keyframes unroll { to { clip-path: inset(0 0 0 0); } }
 @media (prefers-reduced-motion: reduce) {
-  .daffodil-fly { display: none; }
+  .seed-fly, .daffodil-glow { display: none; }
   .scroll-body { animation: none; clip-path: none; }
 }

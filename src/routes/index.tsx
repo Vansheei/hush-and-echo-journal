@@ -1,8 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { format, isToday, isYesterday } from "date-fns";
-import { Plus, AlertCircle } from "lucide-react";
-import { CompanionCard } from "@/components/diary/BookSections";
+import { Plus, AlertCircle, ArrowDownUp } from "lucide-react";
 import { BookIndex, SECTIONS } from "@/components/diary/BookIndex";
 import { TurnableBook } from "@/components/diary/TurnableBook";
 import { EntryToken, RibbonMark } from "@/components/diary/EntryToken";
@@ -42,6 +41,7 @@ function Timeline() {
   const [entries, setEntries] = useState<Entry[] | null>(null);
   const [onlyRibbon, setOnlyRibbon] = useState(false);
   const [page, setPage] = useState(0);
+  const [newestFirst, setNewestFirst] = useState(true);
 
   useEffect(() => {
     let active = true;
@@ -50,7 +50,8 @@ function Timeline() {
   }, [key, version]);
 
   const groups: [string, Entry[]][] = [];
-  for (const e of (entries ?? []).filter((x) => !onlyRibbon || x.ribbon)) {
+  const shown = (entries ?? []).filter((x) => !onlyRibbon || x.ribbon).sort((a, b) => newestFirst ? b.createdAt - a.createdAt : a.createdAt - b.createdAt);
+  for (const e of shown) {
     const l = dayLabel(e.createdAt);
     const g = groups.at(-1);
     if (g && g[0] === l) g[1].push(e);
@@ -82,26 +83,37 @@ function Timeline() {
   };
 
   const keepsakes: IndexItemLike = { label: "The Keepsakes", onSelect: () => { setOnlyRibbon(true); setPage(1); } };
+  const chaptersByDay: IndexItemLike = { label: "Chapters by day", onSelect: () => { setOnlyRibbon(false); setPage(1); } };
   const indexPage = (
-    <BookIndex items={[...SECTIONS, keepsakes]} days={groups.map(([label], i) => ({ label, onSelect: () => setPage(i + 1) }))} />
+    <div className="relative">
+      <SeasonScene />
+      <BookIndex items={[...SECTIONS, keepsakes, chaptersByDay]} days={[]} />
+    </div>
   );
-  const dayPages = groups.map(([label, list]) => (
-    <section key={label} className="space-y-2">
-      <h2 className="day-label">{label}</h2>
-      <p className="-mt-1 text-sm text-muted-foreground">{format(list[0]!.createdAt, "d MMMM yyyy")}</p>
-      {list.map(renderEntry)}
+  const chaptersPage = (
+    <section className="space-y-3">
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="day-label">{onlyRibbon ? "The Keepsakes" : "Chapters"}</h2>
+        <button type="button" onClick={() => setNewestFirst((v) => !v)} className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-0.5 text-sm">
+          <ArrowDownUp className="size-3.5" /> {newestFirst ? "Latest tea first" : "Oldest tea first"}
+        </button>
+      </div>
+      {groups.map(([label, list]) => (
+        <div key={label} className="space-y-2">
+          <h3 className="font-display text-2xl">{label} <span className="font-sans text-sm text-muted-foreground">{format(list[0]!.createdAt, "d MMMM yyyy")}</span></h3>
+          {list.map(renderEntry)}
+        </div>
+      ))}
     </section>
-  ));
+  );
   const empty = entries && (entries.length === 0
     ? <p className="pt-16 text-center text-muted-foreground">No chapters yet. Tap Begin a Chapter when you're ready.</p>
     : onlyRibbon && groups.length === 0 ? <p className="pt-12 text-center text-muted-foreground">No keepsakes yet. Open an entry and tap the ribbon to keep it.</p> : null);
-  const pages = [indexPage, ...(dayPages.length ? dayPages : empty ? [empty] : [])];
+  const pages = [indexPage, groups.length ? chaptersPage : (empty ?? chaptersPage)];
 
   return (
     <div className="app-shell">
-      <AppHeader title="Vanshi’s Diary" />
-      <SeasonScene />
-      <CompanionCard />
+      <AppHeader title="Vanshika’s Diary" />
       <div className="relative z-[1] flex justify-end px-4 pb-3">
         <button aria-pressed={onlyRibbon} onClick={() => { setOnlyRibbon((v) => !v); setPage(0); }} className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-0.5 text-sm ${onlyRibbon ? "border-ribbon bg-accent text-ribbon" : "border-border"}`}>
           <RibbonMark className="w-2.5" /> The Keepsakes
