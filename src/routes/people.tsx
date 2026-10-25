@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppHeader } from "@/components/diary/AppHeader";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ function PeoplePage() {
         <Input aria-label="Nicknames" placeholder="Nicknames, separated by commas" value={nicknames} onChange={e => setNicknames(e.target.value)} />
         <div className="flex gap-2"><Button disabled={!name.trim()} onClick={async () => { if (!key) return; try { const person = { id: edit ?? crypto.randomUUID(), name: name.trim(), nicknames: nicknames.split(",").map(s => s.trim()).filter(Boolean) }; await updatePersonal(key, d => ({ ...d, people: [...d.people.filter(p => p.id !== edit), person] })); setName(""); setNicknames(""); setEdit(null); bump(); } catch { setError("Could not save person."); } }}>{edit ? "Save person" : "Confirm new person"}</Button>{edit && <Button variant="ghost" onClick={() => { setEdit(null); setName(""); setNicknames(""); }}>Cancel</Button>}</div>
         {error && <p role="alert">{error}</p>}
-        {people.map(person => <section key={person.id} className="space-y-2 border-t border-border pt-3"><h2 className="font-display text-3xl">{person.name}</h2><p className="break-words">{person.nicknames.join(", ")}</p><div className="flex gap-2"><Button size="sm" variant="outline" onClick={() => { setEdit(person.id); setName(person.name); setNicknames(person.nicknames.join(", ")); }}>Edit</Button><Button size="sm" variant="ghost" onClick={async () => { if (!key || !window.confirm("Forget this person?")) return; try { await updatePersonal(key, d => ({ ...d, people: d.people.filter(p => p.id !== person.id) })); bump(); } catch { setError("Could not forget person."); } }}>Forget</Button></div></section>)}
+        {people.map(person => <section key={person.id} className="space-y-2 border-t border-border pt-3"><h2 className="font-display text-3xl"><Link to="/people/$id" params={{ id: person.id }} className="underline decoration-gold underline-offset-4">{person.name}</Link></h2><p className="break-words">{person.nicknames.join(", ")}</p><div className="flex gap-2"><Button size="sm" variant="outline" onClick={() => { setEdit(person.id); setName(person.name); setNicknames(person.nicknames.join(", ")); }}>Edit</Button><Button size="sm" variant="ghost" onClick={async () => { if (!key || !window.confirm("Forget this person?")) return; try { await updatePersonal(key, d => ({ ...d, people: d.people.filter(p => p.id !== person.id) })); bump(); } catch { setError("Could not forget person."); } }}>Forget</Button></div></section>)}
       </main>
     </div>
   );
