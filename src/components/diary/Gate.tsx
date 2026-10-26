@@ -25,5 +25,7 @@ export function Gate({ children }: { children: ReactNode }) {
   if (status === "loading") return <div className="screen-center text-paper/70">…</div>;
   if (status === "setup") return <SetupScreen />;
   if (status === "locked") return <LockScreen closing={closing} />;
-  return <>{children}{opening && <UnlockOverlay onDone={done} />}</>;
+  // Show the opening book in the same frame the diary unlocks, so the index never flashes first.
+  const justOpened = prev.current === "locked" && status === "unlocked";
+  return <>{children}{(opening || justOpened) && <UnlockOverlay onDone={done} />}</>;
 }

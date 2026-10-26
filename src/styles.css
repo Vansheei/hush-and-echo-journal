@@ -457,7 +457,7 @@
 /* ---------- Turnable book ---------- */
 .turn-book { position: relative; perspective: 1800px; touch-action: pan-y; user-select: none; }
 .turn-page, .turn-face { min-height: 60dvh; background: linear-gradient(var(--page-fade), var(--page-fade)), var(--card) url("/art/vintage-page.webp") center / cover; border-radius: 2px 8px 8px 2px; padding: 1rem; box-shadow: inset 8px 0 14px -10px var(--paper-edge), 0 10px 24px -16px oklch(0.3 0.04 50 / 50%); }
-.turn-sheet { position: absolute; inset: 0 0 auto 0; transform-origin: left center; transform-style: preserve-3d; z-index: 2; }
+.turn-sheet { will-change: transform; position: absolute; inset: 0 0 auto 0; transform-origin: left center; transform-style: preserve-3d; z-index: 2; }
 .turn-face { backface-visibility: hidden; height: 100%; overflow: hidden; }
 .turn-shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to left, oklch(0.25 0.03 50 / 60%), transparent 70%); border-radius: inherit; }
 
