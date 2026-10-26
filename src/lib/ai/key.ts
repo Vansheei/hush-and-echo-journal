@@ -40,7 +40,7 @@ export async function testKey(apiKey: string, model: ModelChoice): Promise<{ ok:
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST", headers: claudeHeaders(apiKey),
-      body: JSON.stringify({ model: MODELS[model].id, max_tokens: 16, thinking: { type: "disabled" }, messages: [{ role: "user", content: "Reply with OK." }] }),
+      body: JSON.stringify({ model: MODELS[model].id, max_tokens: 16, thinking: { type: "between_tools" }, messages: [{ role: "user", content: "Reply with OK." }] }),
     });
     if (!response.ok) return { ok: false, error: await readClaudeError(response) };
     return { ok: true };
