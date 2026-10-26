@@ -24,7 +24,8 @@ export function formatClaudeError(e: ClaudeError) {
   return `Anthropic error ${e.status}${e.type ? ` · ${e.type}` : ""} · ${e.message}`;
 }
 export async function readClaudeError(response: Response): Promise<string> {
-  const raw = await response.text().catch(() => "");
+  const raw = typeof response.text === "function" ? await response.text().catch(() => "")
+    : JSON.stringify(await response.json().catch(() => null));
   let type = "", message = raw.trim();
   try { const data = JSON.parse(raw); type = data?.error?.type ?? ""; message = data?.error?.message ?? message; } catch { /* plain text */ }
   return formatClaudeError({ status: response.status, type, message: message || "No error text was returned." });
