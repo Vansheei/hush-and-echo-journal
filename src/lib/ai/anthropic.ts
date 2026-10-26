@@ -1,6 +1,7 @@
 import { MODELS, type ModelChoice } from "./models";
 import { PERSONALITY } from "./personality";
 import type { Suggestions } from "@/lib/storage/personal";
+import { claudeHeaders, readClaudeError } from "./key";
 
 export type Reflection = { text: string; looseEnds: string[]; worries: string[]; suggestions?: Suggestions };
 export async function requestReflection(input: {
@@ -12,8 +13,7 @@ export async function requestReflection(input: {
   if (!input.apiKey || !input.text.trim()) throw new Error("A key and transcript are required.");
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST", signal: input.signal,
-    headers: { "content-type": "application/json", "x-api-key": input.apiKey,
-      "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+    headers: claudeHeaders(input.apiKey),
     body: JSON.stringify({ model: MODELS[input.model].id, max_tokens: 4096,
       // These exact 5.5 models think by default. Reserve the allowance for the
       // requested reply, not an up-front thinking pass (no tools are offered).
@@ -22,10 +22,7 @@ export async function requestReflection(input: {
       system: `${PERSONALITY}\nApproach: ${input.approach ?? "brief reflection"}. Return only JSON: {"text":"reply", "looseEnds":[], "worries":[], "meanings":[{"phrase":"unclear phrase","meaning":"tentative meaning","language":"language"}], "people":[{"mention":"name","question":"clarifying question"}], "notes":[{"kind":"fact","text":"something learned about the owner, fact or interpretation"}]}. Suggest notes only when you genuinely learned something about the owner; leave suggestions empty unless needed.\n${input.context ?? ""}`,
       messages: [...(input.conversation ?? []), { role: "user", content: input.text }] }),
   });
-  if (!response.ok) {
-    const error = await response.json().catch(() => null);
-    throw new Error(error?.error?.message ?? `Claude request failed (${response.status}). No other model was used.`);
-  }
+  if (!response.ok) throw new Error(`${await readClaudeError(response)} (No other model was used.)`);
   const data = await response.json();
   if (data.stop_reason === "refusal") throw new Error("Claude declined this request. Nothing else was sent.");
   if (data.stop_reason === "max_tokens") throw new Error("Claude reached the reply limit before finishing. Please ask again; nothing was resent automatically.");
