@@ -17,6 +17,8 @@ export const SUBTITLES: Record<string, string> = {
   "Archive": "search everything you’ve recorded",
   "Begin a Chapter": "record a new entry",
   "Inner Universe": "what the companion knows about you",
+  "The Keepsakes": "only the entries you ribboned",
+  "Chapters by day": "every entry, newest day first",
 };
 
 export const SECTIONS: IndexItem[] = [
