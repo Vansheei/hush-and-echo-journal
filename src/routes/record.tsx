@@ -39,6 +39,8 @@ function RecordPage() {
   const [saving, setSaving] = useState(false);
   const streamRef = useRef<MediaStream | null>(null);
   const recRef = useRef<MediaRecorder | null>(null);
+  const camera = useRef<HTMLVideoElement>(null);
+  const canvas = useRef<HTMLCanvasElement>(null);
   const preview = useRef<HTMLVideoElement>(null);
   const saved = useRef(false);
   const reviewUrl = useRef<string | null>(null);
@@ -69,7 +71,7 @@ function RecordPage() {
     navigator.mediaDevices
       .getUserMedia(
         kind === "video"
-          ? { audio: true, video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: facing } }
+          ? { audio: true, video: { width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: facing } }
           : { audio: true },
       )
       .then((s) => {
@@ -79,13 +81,43 @@ function RecordPage() {
         const track = s.getVideoTracks()[0];
         const caps = track?.getCapabilities?.() as (MediaTrackCapabilities & { torch?: boolean }) | undefined;
         setHasTorch(!!caps?.torch);
-        if (preview.current) preview.current.srcObject = kind === "video" ? s : null;
+        if (camera.current) {
+          camera.current.srcObject = kind === "video" ? s : null;
+          void camera.current.play().catch(() => {});
+        }
       })
       .catch(() => setErr("Camera or microphone permission is needed."));
     return () => {
       cancelled = true;
     };
   }, [kind, facing, state, stopStream]);
+
+  // Paint the camera onto a canvas; front camera is flipped so the preview shows
+  // the owner as others see them. Recording takes this same canvas stream, so the
+  // saved video always matches what was on screen.
+  useEffect(() => {
+    if (kind !== "video" || state === "review") return;
+    let raf = 0;
+    const draw = () => {
+      const video = camera.current, target = canvas.current;
+      if (video && target && video.videoWidth > 0) {
+        if (target.width !== video.videoWidth || target.height !== video.videoHeight) {
+          target.width = video.videoWidth;
+          target.height = video.videoHeight;
+        }
+        const ctx = target.getContext("2d");
+        if (ctx) {
+          ctx.save();
+          if (facing === "user") { ctx.translate(target.width, 0); ctx.scale(-1, 1); }
+          ctx.drawImage(video, 0, 0);
+          ctx.restore();
+        }
+      }
+      raf = requestAnimationFrame(draw);
+    };
+    raf = requestAnimationFrame(draw);
+    return () => cancelAnimationFrame(raf);
+  }, [kind, facing, state]);
 
   useEffect(() => {
     if (state !== "rec") return;
@@ -100,7 +132,12 @@ function RecordPage() {
       kind === "video"
         ? pick(["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm", "video/mp4"])
         : pick(["audio/webm;codecs=opus", "audio/webm", "audio/mp4"]);
-    const rec = new MediaRecorder(s, {
+    // Video records the painted canvas (already flipped for the front camera) plus the mic.
+    const recordStream =
+      kind === "video" && canvas.current
+        ? new MediaStream([...canvas.current.captureStream(30).getVideoTracks(), ...s.getAudioTracks()])
+        : s;
+    const rec = new MediaRecorder(recordStream, {
       ...(mimeType ? { mimeType } : {}),
       videoBitsPerSecond: 1_500_000,
       audioBitsPerSecond: 96_000,
@@ -124,7 +161,7 @@ function RecordPage() {
   async function toggleTorch() {
     const next = !torch;
     const track = streamRef.current?.getVideoTracks()[0];
-    // Real LED where the camera has one; otherwise a warm screen flash lights the face.
+    // Real LED where the camera has one; otherwise a full-screen warm flash lights the face.
     if (hasTorch && track) {
       try { await track.applyConstraints({ advanced: [{ torch: next } as MediaTrackConstraintSet] }); }
       catch { setErr("The light could not be switched on."); return; }
@@ -157,13 +194,38 @@ function RecordPage() {
     }
   }
 
+  const screenFlash = torch && !hasTorch && kind === "video" && state !== "review";
+
   return (
-    <div className="app-shell flex h-dvh flex-col bg-stage text-stage-foreground">
-      <div className="relative z-10 flex items-center justify-between p-4">
+    <div className="fixed inset-0 z-40 flex flex-col overflow-hidden bg-stage text-stage-foreground" style={{ paddingTop: "var(--safe-top)", paddingBottom: "var(--safe-bottom)", paddingLeft: "var(--safe-left)", paddingRight: "var(--safe-right)" }}>
+      {/* Full-screen camera canvas; hidden raw camera element feeds it. */}
+      <video ref={camera} autoPlay muted playsInline className="hidden" />
+      {kind === "video" && state !== "review" && (
+        <canvas ref={canvas} className="absolute inset-0 size-full object-cover" />
+      )}
+      {kind === "audio" && state !== "review" && (
+        <div className="absolute inset-0 grid place-items-center">
+          <Mic className={`size-24 ${state === "rec" ? "animate-pulse text-recording" : "opacity-60"}`} />
+        </div>
+      )}
+      {state === "review" && result && (
+        kind === "video" ? (
+          <video src={result.url} controls playsInline className="absolute inset-0 size-full object-contain" />
+        ) : (
+          <div className="absolute inset-0 grid place-items-center">
+            <audio src={result.url} controls className="w-4/5" />
+          </div>
+        )
+      )}
+      {/* Front-flash: flood the whole screen with warm white while recording. */}
+      {screenFlash && <div aria-hidden className="absolute inset-0 z-20" style={{ background: "oklch(0.97 0.03 90)" }} />}
+
+      {/* Floating controls above the preview and the flash. */}
+      <div className="relative z-30 flex items-center justify-between p-4">
         <Button variant="ghost" size="icon" className="icon-btn" aria-label={t("Close")} disabled={state !== "idle" || saving} onClick={() => nav({ to: "/" })}>
           <X className="size-5" />
         </Button>
-        <span className="font-mono text-lg tabular-nums">{fmtDuration(secs)}</span>
+        <span className="rounded-full bg-stage/60 px-3 py-1 font-mono text-lg tabular-nums">{fmtDuration(secs)}</span>
         {kind === "video" && state !== "review" ? (
           <div className="flex gap-1">
           <button className="icon-btn" aria-label={t(torch ? "Light off" : "Light on")} aria-pressed={torch} onClick={() => void toggleTorch()}>
@@ -183,25 +245,12 @@ function RecordPage() {
         )}
       </div>
 
-      {torch && !hasTorch && kind === "video" && <div aria-hidden className="pointer-events-none fixed inset-0 z-0 bg-paper" />}
-      <div className={`relative z-10 mx-4 flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-2xl ${torch && !hasTorch ? "m-6" : "bg-stage-muted"}`}>
-        {state === "review" && result ? (
-          kind === "video" ? (
-            <video src={result.url} controls playsInline className="size-full object-contain" />
-          ) : (
-            <audio src={result.url} controls className="w-4/5" />
-          )
-        ) : kind === "video" ? (
-          <video ref={preview} autoPlay muted playsInline className="size-full object-contain [transform:none]" style={{ transform: "none" }} />
-        ) : (
-          <Mic className={`size-20 ${state === "rec" ? "animate-pulse text-recording" : "opacity-60"}`} />
-        )}
-        {err && <p className="absolute inset-x-4 bottom-4 text-center text-sm">{t(err)}</p>}
-      </div>
+      {err && <p className="relative z-30 mx-4 rounded-md bg-stage/70 p-2 text-center text-sm">{t(err)}</p>}
+      <div className="flex-1" />
 
-      <div className="relative z-10 space-y-4 p-6">
+      <div className="relative z-30 space-y-4 p-6">
         {state === "idle" && (
-          <div className="mx-auto flex w-fit rounded-full bg-stage-muted p-1 text-sm">
+          <div className="mx-auto flex w-fit rounded-full bg-stage/70 p-1 text-sm">
             {(["video", "audio"] as const).map((k) => (
               <button
                 key={k}
