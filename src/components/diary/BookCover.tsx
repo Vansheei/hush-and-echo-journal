@@ -26,12 +26,12 @@ const SEEDS = HEADS.flatMap(([x, y], h) => [0, 1, 2, 3, 4].map((i) => ({
 // Daffodils in the art: they glow softly in place.
 const DAFFS: [number, number][] = [[9, 86], [14, 88], [92, 85], [88, 91]];
 
-export function BookCover({ children, lit = false, variant }: { children?: ReactNode; lit?: boolean; variant?: Cover }) {
+export function BookCover({ children, lit = false, variant, full = false }: { children?: ReactNode; lit?: boolean; variant?: Cover; full?: boolean }) {
   useLanguage();
   const chosen = useAppearance().cover;
   const cover = variant ?? chosen;
   return (
-    <div className="book-cover [container-type:inline-size]">
+    <div className={full ? "cover-full [container-type:inline-size]" : "book-cover [container-type:inline-size]"}>
       <img src={COVER_ART[cover] ?? COVER_ART.green} alt={t("Vanshika’s Diary")} className={`absolute inset-0 size-full object-cover ${lit ? "cover-art-lit" : ""}`} draggable={false} />
       {lit && DAFFS.map(([x, y], i) => (
         <span key={`d${i}`} className="daffodil-glow" style={{ left: `${x}%`, top: `${y}%`, "--d": `${0.3 + i * 0.2}s` } as CSSProperties} />
@@ -41,7 +41,7 @@ export function BookCover({ children, lit = false, variant }: { children?: React
           <Seed />
         </span>
       ))}
-      {children && <div className="absolute inset-x-8 bottom-[15%]">{children}</div>}
+      {children && <div className={full ? "cover-full-controls" : "absolute inset-x-8 bottom-[15%]"}>{children}</div>}
     </div>
   );
 }

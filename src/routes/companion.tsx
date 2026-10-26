@@ -78,7 +78,7 @@ function CompanionPage() {
     const selected = voices.find(v => v.voiceURI === voice) ?? voices[0];
     if (!selected) { setStatus("No on-device voice is installed. Text replies remain available."); return; }
     try { await speakLocal(text, selected, look.companionVoiceSpeed); }
-    catch { if (alive.current) setStatus("Voice playback failed. Install an offline Android voice or use text replies."); }
+    catch (e) { if (alive.current) setStatus(`${t("Voice playback failed.")} ${e instanceof Error ? e.message : String(e)}`); }
   }
 
   /** One listening turn: records until you stop speaking, then transcribes locally. */

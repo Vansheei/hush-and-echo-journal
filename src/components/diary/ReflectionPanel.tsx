@@ -75,6 +75,7 @@ export function ReflectionPanel({ entry }: { entry: Entry }) {
       <Button size="sm" variant="outline" onClick={async () => { if (key) { const latest = await getEntry(key, entry.id); if (latest) await putEntry(key, { ...latest, toneNotes: notes.split("\n").filter(Boolean) }); bump(); } }}>{t("Save notes")}</Button>
       <Button size="sm" variant="ghost" onClick={async () => { setNotes(""); if (key) { const latest = await getEntry(key, entry.id); if (latest) await putEntry(key, { ...latest, toneNotes: [] }); bump(); } }}>{t("Remove notes")}</Button>
     </div>
+    {mode === "listen" && <p className="text-sm text-muted-foreground">{t("To ask Claude, switch this entry to Reflect.")}</p>}
     {mode === "reflect" && transcript.trim() && <Button onClick={() => { setError(""); setOpen(true); }}>{t("Request reflection")}</Button>}
     {entry.reflection && <div className="space-y-3">
       <h2 className="font-medium">{t("Reflection")}</h2><p className="whitespace-pre-wrap break-words">{entry.reflection.text}</p>
@@ -82,7 +83,7 @@ export function ReflectionPanel({ entry }: { entry: Entry }) {
       {entry.reflection.looseEnds.map((text, i) => <div key={`l${i}`} className="space-y-2"><p>{text}</p><Button size="sm" variant="outline" onClick={() => accept(text, "loose")}>{t("Add to loose ends")}</Button></div>)}
       {entry.reflection.worries.map((text, i) => <div key={`w${i}`} className="space-y-2"><p>{text}</p><Button size="sm" variant="outline" onClick={() => accept(text, "worry")}>{t("Park this worry")}</Button></div>)}
     </div>}
-    {!open && error && <p role="alert" className="text-sm text-destructive">{t(error)}</p>}
+    {!open && error && <p role="alert" className="break-words rounded border border-destructive p-2 text-sm text-destructive">{t(error)}</p>}
     <Dialog open={open} onOpenChange={(v) => { if (!v) controller.current?.abort(); setOpen(v); }}>
       <DialogContent className="max-h-[85dvh] overflow-y-auto">
         <DialogHeader><DialogTitle>{t("Send this text to Claude?")}</DialogTitle><DialogDescription>{t("Only the text below will leave this device. No audio or video is sent.")}</DialogDescription></DialogHeader>

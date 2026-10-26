@@ -46,3 +46,7 @@
 
 - [x] Capacitor Android APK: offline bundle, mic/camera only, GitHub debug APK workflow (Gradle build first verified on GitHub).
 - [x] Add burgundy and blue covers following the green cover pattern.
+- [x] Phone fixes round: Claude key cleaning/diagnostic/test, real Anthropic errors, Android voice fallback, reflection hints, unmirrored fitted camera with flip/light, full-screen lock cover, hide passphrase option.
+- [x] Anthropic key setup flow in Settings with validation and Companion/Reflections/Week's Tale readiness.
+- [ ] Share an entry + AI Gateway reflection (blocked: conflicts with owner rules "no sharing" and "no backend; browser-direct Claude with own key" — needs owner confirmation).
+- [x] Android app icon (all densities, adaptive, round) and splash from the green cover; label "Vanshika’s Diary".
