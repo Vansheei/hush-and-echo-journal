@@ -72,7 +72,7 @@ function RecordPage() {
     navigator.mediaDevices
       .getUserMedia(
         kind === "video"
-          ? { audio: true, video: { width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: facing } }
+          ? { audio: true, video: { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 }, facingMode: facing } }
           : { audio: true },
       )
       .then((s) => {
@@ -106,7 +106,7 @@ function RecordPage() {
           target.width = video.videoWidth;
           target.height = video.videoHeight;
         }
-        const ctx = target.getContext("2d");
+        const ctx = target.getContext("2d", { alpha: false, desynchronized: true });
         if (ctx) {
           ctx.save();
           if (facing === "user") { ctx.translate(target.width, 0); ctx.scale(-1, 1); }
@@ -134,11 +134,14 @@ function RecordPage() {
     if (!s) return;
     const mimeType =
       kind === "video"
-        ? pick(["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm", "video/mp4"])
+        // H.264 first: phones encode it in hardware, where VP9 falls back to software and stutters.
+        ? pick(["video/mp4;codecs=avc1,mp4a", "video/mp4", "video/webm;codecs=h264,opus", "video/webm;codecs=vp8,opus", "video/webm"])
         : pick(["audio/webm;codecs=opus", "audio/webm", "audio/mp4"]);
     // Video records the painted canvas (already flipped for the front camera) plus the mic.
     const recordStream =
-      kind === "video" && canvas.current
+      // The back camera needs no mirroring, so record it directly and skip a whole
+      // canvas repaint per frame; only the front camera pays for the flip.
+      kind === "video" && canvas.current && facing === "user"
         ? new MediaStream([...canvas.current.captureStream(30).getVideoTracks(), ...s.getAudioTracks()])
         : s;
     const rec = new MediaRecorder(recordStream, {
