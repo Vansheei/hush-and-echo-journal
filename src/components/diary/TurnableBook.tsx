@@ -11,10 +11,23 @@ export function TurnableBook({ pages, page, onPage }: { pages: ReactNode[]; page
   const [turn, setTurn] = useState<Turn | null>(null);
   const ref = useRef<HTMLDivElement>(null);
   const start = useRef<{ x: number; y: number; axis?: "x" | "y"; moved: boolean } | null>(null);
+  const live = useRef<Turn | null>(null);
+  const sheetEl = useRef<HTMLDivElement>(null);
+  const shadeEl = useRef<HTMLDivElement>(null);
+  const frame = useRef(0);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  useEffect(() => () => clearTimeout(timer.current), []);
+  useEffect(() => () => { clearTimeout(timer.current); cancelAnimationFrame(frame.current); }, []);
+  const angleOf = (t: Turn) => (t.dir === 1 ? -180 * t.p : -180 * (1 - t.p));
+  // While dragging, move the sheet directly instead of re-rendering every page on each finger movement.
+  const paint = () => {
+    frame.current = 0; const t = live.current; if (!t || !sheetEl.current) return;
+    const a = angleOf(t);
+    sheetEl.current.style.transform = `rotateY(${a}deg)`;
+    if (shadeEl.current) shadeEl.current.style.opacity = String(Math.sin((-a / 180) * Math.PI) * 0.5);
+  };
 
   const finish = (t: Turn) => {
+    live.current = null;
     const commit = t.p > 0.3;
     pageTurn();
     setTurn({ ...t, p: commit ? 1 : 0, settling: true, commit });
@@ -35,11 +48,15 @@ export function TurnableBook({ pages, page, onPage }: { pages: ReactNode[]; page
     if (s.axis !== "x") return;
     s.moved = true;
     const dir: 1 | -1 = dx < 0 ? 1 : -1;
-    if ((dir === 1 && page >= pages.length - 1) || (dir === -1 && page <= 0)) { setTurn(null); return; }
+    if ((dir === 1 && page >= pages.length - 1) || (dir === -1 && page <= 0)) { live.current = null; setTurn(null); return; }
     const w = ref.current?.offsetWidth ?? 360;
-    setTurn({ dir, p: Math.min(1, Math.abs(dx) / w) });
+    const next = { dir, p: Math.min(1, Math.abs(dx) / w) };
+    const changed = live.current?.dir !== dir;
+    live.current = next;
+    if (changed) setTurn(next);
+    else if (!frame.current) frame.current = requestAnimationFrame(paint);
   };
-  const onUp = () => { const s = start.current; start.current = null; if (s?.moved && turn && !turn.settling) finish(turn); };
+  const onUp = () => { const s = start.current; start.current = null; if (s?.moved && live.current && !turn?.settling) finish(live.current); };
 
   const under = turn ? pages[turn.dir === 1 ? page + 1 : page] : null;
   const sheet = turn ? pages[turn.dir === 1 ? page : page - 1] : null;
@@ -54,10 +71,10 @@ export function TurnableBook({ pages, page, onPage }: { pages: ReactNode[]; page
     >
       <div className="turn-page">{turn ? under : pages[page]}</div>
       {turn && (
-        <div className="turn-sheet"
+        <div ref={sheetEl} className="turn-sheet"
           style={{ transform: `rotateY(${angle}deg)`, transition: turn.settling ? "transform 0.55s cubic-bezier(.4,.1,.3,1)" : "none" }}>
           <div className="turn-face">{sheet}</div>
-          <div className="turn-shade" style={{ opacity: Math.sin((-angle / 180) * Math.PI) * 0.5 }} />
+          <div ref={shadeEl} className="turn-shade" style={{ opacity: Math.sin((-angle / 180) * Math.PI) * 0.5 }} />
         </div>
       )}
       <div className="mt-3 flex items-center justify-between text-sm text-muted-foreground">
