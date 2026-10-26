@@ -8,7 +8,10 @@ export type LocalVoice = { voiceURI: string; name: string; lang: string; nativeI
 export async function localVoices(): Promise<LocalVoice[]> {
   if (isNativeAndroid()) {
     const { voices } = await (await tts()).getSupportedVoices();
-    return voices.map((v, nativeIndex) => ({ ...v, nativeIndex })).filter(v => v.localService);
+    // Prefer offline voices; many Android voices report localService=false, so fall back to all installed ones.
+    const all = voices.map((v, nativeIndex) => ({ ...v, nativeIndex }));
+    const local = all.filter(v => v.localService);
+    return local.length ? local : all.length ? all : [{ voiceURI: "android-default", name: "Android default voice", lang: navigator.language || "en-US", nativeIndex: -1 }];
   }
   return window.speechSynthesis?.getVoices().filter(v => v.localService) ?? [];
 }
@@ -27,7 +30,7 @@ export async function speakLocal(text: string, selected: LocalVoice, rate = COMP
     cancelPending = done;
     if (TextToSpeech) {
       if (selected.nativeIndex === undefined) { done(); reject(new Error("Select an installed on-device voice.")); return; }
-      TextToSpeech.speak({ text, lang: selected.lang, voice: selected.nativeIndex, rate, queueStrategy: 0 })
+      TextToSpeech.speak({ text, lang: selected.lang, ...(selected.nativeIndex >= 0 ? { voice: selected.nativeIndex } : {}), rate, queueStrategy: 0 })
         .then(done, error => { done(); reject(error); });
     } else {
       const voice = window.speechSynthesis?.getVoices().find(v => v.voiceURI === selected.voiceURI && v.localService);
