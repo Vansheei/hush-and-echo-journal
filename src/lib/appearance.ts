@@ -3,9 +3,9 @@
 import { useSyncExternalStore } from "react";
 
 export type Cover = "green" | "plum" | "ocean";
-type Prefs = { cover: Cover; coverChosen: boolean; sounds: boolean; seasonalScene: boolean; readRepliesAloud: boolean; companionVoiceSpeed: number; language: "en" | "hi" | "de" };
+type Prefs = { cover: Cover; coverChosen: boolean; sounds: boolean; seasonalScene: boolean; readRepliesAloud: boolean; companionVoiceSpeed: number; language: "en" | "hi" | "de"; hidePassphrase: boolean };
 const KEY = "diary-appearance";
-const DEFAULTS: Prefs = { cover: "green", coverChosen: false, sounds: true, seasonalScene: true, readRepliesAloud: true, companionVoiceSpeed: 1.15, language: "en" };
+const DEFAULTS: Prefs = { cover: "green", coverChosen: false, sounds: true, seasonalScene: true, readRepliesAloud: true, companionVoiceSpeed: 1.15, language: "en", hidePassphrase: false };
 const listeners = new Set<() => void>();
 let cache: Prefs | null = null;
 

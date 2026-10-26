@@ -475,3 +475,13 @@
   .seed-fly, .daffodil-glow { display: none; }
   .scroll-body { animation: none; clip-path: none; }
 }
+
+/* Lock screen: the cover is the whole screen; controls float over the art. */
+.cover-full { position: fixed; inset: 0; overflow: hidden; background-color: var(--cover-deep); color: var(--gold); }
+.cover-full > img { object-fit: cover; }
+.cover-full-controls {
+  position: absolute; inset-inline: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+  padding: 3rem calc(1.5rem + var(--safe-right)) calc(1.25rem + var(--safe-bottom)) calc(1.5rem + var(--safe-left));
+  background: linear-gradient(to top, oklch(0 0 0 / 60%), oklch(0 0 0 / 35%) 60%, transparent);
+}
+.cover-full-controls > * { width: 100%; max-width: 22rem; }
