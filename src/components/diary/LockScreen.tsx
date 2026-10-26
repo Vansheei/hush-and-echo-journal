@@ -53,7 +53,7 @@ export function LockScreen({ closing = false }: { closing?: boolean }) {
       <h1 className="sr-only">{t("Diary is locked")}</h1>
       {mode === "pass" ? (
         <>
-          <div className={closing ? "cover-closing" : ""}>
+          <div className={closing ? "cover-closing fixed inset-0" : "fixed inset-0"}>
             <BookCover full>
               {showField && <form
                 className="space-y-2"
