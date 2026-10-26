@@ -34,4 +34,4 @@
 - Android encrypted backups write UTF-8 ciphertext to Filesystem Cache and pass its URI to Share; native Keystore secrets never enter backups. Why: WebView downloads fail and restored device wraps must not unlock on another device.
 - Native App back events offer active conversation/book handlers first, then router history/home, exiting only at the root with no history. Why: Android back must respect page turns and active work rather than close the diary prematurely.
 - New native settings default to the smaller multilingual model; browser defaults and explicit saved selections remain intact. Why: improve Android transcription speed without overriding the owner's chosen accuracy.
-- Anthropic keys are cleaned of hidden characters on save, shown only as count/first 6/last 4, and every Claude error surfaces Anthropic status, type and message via `src/lib/ai/key.ts`. Why: phone pastes can corrupt keys and the owner must see the real cause.
+- Anthropic keys are sanitized on save, summarized only as count/first 6/last 4, and Claude errors show Anthropic status/type/message (`src/lib/ai/key.ts`). Why: phone pastes corrupt keys; owner needs the real cause.
