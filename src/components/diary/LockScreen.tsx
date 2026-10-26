@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useVault } from "@/lib/vault-context";
-import { touchPoint } from "@/lib/appearance";
+import { touchPoint, useAppearance } from "@/lib/appearance";
+import { passphraseHidden } from "@/lib/lock-options";
 import { BookCover } from "./BookCover";
 import { getDeviceWrap } from "@/lib/crypto/device";
 import { hasPin } from "@/lib/crypto/pin";
@@ -18,6 +19,12 @@ export function LockScreen({ closing = false }: { closing?: boolean }) {
   useEffect(() => { let active = true; hasPin().then(v => { if (active) setPinEnabled(v); }); return () => { active = false; }; }, []);
   const [deviceEnabled, setDeviceEnabled] = useState(false);
   useEffect(() => { let active = true; getDeviceWrap().then((wrap) => { if (active) setDeviceEnabled(!!wrap); }); return () => { active = false; }; }, []);
+  const look = useAppearance();
+  const [forcePass, setForcePass] = useState(false);
+  const hidden = passphraseHidden(look.hidePassphrase, pinEnabled, deviceEnabled) && !forcePass;
+  // With the passphrase hidden, the PIN (if set) is the typed option; otherwise only fingerprint.
+  const pinMode = hidden ? pinEnabled : usePin;
+  const showField = !hidden || pinEnabled;
   const [mode, setMode] = useState<"pass" | "recover">("pass");
   const [pass, setPass] = useState("");
   const [phrase, setPhrase] = useState("");
@@ -42,25 +49,25 @@ export function LockScreen({ closing = false }: { closing?: boolean }) {
   };
 
   return (
-    <div className="screen-center flex-col gap-5" onPointerDown={mark}>
+    <div className={mode === "pass" ? "min-h-dvh" : "screen-center flex-col gap-5"} onPointerDown={mark}>
       <h1 className="sr-only">{t("Diary is locked")}</h1>
       {mode === "pass" ? (
         <>
-          <div className={closing ? "cover-closing w-full flex justify-center" : "w-full flex justify-center"}>
-            <BookCover>
-              <form
+          <div className={closing ? "cover-closing" : ""}>
+            <BookCover full>
+              {showField && <form
                 className="space-y-2"
                 onSubmit={(e) => {
                   e.preventDefault();
-                  void run(() => usePin ? unlockPin(pass) : unlock(pass));
+                  void run(() => pinMode ? unlockPin(pass) : unlock(pass));
                 }}
               >
                 <Input
                   type="password"
                   autoFocus
-                  inputMode={usePin ? "numeric" : "text"}
-                  aria-label={usePin ? t("Diary PIN") : t("Passphrase")}
-                  placeholder={usePin ? t("Diary PIN") : t("Passphrase")}
+                  inputMode={pinMode ? "numeric" : "text"}
+                  aria-label={pinMode ? t("Diary PIN") : t("Passphrase")}
+                  placeholder={pinMode ? t("Diary PIN") : t("Passphrase")}
                   value={pass}
                   onChange={(e) => setPass(e.target.value)}
                   className="border-gold/60 bg-cover text-center text-gold placeholder:text-gold/60"
@@ -69,11 +76,10 @@ export function LockScreen({ closing = false }: { closing?: boolean }) {
                 <Button className="w-full border border-gold bg-transparent text-gold hover:bg-gold/10" disabled={busy || !pass}>
                   {busy ? t("Opening…") : t("Open")}
                 </Button>
-              </form>
-            </BookCover>
-          </div>
-          <div className="flex flex-col items-center gap-2 text-gold/80">
-            {pinEnabled && <Button variant="ghost" disabled={busy} onClick={() => { setUsePin(!usePin); setPass(""); setErr(""); }}>{usePin ? t("Use passphrase") : t("Use diary PIN")}</Button>}
+              </form>}
+              {!showField && err && <p className="text-center text-sm text-gold">{t(err)}</p>}
+          <div className="flex flex-col items-center gap-1 text-gold/90">
+            {pinEnabled && !hidden && <Button variant="ghost" disabled={busy} onClick={() => { setUsePin(!usePin); setPass(""); setErr(""); }}>{usePin ? t("Use passphrase") : t("Use diary PIN")}</Button>}
             <Button type="button" variant="ghost" className="text-gold/70" disabled={busy} onClick={() => {
               if (deviceEnabled) void run(unlockDevice);
               else setErr("Open with your passphrase, then enable fingerprint unlock in Settings.");
@@ -81,6 +87,9 @@ export function LockScreen({ closing = false }: { closing?: boolean }) {
               <Fingerprint /> {t("Fingerprint unlock")}</Button>
             <button type="button" className="text-sm underline" onClick={() => setMode("recover")}>
               {t("Forgot passphrase?")}</button>
+            {hidden && <button type="button" className="text-sm underline" onClick={() => { setForcePass(true); setUsePin(false); setPass(""); setErr(""); }}>{t("Use passphrase")}</button>}
+          </div>
+            </BookCover>
           </div>
         </>
       ) : (
