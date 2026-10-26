@@ -44,6 +44,9 @@ export function ItemsPage({ kind }: { kind: DiaryItem["kind"] }) {
         <Button variant={!closed ? "default" : "outline"} onClick={() => setClosed(false)}>{t("Open")}</Button>
         <Button variant={closed ? "default" : "outline"} onClick={() => setClosed(true)}>{kind === "loose" ? t("Resolved") : t("Archived")}</Button>
       </div>
+      {items.filter((i) => i.closed === closed).length === 0 && <p className="text-sm italic opacity-70">{closed
+        ? (kind === "loose" ? t("Nothing resolved yet.") : t("Nothing archived yet."))
+        : (kind === "loose" ? t("Nothing unfinished yet. Add a thought or task you want to come back to.") : t("No worries parked. Write one down and leave it here until you're ready to face it."))}</p>}
       <ul className="divide-y divide-border">
         {items.filter((i) => i.closed === closed).map((item) => <li key={item.id} className="space-y-2 py-4">
           <p className="break-words">{item.text}</p>

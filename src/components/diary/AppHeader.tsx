@@ -4,6 +4,7 @@ import { ArrowLeft, Lock, Plus, Settings } from "lucide-react";
 import type { ReactNode } from "react";
 import { useVault } from "@/lib/vault-context";
 import { PageFrame } from "./PageFrame";
+import { SUBTITLES } from "./BookIndex";
 import { Button } from "@/components/ui/button";
 
 /** Curled parchment scroll banner holding a page title. */
@@ -70,6 +71,7 @@ export function AppHeader({ title, back, backTo }: { title: ReactNode; back?: bo
           <ScrollBanner>{typeof title === "string" ? t(title) : title}</ScrollBanner>
           <Link to="/companion" className="lantern-link grid h-14 w-12 shrink-0 place-items-center" aria-label={t("Night Companion")} title={t("Night Companion")}><Lantern /></Link>
         </div>
+        {typeof title === "string" && SUBTITLES[title] && <p className="-mt-1 mb-2 text-center text-sm italic opacity-70">{t(SUBTITLES[title] ?? "")}</p>}
       </header>
     </>
   );

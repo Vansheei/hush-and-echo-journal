@@ -58,6 +58,43 @@ export async function decodeToMono16k(blob: Blob): Promise<Float32Array> {
 }
 
 const PIECE_SEC = 30;
+const RATE = 16000;
+// Whisper loops on a fragment that starts or ends mid-word, so cut in the quietest
+// 100ms within the last few seconds of a piece instead of exactly on the 30s mark.
+const SEARCH_SEC = 6;
+const WINDOW = Math.round(0.1 * RATE);
+export function quietCut(audio: Float32Array, from: number, to: number) {
+  const last = Math.min(to, audio.length);
+  if (last - from <= WINDOW || last >= audio.length) return last;
+  const energy = (start: number) => { let sum = 0; for (let i = start; i < start + WINDOW; i++) { const v = audio[i] ?? 0; sum += v * v; } return sum; };
+  const earliest = Math.max(from + WINDOW, last - SEARCH_SEC * RATE);
+  let bestAt = last, bestEnergy = Infinity;
+  for (let start = earliest; start + WINDOW <= last; start += WINDOW) {
+    const sum = energy(start);
+    if (sum < bestEnergy) { bestEnergy = sum; bestAt = start + Math.floor(WINDOW / 2); }
+  }
+  // Only move the cut for a real pause; on uniform audio keep the full-length piece.
+  return bestEnergy < energy(last - WINDOW) * 0.5 ? bestAt : last;
+}
+
+const norm = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim();
+/** Whisper repetition loops emit one short phrase over and over; keep a single copy and say so. */
+export function collapseRepeats(segments: Segment[], limit = 3): Segment[] {
+  const out: Segment[] = [];
+  for (let i = 0; i < segments.length; ) {
+    const first = segments[i];
+    if (!first) { i++; continue; }
+    let run = 1;
+    while (i + run < segments.length && norm(segments[i + run]?.text ?? "") === norm(first.text) && norm(first.text)) run++;
+    const last = segments[i + run - 1] ?? first;
+    out.push(run > limit
+      ? { start: first.start, end: last.end, text: `${first.text} […repeated ${run} times, likely a transcription glitch]` }
+      : { ...first });
+    if (run > limit) i += run;
+    else { i++; for (let k = 1; k < run; k++, i++) { const s = segments[i]; if (s) out.push({ ...s }); } }
+  }
+  return out;
+}
 
 export async function transcribe(
   blob: Blob,
@@ -70,14 +107,15 @@ export async function transcribe(
 }
 
 export async function transcribeAudio(audio: Float32Array, model: WhisperModel, onProgress: (p: TranscribeProgress) => void): Promise<Segment[]> {
-  const step = PIECE_SEC * 16000;
-  const n = Math.max(1, Math.ceil(audio.length / step));
+  const step = PIECE_SEC * RATE;
+  const total = Math.max(1, Math.ceil(audio.length / step));
   const segments: Segment[] = [];
   onProgress({ phase: "transcribe", pct: 0 });
-  for (let i = 0; i < n; i++) {
-    const offset = i * PIECE_SEC;
-    const piece = audio.slice(i * step, (i + 1) * step);
-    const pieceEnd = offset + piece.length / 16000;
+  for (let from = 0, i = 0; from < audio.length; i++) {
+    const to = quietCut(audio, from, from + step);
+    const offset = from / RATE;
+    const piece = audio.slice(from, to);
+    const pieceEnd = offset + piece.length / RATE;
     const out = await runPiece(piece, model, (p) => onProgress({ phase: "download", pct: p }));
     const chunks = out.chunks?.length ? out.chunks : [{ timestamp: [0, null] as [number, null], text: out.text }];
     for (const c of chunks) {
@@ -89,9 +127,11 @@ export async function transcribeAudio(audio: Float32Array, model: WhisperModel, 
         text,
       });
     }
-    onProgress({ phase: "transcribe", pct: Math.round(((i + 1) / n) * 100) });
+    from = to;
+    onProgress({ phase: "transcribe", pct: Math.min(99, Math.round(((i + 1) / total) * 100)) });
   }
+  onProgress({ phase: "transcribe", pct: 100 });
   // Caller owns decoded audio and wipes it after tone analysis. Keep the speech-only
   // worker/model alive across locking; it contains no vault key or diary history.
-  return segments;
+  return collapseRepeats(segments);
 }

@@ -125,6 +125,18 @@ function RecordPage() {
     return () => clearInterval(t);
   }, [state]);
 
+  // Hold the screen on while recording so the display timeout cannot cut a take short.
+  useEffect(() => {
+    if (state === "idle" || state === "review") return;
+    let lock: WakeLockSentinel | null = null;
+    let dropped = false;
+    const acquire = () => navigator.wakeLock?.request("screen").then(l => { if (dropped) void l.release(); else lock = l; }).catch(() => {});
+    const onVisible = () => { if (document.visibilityState === "visible" && !lock) void acquire(); };
+    void acquire();
+    document.addEventListener("visibilitychange", onVisible);
+    return () => { dropped = true; document.removeEventListener("visibilitychange", onVisible); void lock?.release().catch(() => {}); lock = null; };
+  }, [state]);
+
   function start() {
     const s = streamRef.current;
     if (!s) return;
@@ -217,8 +229,8 @@ function RecordPage() {
           </div>
         )
       )}
-      {/* Front-flash: flood the whole screen with warm white while recording. */}
-      {screenFlash && <div aria-hidden className="absolute inset-0 z-20" style={{ background: "oklch(0.97 0.03 90)" }} />}
+      {/* Front-flash: a thick warm-white frame lights the face and leaves the preview visible. */}
+      {screenFlash && <div aria-hidden className="pointer-events-none absolute inset-0 z-20 border-[14vmax] border-solid" style={{ borderColor: "oklch(0.97 0.03 90)", boxShadow: "inset 0 0 6vmax 2vmax oklch(0.97 0.03 90 / 70%)" }} />}
 
       {/* Floating controls above the preview and the flash. */}
       <div className="relative z-30 flex items-center justify-between p-4">
