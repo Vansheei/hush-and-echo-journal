@@ -17,6 +17,7 @@ import { transcribe } from "@/lib/transcription";
 import { semanticSearch, stopSearch } from "@/lib/search";
 import { localVoices, speakLocal, stopSpeech, type LocalVoice } from "@/lib/native/speech";
 import { registerBackHandler } from "@/lib/native/back";
+import { isNativeAndroid } from "@/lib/native/platform";
 import { useAppearance, setAppearance } from "@/lib/appearance";
 
 export const Route = createFileRoute("/companion")({ ssr: false, head: () => ({ meta: [
@@ -51,12 +52,14 @@ function CompanionPage() {
   const convoRef = useRef(false);
   const trustRef = useRef(false);
   const speakRef = useRef(true);
+  const alwaysSendRef = useRef(false);
   const packetRef = useRef<Packet | null>(null);
   const draftRef = useRef("");
   useBlocker({ shouldBlockFn: () => convoRef.current || sending.current, enableBeforeUnload: convo || busy });
   useEffect(() => { draftRef.current = draft; }, [draft]);
   useEffect(() => { trustRef.current = trust; }, [trust]);
   useEffect(() => { speakRef.current = speak; }, [speak]);
+  useEffect(() => { alwaysSendRef.current = look.alwaysSend; }, [look.alwaysSend]);
   useEffect(() => { let active = true; if (key) getPersonal(key).then(d => { if (active) setDraft(d.draft); }); return () => { active = false; }; }, [key]);
   useEffect(() => { let active = true; if (key) getPersonal(key).then(d => { if (active) setMessages(d.chat); }); return () => { active = false; }; }, [key, version]);
   useEffect(() => {
@@ -76,7 +79,8 @@ function CompanionPage() {
 
   async function read(text: string) {
     const selected = voices.find(v => v.voiceURI === voice) ?? voices[0];
-    if (!selected) { setStatus("No on-device voice is installed. Text replies remain available."); return; }
+    // Android speaks through its own engine with no voice chosen; only the browser needs one.
+    if (!selected && !isNativeAndroid()) { setStatus("No on-device voice is installed. Text replies remain available."); return; }
     try { await speakLocal(text, selected, look.companionVoiceSpeed); }
     catch (e) { if (alive.current) setStatus(`${t("Voice playback failed.")} ${e instanceof Error ? e.message : String(e)}`); }
   }
@@ -168,7 +172,7 @@ function CompanionPage() {
   /** A typed or spoken turn. Trusted conversations skip the send preview. */
   async function deliver(text: string) {
     if (!key || sending.current) return;
-    if (trustRef.current) { void sendTurn(text); return; }
+    if (trustRef.current || alwaysSendRef.current) { void sendTurn(text); return; }
     try {
       const packet = await buildPacket(text);
       if (!alive.current) return;

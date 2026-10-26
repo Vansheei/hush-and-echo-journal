@@ -21,7 +21,7 @@ it("sends the exact Anthropic headers and shows Anthropic's own error", async ()
   const fetcher = vi.fn().mockResolvedValue({ ok: false, status: 401, text: async () => JSON.stringify({ type: "error", error: { type: "authentication_error", message: "invalid x-api-key" } }) });
   vi.stubGlobal("fetch", fetcher);
   expect(await testKey(real, "haiku")).toEqual({ ok: false, error: "Anthropic error 401 · authentication_error · invalid x-api-key" });
-  expect(JSON.parse(fetcher.mock.calls[0]?.[1].body).thinking).toEqual({ type: "between_tools" });
+  expect(JSON.parse(fetcher.mock.calls[0]?.[1].body).thinking).toEqual({ type: "disabled" });
   const headers = fetcher.mock.calls[0]?.[1].headers;
   expect(headers).toEqual({ "content-type": "application/json", "x-api-key": real, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" });
   await expect(requestReflection({ confirmed: true, mode: "reflect", apiKey: real, text: "hi", model: "haiku", signal: new AbortController().signal })).rejects.toThrow("401 · authentication_error · invalid x-api-key");

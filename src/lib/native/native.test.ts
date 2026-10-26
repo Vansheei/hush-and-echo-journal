@@ -61,18 +61,28 @@ describe("native Android rules", () => {
     if (written === undefined || shared === undefined) throw new Error("Missing write or share");
     expect(written).toBeLessThan(shared);
   });
-  it("uses only local Android voices at 1.15x and waits for playback", async () => {
+  it("offers the Android default first, then local voices, and waits for playback", async () => {
     mocks.voices.mockResolvedValue({ voices: [{ name: "remote", localService: false, voiceURI: "remote", lang: "en" }, { name: "offline", localService: true, voiceURI: "offline", lang: "en-IN" }] });
-    const voices = await localVoices(); expect(voices.map(v => v.voiceURI)).toEqual(["offline"]);
+    const voices = await localVoices(); expect(voices.map(v => v.voiceURI)).toEqual(["android-default", "offline"]);
     let complete: (() => void) | undefined;
     mocks.speak.mockImplementationOnce(() => new Promise<void>(resolve => { complete = resolve; }));
-    const voice = voices[0]; if (!voice) throw new Error("Missing local voice");
+    const voice = voices[1]; if (!voice) throw new Error("Missing local voice");
     let ended = false; const speaking = speakLocal("reply", voice).then(() => { ended = true; });
     await vi.waitFor(() => expect(mocks.speak).toHaveBeenCalled());
     expect(ended).toBe(false);
     expect(mocks.speak.mock.calls[0]?.[0]).toEqual({ text: "reply", lang: "en-IN", voice: 1, rate: 1.15, queueStrategy: 0 });
     complete?.(); await speaking; expect(ended).toBe(true);
     await stopSpeech(); expect(mocks.stop).toHaveBeenCalled();
+  });
+  it("still speaks through the Android engine when no voice is listed or chosen", async () => {
+    mocks.voices.mockResolvedValue({ voices: [] });
+    expect((await localVoices()).map(v => v.voiceURI)).toEqual(["android-default"]);
+    mocks.voices.mockRejectedValueOnce(new Error("engine did not enumerate"));
+    expect((await localVoices()).map(v => v.voiceURI)).toEqual(["android-default"]);
+    mocks.speak.mockResolvedValueOnce(undefined);
+    await speakLocal("reply", undefined);
+    expect(mocks.speak.mock.calls[0]?.[0]).toMatchObject({ text: "reply", rate: 1.15 });
+    expect(mocks.speak.mock.calls[0]?.[0]).not.toHaveProperty("voice");
   });
   it("back turns a book page first, then navigates, and exits only at the start", async () => {
     const back = vi.fn(), home = vi.fn(), exit = vi.fn(async () => {}), pageBack = vi.fn(() => true);

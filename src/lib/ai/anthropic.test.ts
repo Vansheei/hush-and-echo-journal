@@ -40,14 +40,14 @@ it("stops on an empty refusal without retrying", async () => {
   const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ stop_reason: "refusal", content: [] }) }); vi.stubGlobal("fetch", fetcher);
   await expect(requestReflection(input)).rejects.toThrow("declined"); expect(fetcher).toHaveBeenCalledTimes(1);
 });
-it.each(["haiku", "sonnet"] as const)("sends the allowed between_tools thinking form for %s, never disabled", async (model) => {
+it.each([["haiku", { type: "disabled" }], ["sonnet", { type: "between_tools" }]] as const)("sends the thinking form %s actually accepts", async (model, thinking) => {
   const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ stop_reason: "end_turn", content: [{ type: "text", text: '{"text":"Your week","looseEnds":[],"worries":[]}' }] }) });
   vi.stubGlobal("fetch", fetcher);
   expect((await requestReflection({ ...input, model })).text).toBe("Your week");
   const body = JSON.parse(fetcher.mock.calls[0]?.[1].body);
   expect(body.max_tokens).toBe(4096);
-  // Anthropic rejects {"type":"disabled"} on these models (400 invalid_request_error).
-  expect(body.thinking).toEqual({ type: "between_tools" });
+  // Each model rejects the other's off form with 400 invalid_request_error.
+  expect(body.thinking).toEqual(thinking);
   expect(body.output_config.effort).toBe("low");
   expect(fetcher).toHaveBeenCalledTimes(1);
 });

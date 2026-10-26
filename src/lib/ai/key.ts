@@ -40,7 +40,8 @@ export async function testKey(apiKey: string, model: ModelChoice): Promise<{ ok:
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST", headers: claudeHeaders(apiKey),
-      body: JSON.stringify({ model: MODELS[model].id, max_tokens: 16, thinking: { type: "between_tools" }, messages: [{ role: "user", content: "Reply with OK." }] }),
+      // Same shape as a real request, minus diary content, so a passing test means real calls work.
+      body: JSON.stringify({ model: MODELS[model].id, max_tokens: 16, thinking: MODELS[model].thinkingOff, output_config: { effort: "low" }, messages: [{ role: "user", content: "Reply with OK." }] }),
     });
     if (!response.ok) return { ok: false, error: await readClaudeError(response) };
     return { ok: true };

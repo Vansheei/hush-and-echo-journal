@@ -8,9 +8,11 @@ import { requestReflection } from "@/lib/ai/anthropic";
 import { useVault } from "@/lib/vault-context";
 import { contextText, getPersonal } from "@/lib/storage/personal";
 import { Clarifications } from "./Clarifications";
+import { useAppearance } from "@/lib/appearance";
 
 export function ReflectionPanel({ entry }: { entry: Entry }) {
   useLanguage();
+  const look = useAppearance();
   const { key, settings, bump } = useVault();
   const [notes, setNotes] = useState((entry.toneNotes ?? []).join("\n"));
   const [includeTone, setIncludeTone] = useState(false);
@@ -76,7 +78,7 @@ export function ReflectionPanel({ entry }: { entry: Entry }) {
       <Button size="sm" variant="ghost" onClick={async () => { setNotes(""); if (key) { const latest = await getEntry(key, entry.id); if (latest) await putEntry(key, { ...latest, toneNotes: [] }); bump(); } }}>{t("Remove notes")}</Button>
     </div>
     {mode === "listen" && <p className="text-sm text-muted-foreground">{t("To ask Claude, switch this entry to Reflect.")}</p>}
-    {mode === "reflect" && transcript.trim() && <Button onClick={() => { setError(""); setOpen(true); }}>{t("Request reflection")}</Button>}
+    {mode === "reflect" && transcript.trim() && <Button disabled={busy} onClick={() => { setError(""); if (look.alwaysSend) void reflect(); else setOpen(true); }}>{busy ? t("Waiting for Claude…") : t("Request reflection")}</Button>}
     {entry.reflection && <div className="space-y-3">
       <h2 className="font-medium">{t("Reflection")}</h2><p className="whitespace-pre-wrap break-words">{entry.reflection.text}</p>
       <Clarifications suggestions={entry.reflection.suggestions} />
