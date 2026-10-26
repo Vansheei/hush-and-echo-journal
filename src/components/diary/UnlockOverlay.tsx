@@ -16,10 +16,10 @@ export function UnlockOverlay({ onDone }: { onDone: () => void }) {
   if (gone) return null;
   return (
     <div className="unlock-overlay" aria-hidden>
-      <div className="relative w-[min(100%,22rem)]">
+      <div className="relative size-full">
         <div className="absolute inset-0"><div className="flutter" /><div className="flutter" /><div className="flutter" /></div>
-        <div className="book-swing relative">
-          <BookCover lit />
+        <div className="book-swing relative size-full">
+          <BookCover lit full />
           <div className="rising-light" />
         </div>
         {MOTES.map((dx, i) => (

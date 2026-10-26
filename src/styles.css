@@ -260,9 +260,11 @@
 }
 @utility record-fab {
   position: fixed;
+  z-index: 70;
   left: 50%;
   bottom: calc(1.5rem + var(--safe-bottom));
   transform: translateX(-50%);
+  touch-action: manipulation;
   display: grid;
   place-items: center;
   width: 4rem;
@@ -354,7 +356,7 @@
 .cover-gold-lit { color: var(--gold-bright); filter: drop-shadow(0 0 3px var(--gold)); }
 
 @property --lit { syntax: "<percentage>"; inherits: false; initial-value: 0%; }
-.unlock-overlay { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 1.5rem; perspective: 1600px; pointer-events: none; background: var(--cover-deep); background-image: var(--cloth); animation: overlay-out 0.4s ease 2.85s forwards; }
+.unlock-overlay { position: fixed; inset: 0; z-index: 60; display: grid; place-items: stretch; perspective: 1600px; pointer-events: none; background: var(--cover-deep); background-image: var(--cloth); animation: overlay-out 0.4s ease 2.85s forwards; }
 
 .unlock-overlay .cover-ornament { animation: ornament 0.5s ease 0.85s both; }
 .unlock-overlay .book-swing { transform-origin: left center; animation: swing 0.8s cubic-bezier(.55,.05,.4,1) 2.2s forwards; }
