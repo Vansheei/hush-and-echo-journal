@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { fmtDuration } from "@/components/diary/AppHeader";
 import { saveEntry } from "@/lib/storage/db";
 import { useVault } from "@/lib/vault-context";
+import { keepAwake } from "@/lib/native/awake";
 
 export const Route = createFileRoute("/record")({
   ssr: false,
@@ -126,16 +127,7 @@ function RecordPage() {
   }, [state]);
 
   // Hold the screen on while recording so the display timeout cannot cut a take short.
-  useEffect(() => {
-    if (state === "idle" || state === "review") return;
-    let lock: WakeLockSentinel | null = null;
-    let dropped = false;
-    const acquire = () => navigator.wakeLock?.request("screen").then(l => { if (dropped) void l.release(); else lock = l; }).catch(() => {});
-    const onVisible = () => { if (document.visibilityState === "visible" && !lock) void acquire(); };
-    void acquire();
-    document.addEventListener("visibilitychange", onVisible);
-    return () => { dropped = true; document.removeEventListener("visibilitychange", onVisible); void lock?.release().catch(() => {}); lock = null; };
-  }, [state]);
+  useEffect(() => (state === "idle" || state === "review" ? undefined : keepAwake()), [state]);
 
   function start() {
     const s = streamRef.current;

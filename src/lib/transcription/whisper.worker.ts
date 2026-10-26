@@ -7,6 +7,18 @@ env.useBrowserCache = false;
 env.useCustomCache = true;
 env.customCache = durableModelCache();
 
+// ONNX Runtime's WASM backend runs single-threaded unless the page is cross-origin
+// isolated, which is the difference between roughly realtime and many times slower.
+// Ask for every core when isolation allows threads, and keep SIMD on either way.
+const wasm = env.backends?.onnx?.wasm;
+if (wasm) {
+  const threads = typeof self.crossOriginIsolated === "boolean" && self.crossOriginIsolated
+    ? Math.max(1, Math.min(4, navigator.hardwareConcurrency || 1)) : 1;
+  wasm.numThreads = threads;
+  wasm.simd = true;
+  wasm.proxy = false;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let pipe: any = null;
 let loaded = "";
@@ -23,7 +35,7 @@ async function hasWebGPU() {
 
 async function getPipe(model: string, onProgress: (x: { status: string; progress?: number }) => void) {
   if (pipe && loaded === model) return pipe;
-  const id = model === "small" ? "onnx-community/whisper-small" : "onnx-community/whisper-base";
+  const id = model === "small" ? "onnx-community/whisper-small" : model === "base" ? "onnx-community/whisper-base" : "onnx-community/whisper-tiny";
   const gpu = await hasWebGPU();
   const opts = { progress_callback: onProgress };
   try {

@@ -79,8 +79,9 @@ export function CompanionSettings() {
       <p className="text-sm text-muted-foreground">{t("Multilingual · automatic language detection · no translation. Model files stay on this phone unless browser storage is cleared or evicted.")}</p>
       {(
         [
-          ["base", "Multilingual base", isNativeAndroid() ? "Android default · faster, slightly less accurate" : "Lighter download"],
-          ["small", "Multilingual small", isNativeAndroid() ? "Slower · more accurate" : "Default · more accurate"],
+          ["tiny", "Multilingual tiny", isNativeAndroid() ? "Android default · fastest, least accurate" : "Fastest, least accurate"],
+          ["base", "Multilingual base", isNativeAndroid() ? "Around three times slower than tiny" : "Lighter download"],
+          ["small", "Multilingual small", isNativeAndroid() ? "Slowest on a phone · most accurate" : "Default · more accurate"],
         ] as [WhisperModel, string, string][]
       ).map(([v, l, d]) => (
         <label key={v} className="flex items-center gap-3 py-1">

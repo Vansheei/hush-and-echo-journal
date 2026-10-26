@@ -46,10 +46,10 @@ describe("native Android rules", () => {
     await expect(unlockNative()).rejects.toThrow("cancelled");
     await removeNativeUnlock();
   });
-  it("Android defaults to base while browser defaults to small and explicit small survives", async () => {
-    expect(defaultWhisperModel(true)).toBe("base"); expect(defaultWhisperModel(false)).toBe("small");
+  it("Android defaults to tiny while browser defaults to small and explicit small survives", async () => {
+    expect(defaultWhisperModel(true)).toBe("tiny"); expect(defaultWhisperModel(false)).toBe("small");
     const { key } = await createVault("owner-pass", 1000);
-    await putSettings(key, platformSettings()); expect((await getSettings(key)).whisperModel).toBe("base");
+    await putSettings(key, platformSettings()); expect((await getSettings(key)).whisperModel).toBe("tiny");
     await putSettings(key, { ...platformSettings(), whisperModel: "small", whisperModelChosen: true }); expect((await getSettings(key)).whisperModel).toBe("small");
   });
   it("writes the encrypted backup before sharing the returned file URI", async () => {
