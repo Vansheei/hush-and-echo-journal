@@ -1,6 +1,6 @@
 import { t, useLanguage } from "@/lib/i18n";
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, Lock, Settings } from "lucide-react";
+import { ArrowLeft, Lock, Plus, Settings } from "lucide-react";
 import type { ReactNode } from "react";
 import { useVault } from "@/lib/vault-context";
 import { PageFrame } from "./PageFrame";
@@ -62,6 +62,7 @@ export function AppHeader({ title, back, backTo }: { title: ReactNode; back?: bo
             <Link to={backTo ?? "/"} className="icon-btn" aria-label={t("Back")}><ArrowLeft className="size-5" /></Link>
           ) : <span className="size-10" />}
           <span className="flex-1" />
+          <Link to="/record" className="icon-btn" aria-label={t("Begin a Chapter")}><Plus className="size-5" /></Link>
           <Link to="/settings" className="icon-btn" aria-label={t("Settings")}><Settings className="size-5" /></Link>
           <Button variant="ghost" size="icon" className="icon-btn" aria-label={t("Lock now")} onClick={lock}><Lock className="size-5" /></Button>
         </div>

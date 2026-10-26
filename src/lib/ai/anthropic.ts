@@ -15,9 +15,9 @@ export async function requestReflection(input: {
     method: "POST", signal: input.signal,
     headers: claudeHeaders(input.apiKey),
     body: JSON.stringify({ model: MODELS[input.model].id, max_tokens: 4096,
-      // These exact 5.5 models think by default. Reserve the allowance for the
-      // requested reply, not an up-front thinking pass (no tools are offered).
-      thinking: { type: input.model === "sonnet" ? "between_tools" : "disabled" },
+      // These exact 5.5 models think by default; Anthropic rejects "disabled" and
+      // requires "between_tools" as the off form. Reserve tokens for the reply.
+      thinking: { type: "between_tools" },
       output_config: { effort: "low" },
       system: `${PERSONALITY}\nApproach: ${input.approach ?? "brief reflection"}. Return only JSON: {"text":"reply", "looseEnds":[], "worries":[], "meanings":[{"phrase":"unclear phrase","meaning":"tentative meaning","language":"language"}], "people":[{"mention":"name","question":"clarifying question"}], "notes":[{"kind":"fact","text":"something learned about the owner, fact or interpretation"}]}. Suggest notes only when you genuinely learned something about the owner; leave suggestions empty unless needed.\n${input.context ?? ""}`,
       messages: [...(input.conversation ?? []), { role: "user", content: input.text }] }),
