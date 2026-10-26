@@ -183,7 +183,7 @@ function RecordPage() {
         )}
       </div>
 
-      {torch && !hasTorch && kind === "video" && <div aria-hidden className="pointer-events-none fixed inset-0 z-0 bg-[oklch(0.98_0.03_85)]" />}
+      {torch && !hasTorch && kind === "video" && <div aria-hidden className="pointer-events-none fixed inset-0 z-0 bg-paper" />}
       <div className={`relative z-10 mx-4 flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-2xl ${torch && !hasTorch ? "m-6" : "bg-stage-muted"}`}>
         {state === "review" && result ? (
           kind === "video" ? (
