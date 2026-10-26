@@ -3,7 +3,9 @@ import { PERSONALITY } from "./personality";
 import type { Suggestions } from "@/lib/storage/personal";
 import { claudeHeaders, readClaudeError } from "./key";
 
-export type Reflection = { text: string; looseEnds: string[]; worries: string[]; suggestions?: Suggestions };
+/** A follow-up exchange hanging off one reflection. "note" lines are the owner's own words, never AI. */
+export type ReflectionTurn = { role: "you" | "companion" | "note"; text: string };
+export type Reflection = { text: string; looseEnds: string[]; worries: string[]; suggestions?: Suggestions; thread?: ReflectionTurn[] };
 export async function requestReflection(input: {
   confirmed: boolean; mode: "listen" | "reflect"; apiKey: string; text: string;
   model: ModelChoice; signal: AbortSignal;

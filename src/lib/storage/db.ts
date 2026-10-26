@@ -65,6 +65,8 @@ export type Entry = {
   ribbon?: boolean;
   flagged?: string[];
   reflection?: Reflection;
+  /** The owner corrected the transcript by hand; reflections use their words. */
+  edited?: boolean;
 };
 
 /** A written entry: text only, no media, ready immediately. */

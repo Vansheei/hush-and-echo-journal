@@ -19,6 +19,7 @@ export function ReflectionPanel({ entry }: { entry: Entry }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [reply, setReply] = useState("");
   const [context, setContext] = useState("");
   useEffect(() => { let alive = true; if (key) getPersonal(key).then(d => { if (alive) setContext(contextText(d)); }); return () => { alive = false; }; }, [key, entry]);
   const controller = useRef<AbortController | null>(null);
@@ -50,6 +51,40 @@ export function ReflectionPanel({ entry }: { entry: Entry }) {
     } catch (e) { if (active.current) setError(e instanceof Error ? e.message : "Reflection failed."); }
     finally { if (active.current) setBusy(false); controller.current = null; }
   }
+  /** Continue the conversation on this entry. The thread travels as context, nothing else. */
+  async function followUp(text: string) {
+    if (!key || busy || !entry.reflection) return;
+    setBusy(true); setError("");
+    const abort = new AbortController(); controller.current = abort;
+    try {
+      const apiKey = await getApiKey(key);
+      if (!active.current) return;
+      if (!apiKey) throw new Error("Save your Anthropic key in Settings first.");
+      const thread = entry.reflection.thread ?? [];
+      const conversation = [
+        { role: "user" as const, content: outgoing },
+        { role: "assistant" as const, content: entry.reflection.text },
+        ...thread.filter(x => x.role !== "note").map(x => ({ role: x.role === "you" ? "user" as const : "assistant" as const, content: x.text })),
+      ];
+      const next = await requestReflection({ confirmed: true, mode, apiKey, text, context, conversation, model: settings.models.reflection, signal: abort.signal });
+      if (!active.current || abort.signal.aborted) return;
+      const latest = await getEntry(key, entry.id);
+      if (!active.current || !latest?.reflection) return;
+      await putEntry(key, { ...latest, reflection: { ...latest.reflection, thread: [...(latest.reflection.thread ?? []), { role: "you", text }, { role: "companion", text: next.text }] } });
+      setReply(""); bump();
+    } catch (e) { if (active.current) setError(e instanceof Error ? e.message : "Reply failed."); }
+    finally { if (active.current) setBusy(false); controller.current = null; }
+  }
+
+  /** The owner's own words, kept on the entry and never sent anywhere. */
+  async function addNote(text: string) {
+    if (!key) return;
+    const latest = await getEntry(key, entry.id);
+    if (!latest?.reflection) return;
+    await putEntry(key, { ...latest, reflection: { ...latest.reflection, thread: [...(latest.reflection.thread ?? []), { role: "note", text }] } });
+    setReply(""); bump();
+  }
+
   async function accept(text: string, kind: "loose" | "worry") {
     if (!key) return;
     try {
@@ -84,6 +119,16 @@ export function ReflectionPanel({ entry }: { entry: Entry }) {
       <Clarifications suggestions={entry.reflection.suggestions} />
       {entry.reflection.looseEnds.map((text, i) => <div key={`l${i}`} className="space-y-2"><p>{text}</p><Button size="sm" variant="outline" onClick={() => accept(text, "loose")}>{t("Add to loose ends")}</Button></div>)}
       {entry.reflection.worries.map((text, i) => <div key={`w${i}`} className="space-y-2"><p>{text}</p><Button size="sm" variant="outline" onClick={() => accept(text, "worry")}>{t("Park this worry")}</Button></div>)}
+      {(entry.reflection.thread ?? []).map((turn, i) => <div key={`t${i}`} className={turn.role === "companion" ? "" : "border-l-2 border-primary pl-3"}>
+        <h3 className="font-display text-xl">{turn.role === "companion" ? t("Companion") : turn.role === "note" ? t("My note") : t("You")}</h3>
+        <p className="whitespace-pre-wrap break-words">{turn.text}</p>
+      </div>)}
+      <Textarea aria-label={t("Reply to this reflection")} rows={3} value={reply} onChange={(e) => setReply(e.target.value)} placeholder={t("Answer it, correct it, or just add a thought of your own…")} />
+      <div className="flex flex-wrap gap-2">
+        <Button size="sm" disabled={!reply.trim() || busy} onClick={() => { setError(""); void followUp(reply.trim()); }}>{busy ? t("Waiting for Claude…") : t("Reply")}</Button>
+        <Button size="sm" variant="outline" disabled={!reply.trim() || busy} onClick={() => void addNote(reply.trim())}>{t("Keep as my note")}</Button>
+      </div>
+      <p className="text-sm text-muted-foreground">{t("Reply asks the companion. Keep as my note saves your words only, and sends nothing.")}</p>
     </div>}
     {!open && error && <p role="alert" className="break-words rounded border border-destructive p-2 text-sm text-destructive">{t(error)}</p>}
     <Dialog open={open} onOpenChange={(v) => { if (!v) controller.current?.abort(); setOpen(v); }}>
