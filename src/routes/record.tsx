@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { fmtDuration } from "@/components/diary/AppHeader";
 import { saveEntry } from "@/lib/storage/db";
 import { useVault } from "@/lib/vault-context";
-import { keepAwake } from "@/lib/native/awake";
 
 export const Route = createFileRoute("/record")({
   ssr: false,
@@ -72,7 +71,7 @@ function RecordPage() {
     navigator.mediaDevices
       .getUserMedia(
         kind === "video"
-          ? { audio: true, video: { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 }, facingMode: facing } }
+          ? { audio: true, video: { width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: facing } }
           : { audio: true },
       )
       .then((s) => {
@@ -106,7 +105,7 @@ function RecordPage() {
           target.width = video.videoWidth;
           target.height = video.videoHeight;
         }
-        const ctx = target.getContext("2d", { alpha: false, desynchronized: true });
+        const ctx = target.getContext("2d");
         if (ctx) {
           ctx.save();
           if (facing === "user") { ctx.translate(target.width, 0); ctx.scale(-1, 1); }
@@ -126,22 +125,16 @@ function RecordPage() {
     return () => clearInterval(t);
   }, [state]);
 
-  // Hold the screen on while recording so the display timeout cannot cut a take short.
-  useEffect(() => (state === "idle" || state === "review" ? undefined : keepAwake()), [state]);
-
   function start() {
     const s = streamRef.current;
     if (!s) return;
     const mimeType =
       kind === "video"
-        // H.264 first: phones encode it in hardware, where VP9 falls back to software and stutters.
-        ? pick(["video/mp4;codecs=avc1,mp4a", "video/mp4", "video/webm;codecs=h264,opus", "video/webm;codecs=vp8,opus", "video/webm"])
+        ? pick(["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm", "video/mp4"])
         : pick(["audio/webm;codecs=opus", "audio/webm", "audio/mp4"]);
     // Video records the painted canvas (already flipped for the front camera) plus the mic.
     const recordStream =
-      // The back camera needs no mirroring, so record it directly and skip a whole
-      // canvas repaint per frame; only the front camera pays for the flip.
-      kind === "video" && canvas.current && facing === "user"
+      kind === "video" && canvas.current
         ? new MediaStream([...canvas.current.captureStream(30).getVideoTracks(), ...s.getAudioTracks()])
         : s;
     const rec = new MediaRecorder(recordStream, {
@@ -224,8 +217,8 @@ function RecordPage() {
           </div>
         )
       )}
-      {/* Front-flash: a thick warm-white frame lights the face and leaves the preview visible. */}
-      {screenFlash && <div aria-hidden className="pointer-events-none absolute inset-0 z-20 border-[14vmax] border-solid" style={{ borderColor: "oklch(0.97 0.03 90)", boxShadow: "inset 0 0 6vmax 2vmax oklch(0.97 0.03 90 / 70%)" }} />}
+      {/* Front-flash: flood the whole screen with warm white while recording. */}
+      {screenFlash && <div aria-hidden className="absolute inset-0 z-20" style={{ background: "oklch(0.97 0.03 90)" }} />}
 
       {/* Floating controls above the preview and the flash. */}
       <div className="relative z-30 flex items-center justify-between p-4">

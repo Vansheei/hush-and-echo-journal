@@ -3,9 +3,7 @@ import { PERSONALITY } from "./personality";
 import type { Suggestions } from "@/lib/storage/personal";
 import { claudeHeaders, readClaudeError } from "./key";
 
-/** A follow-up exchange hanging off one reflection. "note" lines are the owner's own words, never AI. */
-export type ReflectionTurn = { role: "you" | "companion" | "note"; text: string };
-export type Reflection = { text: string; looseEnds: string[]; worries: string[]; suggestions?: Suggestions; thread?: ReflectionTurn[] };
+export type Reflection = { text: string; looseEnds: string[]; worries: string[]; suggestions?: Suggestions };
 export async function requestReflection(input: {
   confirmed: boolean; mode: "listen" | "reflect"; apiKey: string; text: string;
   model: ModelChoice; signal: AbortSignal;
@@ -17,7 +15,9 @@ export async function requestReflection(input: {
     method: "POST", signal: input.signal,
     headers: claudeHeaders(input.apiKey),
     body: JSON.stringify({ model: MODELS[input.model].id, max_tokens: 4096,
-      thinking: MODELS[input.model].thinkingOff,
+      // These exact 5.5 models think by default; Anthropic rejects "disabled" and
+      // requires "between_tools" as the off form. Reserve tokens for the reply.
+      thinking: { type: "between_tools" },
       output_config: { effort: "low" },
       system: `${PERSONALITY}\nApproach: ${input.approach ?? "brief reflection"}. Return only JSON: {"text":"reply", "looseEnds":[], "worries":[], "meanings":[{"phrase":"unclear phrase","meaning":"tentative meaning","language":"language"}], "people":[{"mention":"name","question":"clarifying question"}], "notes":[{"kind":"fact","text":"something learned about the owner, fact or interpretation"}]}. Suggest notes only when you genuinely learned something about the owner; leave suggestions empty unless needed.\n${input.context ?? ""}`,
       messages: [...(input.conversation ?? []), { role: "user", content: input.text }] }),

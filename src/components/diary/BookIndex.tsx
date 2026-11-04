@@ -3,24 +3,6 @@ import { Link } from "@tanstack/react-router";
 
 export type IndexItem = { label: string; to?: string; onSelect?: () => void };
 
-/** Plain-English gloss for each whimsical name, shown in the index and atop each section. */
-export const SUBTITLES: Record<string, string> = {
-  "Night Companion": "talk it through out loud",
-  "Spill the tea": "write an entry by hand",
-  "The Week’s Tale": "your week, as a scroll",
-  "Unfinished Chapters": "things left hanging, to finish later",
-  "Quiet Garden": "park a worry here until you’re ready",
-  "Side Characters": "the people in your life",
-  "Settings": "keys, locks, covers and voices",
-  "Lexicon": "your own words and what they mean",
-  "Unsent Letters": "drafts written to someone, never sent",
-  "Archive": "search everything you’ve recorded",
-  "Begin a Chapter": "record a new entry",
-  "Inner Universe": "what the companion knows about you",
-  "The Keepsakes": "only the entries you ribboned",
-  "Chapters by day": "every entry, newest day first",
-};
-
 export const SECTIONS: IndexItem[] = [
   { label: "Night Companion", to: "/companion" },
   { label: "Spill the tea", to: "/write" },
@@ -56,7 +38,6 @@ export function BookIndex({ items, days }: { items: IndexItem[]; days: { label: 
               {it.to
                 ? <Link to={it.to} className="index-row"><span>{t(it.label)}</span><span className="index-dots" /></Link>
                 : <button type="button" onClick={it.onSelect} className="index-row w-full text-left"><span>{t(it.label)}</span><span className="index-dots" /></button>}
-              {SUBTITLES[it.label] && <span className="index-note">{t(SUBTITLES[it.label] ?? "")}</span>}
             </li>
           );
         })}

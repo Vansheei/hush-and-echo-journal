@@ -3,10 +3,9 @@
 import { useSyncExternalStore } from "react";
 
 export type Cover = "green" | "plum" | "ocean";
-type Prefs = { cover: Cover; coverChosen: boolean; sounds: boolean; seasonalScene: boolean; readRepliesAloud: boolean; companionVoiceSpeed: number; language: "en" | "hi" | "de"; hidePassphrase: boolean; alwaysSend: boolean };
+type Prefs = { cover: Cover; coverChosen: boolean; sounds: boolean; seasonalScene: boolean; readRepliesAloud: boolean; companionVoiceSpeed: number; language: "en" | "hi" | "de"; hidePassphrase: boolean };
 const KEY = "diary-appearance";
-// alwaysSend replaces the per-request confirm dialog; one of the two must always be satisfied.
-const DEFAULTS: Prefs = { cover: "green", coverChosen: false, sounds: true, seasonalScene: true, readRepliesAloud: true, companionVoiceSpeed: 1.15, language: "en", hidePassphrase: false, alwaysSend: false };
+const DEFAULTS: Prefs = { cover: "green", coverChosen: false, sounds: true, seasonalScene: true, readRepliesAloud: true, companionVoiceSpeed: 1.15, language: "en", hidePassphrase: false };
 const listeners = new Set<() => void>();
 let cache: Prefs | null = null;
 

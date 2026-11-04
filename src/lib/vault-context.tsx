@@ -15,7 +15,6 @@ import {
   type Settings,
 } from "@/lib/storage/db";
 import { decodeToMono16k, transcribeAudio, type TranscribeProgress } from "@/lib/transcription";
-import { keepAwake } from "@/lib/native/awake";
 import { requestPersistence } from "@/lib/storage/persistence";
 import { defaultToneAnalyzer } from "@/lib/tone";
 import { unlockUsingDevice, removeDeviceUnlock } from "@/lib/crypto/device";
@@ -184,9 +183,6 @@ export function VaultProvider({ children }: { children: ReactNode }) {
         for (;;) {
           const job = await prepare();
           if (!job) return;
-          // Android freezes the WebView's JavaScript when the screen sleeps, which would
-          // stall a half-finished transcript, so hold the screen for the length of the job.
-          const wake = keepAwake();
           setVersion((v) => v + 1);
           try {
             const segments = await transcribeAudio(job.audio, settings.whisperModel, (p) =>
@@ -198,7 +194,6 @@ export function VaultProvider({ children }: { children: ReactNode }) {
             await completeEntry(job.writer, { ...job.entry, status: "error", error: err instanceof Error ? err.message : String(err) }, job.revision);
           } finally {
             job.audio.fill(0);
-            wake();
           }
           setProgress((m) => {
             const { [job.entry.id]: _, ...rest } = m;
