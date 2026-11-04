@@ -61,9 +61,10 @@ describe("native Android rules", () => {
     if (written === undefined || shared === undefined) throw new Error("Missing write or share");
     expect(written).toBeLessThan(shared);
   });
-  it("uses only local Android voices at 1.15x and waits for playback", async () => {
+  it("offers the Android engine default plus every installed voice, regardless of localService", async () => {
     mocks.voices.mockResolvedValue({ voices: [{ name: "remote", localService: false, voiceURI: "remote", lang: "en" }, { name: "offline", localService: true, voiceURI: "offline", lang: "en-IN" }] });
-    const voices = await localVoices(); expect(voices.map(v => v.voiceURI)).toEqual(["offline"]);
+    const all = await localVoices(); expect(all.map(v => v.voiceURI)).toEqual(["android-default", "remote", "offline"]);
+    const voices = all.slice(2);
     let complete: (() => void) | undefined;
     mocks.speak.mockImplementationOnce(() => new Promise<void>(resolve => { complete = resolve; }));
     const voice = voices[0]; if (!voice) throw new Error("Missing local voice");
@@ -73,6 +74,9 @@ describe("native Android rules", () => {
     expect(mocks.speak.mock.calls[0]?.[0]).toEqual({ text: "reply", lang: "en-IN", voice: 1, rate: 1.15, queueStrategy: 0 });
     complete?.(); await speaking; expect(ended).toBe(true);
     await stopSpeech(); expect(mocks.stop).toHaveBeenCalled();
+    mocks.speak.mockResolvedValueOnce(undefined);
+    await speakLocal("hi", all[0]!);
+    expect(mocks.speak.mock.calls[1]?.[0]).toEqual({ text: "hi", lang: "en-US", rate: 1.15, queueStrategy: 0 });
   });
   it("back turns a book page first, then navigates, and exits only at the start", async () => {
     const back = vi.fn(), home = vi.fn(), exit = vi.fn(async () => {}), pageBack = vi.fn(() => true);
