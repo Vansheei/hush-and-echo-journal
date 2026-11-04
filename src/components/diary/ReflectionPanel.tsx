@@ -1,3 +1,4 @@
+import { getAppearance } from "@/lib/appearance";
 import { t, useLanguage } from "@/lib/i18n";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
