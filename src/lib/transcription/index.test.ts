@@ -41,8 +41,18 @@ it("transcribes every piece of a 65-second recording with timestamps across the 
   }
   vi.stubGlobal("Worker", WorkerMock);
   const progress = vi.fn();
-  const segments = await transcribeAudio(new Float32Array(65 * 16000), "base", progress);
-  expect(lengths).toEqual([30 * 16000, 30 * 16000, 5 * 16000]);
-  expect(segments.map(({ start, end }) => [start, end])).toEqual([[0, 30], [30, 60], [60, 65]]);
+  const speech = new Float32Array(65 * 16000).map((_, i) => Math.sin(i / 5) * 0.2);
+  const segments = await transcribeAudio(speech, "base", progress);
+  expect(lengths.reduce((a, b) => a + b, 0)).toBe(65 * 16000);
+  for (const l of lengths) expect(l).toBeLessThanOrEqual(28 * 16000);
+  expect(segments[0]!.start).toBe(0);
+  expect(segments[segments.length - 1]!.end).toBe(65);
+});
+
+it("skips silent audio instead of sending it to Whisper", async () => {
+  const posted = vi.fn();
+  vi.stubGlobal("Worker", class { onmessage?: unknown; postMessage = posted; });
+  expect(await transcribeAudio(new Float32Array(40 * 16000), "base", vi.fn())).toEqual([]);
+  expect(posted).not.toHaveBeenCalled();
   expect(progress).toHaveBeenLastCalledWith({ phase: "transcribe", pct: 100 });
 });
