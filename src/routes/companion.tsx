@@ -163,14 +163,14 @@ function CompanionPage() {
         picked.map(r => { const e = byId.get(r.entryId); return `${e ? new Date(e.createdAt).toISOString() : "entry"} at ${fmtDuration(r.start)}: ${r.text}`; }).join("\n");
     } catch { /* Meaning search unavailable: send without past entries. */ }
     const context = contextText(personal) +
-      `\nOwner notebook (facts and interpretations remain distinct):\n${JSON.stringify(personal.notebook)}\n${learningText(personal)}${excerpts}`;
+      (personal.notebook.length ? `\nOwner notebook (facts and interpretations remain distinct):\n${JSON.stringify(personal.notebook)}` : "") + `\n${learningText(personal)}${excerpts}`;
     return { context, sources, history: personal.chat.slice(-12).map(m => ({ role: m.role, content: m.text })) };
   }
 
   /** A typed or spoken turn. Trusted conversations skip the send preview. */
   async function deliver(text: string) {
     if (!key || sending.current) return;
-    if (trustRef.current) { void sendTurn(text); return; }
+    if (trustRef.current || getAppearance().sendWithoutConfirm) { void sendTurn(text); return; }
     try {
       const packet = await buildPacket(text);
       if (!alive.current) return;
