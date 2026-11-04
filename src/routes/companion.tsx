@@ -1,3 +1,4 @@
+import { isNativeAndroid } from "@/lib/native/platform";
 import { t, useLanguage } from "@/lib/i18n";
 import { createFileRoute, useBlocker, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
@@ -15,7 +16,7 @@ import { contextText, learningText, getPersonal, updatePersonal, type ChatMessag
 import { requestReflection } from "@/lib/ai/anthropic";
 import { transcribe } from "@/lib/transcription";
 import { semanticSearch, stopSearch } from "@/lib/search";
-import { localVoices, speakLocal, stopSpeech, type LocalVoice } from "@/lib/native/speech";
+import { ANDROID_DEFAULT_VOICE, localVoices, speakLocal, stopSpeech, type LocalVoice } from "@/lib/native/speech";
 import { registerBackHandler } from "@/lib/native/back";
 import { useAppearance, setAppearance } from "@/lib/appearance";
 
@@ -75,7 +76,8 @@ function CompanionPage() {
   }, [setVaultBusy]);
 
   async function read(text: string) {
-    const selected = voices.find(v => v.voiceURI === voice) ?? voices[0];
+    // Android: always go through the native engine; its default voice is fine when none is listed.
+    const selected = voices.find(v => v.voiceURI === voice) ?? voices[0] ?? (isNativeAndroid() ? ANDROID_DEFAULT_VOICE : undefined);
     if (!selected) { setStatus("No on-device voice is installed. Text replies remain available."); return; }
     try { await speakLocal(text, selected, look.companionVoiceSpeed); }
     catch (e) { if (alive.current) setStatus(`${t("Voice playback failed.")} ${e instanceof Error ? e.message : String(e)}`); }
@@ -161,14 +163,14 @@ function CompanionPage() {
         picked.map(r => { const e = byId.get(r.entryId); return `${e ? new Date(e.createdAt).toISOString() : "entry"} at ${fmtDuration(r.start)}: ${r.text}`; }).join("\n");
     } catch { /* Meaning search unavailable: send without past entries. */ }
     const context = contextText(personal) +
-      `\nOwner notebook (facts and interpretations remain distinct):\n${JSON.stringify(personal.notebook)}\n${learningText(personal)}${excerpts}`;
+      (personal.notebook.length ? `\nOwner notebook (facts and interpretations remain distinct):\n${JSON.stringify(personal.notebook)}` : "") + `\n${learningText(personal)}${excerpts}`;
     return { context, sources, history: personal.chat.slice(-12).map(m => ({ role: m.role, content: m.text })) };
   }
 
   /** A typed or spoken turn. Trusted conversations skip the send preview. */
   async function deliver(text: string) {
     if (!key || sending.current) return;
-    if (trustRef.current) { void sendTurn(text); return; }
+    if (trustRef.current || getAppearance().sendWithoutConfirm) { void sendTurn(text); return; }
     try {
       const packet = await buildPacket(text);
       if (!alive.current) return;

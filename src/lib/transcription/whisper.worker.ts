@@ -49,7 +49,7 @@ self.onmessage = async (e: MessageEvent) => {
       const file = "file" in x && typeof x.file === "string" ? x.file : "";
       if (x.status === "progress" && !cachedModelFiles.has(file)) self.postMessage({ id, type: "download", progress: x.progress ?? 0 });
     });
-    const out = await p(audio, { return_timestamps: true, task: "transcribe" });
+    const out = await p(audio, { return_timestamps: true, task: "transcribe", no_repeat_ngram_size: 4, repetition_penalty: 1.1 });
     audio.fill(0);
     self.postMessage({ id, type: "result", out });
   } catch (err) {

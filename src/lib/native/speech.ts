@@ -5,13 +5,13 @@ const tts = async () => (await import("@capacitor-community/text-to-speech")).Te
 
 export const COMPANION_RATE = 1.15;
 export type LocalVoice = { voiceURI: string; name: string; lang: string; nativeIndex?: number };
+export const ANDROID_DEFAULT_VOICE: LocalVoice = { voiceURI: "android-default", name: "Android default voice", lang: "en-US", nativeIndex: -1 };
 export async function localVoices(): Promise<LocalVoice[]> {
   if (isNativeAndroid()) {
-    const { voices } = await (await tts()).getSupportedVoices();
-    // Prefer offline voices; many Android voices report localService=false, so fall back to all installed ones.
-    const all = voices.map((v, nativeIndex) => ({ ...v, nativeIndex }));
-    const local = all.filter(v => v.localService);
-    return local.length ? local : all.length ? all : [{ voiceURI: "android-default", name: "Android default voice", lang: navigator.language || "en-US", nativeIndex: -1 }];
+    // Talk to the Android engine directly. No localService filter: Google voices often report false
+    // even when the voice data is installed. The engine default is always offered first.
+    const voices = await (await tts()).getSupportedVoices().then(r => r.voices).catch(() => []);
+    return [ANDROID_DEFAULT_VOICE, ...voices.map((v, nativeIndex) => ({ ...v, nativeIndex }))];
   }
   return window.speechSynthesis?.getVoices().filter(v => v.localService) ?? [];
 }
@@ -29,9 +29,9 @@ export async function speakLocal(text: string, selected: LocalVoice, rate = COMP
     const done = () => { if (cancelPending === done) cancelPending = undefined; resolve(); };
     cancelPending = done;
     if (TextToSpeech) {
-      if (selected.nativeIndex === undefined) { done(); reject(new Error("Select an installed on-device voice.")); return; }
-      TextToSpeech.speak({ text, lang: selected.lang, ...(selected.nativeIndex >= 0 ? { voice: selected.nativeIndex } : {}), rate, queueStrategy: 0 })
-        .then(done, error => { done(); reject(error); });
+      const index = selected.nativeIndex ?? -1;
+      TextToSpeech.speak({ text, lang: selected.lang, ...(index >= 0 ? { voice: index } : {}), rate, queueStrategy: 0 })
+        .then(done, error => { done(); reject(new Error(`Android text-to-speech engine: ${error instanceof Error ? error.message : String(error)}`)); });
     } else {
       const voice = window.speechSynthesis?.getVoices().find(v => v.voiceURI === selected.voiceURI && v.localService);
       if (!voice) { done(); reject(new Error("No on-device voice is installed. Text replies remain available.")); return; }
