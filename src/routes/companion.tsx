@@ -18,7 +18,7 @@ import { transcribe } from "@/lib/transcription";
 import { semanticSearch, stopSearch } from "@/lib/search";
 import { ANDROID_DEFAULT_VOICE, localVoices, speakLocal, stopSpeech, type LocalVoice } from "@/lib/native/speech";
 import { registerBackHandler } from "@/lib/native/back";
-import { useAppearance, setAppearance } from "@/lib/appearance";
+import { getAppearance, useAppearance, setAppearance } from "@/lib/appearance";
 
 export const Route = createFileRoute("/companion")({ ssr: false, head: () => ({ meta: [
   { title: "Diary — Companion" }, { name: "description", content: "Your private voice and text diary companion." }, { property: "og:title", content: "Diary — Companion" }, { property: "og:description", content: "An explicitly requested conversation with your diary companion." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
