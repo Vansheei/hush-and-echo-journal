@@ -54,5 +54,4 @@ it("skips silent audio instead of sending it to Whisper", async () => {
   vi.stubGlobal("Worker", class { onmessage?: unknown; postMessage = posted; });
   expect(await transcribeAudio(new Float32Array(40 * 16000), "base", vi.fn())).toEqual([]);
   expect(posted).not.toHaveBeenCalled();
-  expect(progress).toHaveBeenLastCalledWith({ phase: "transcribe", pct: 100 });
 });

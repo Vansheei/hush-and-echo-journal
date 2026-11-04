@@ -1,3 +1,4 @@
+import { isNativeAndroid } from "@/lib/native/platform";
 import { t, useLanguage } from "@/lib/i18n";
 import { createFileRoute, useBlocker, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
@@ -15,7 +16,7 @@ import { contextText, learningText, getPersonal, updatePersonal, type ChatMessag
 import { requestReflection } from "@/lib/ai/anthropic";
 import { transcribe } from "@/lib/transcription";
 import { semanticSearch, stopSearch } from "@/lib/search";
-import { localVoices, speakLocal, stopSpeech, type LocalVoice } from "@/lib/native/speech";
+import { ANDROID_DEFAULT_VOICE, localVoices, speakLocal, stopSpeech, type LocalVoice } from "@/lib/native/speech";
 import { registerBackHandler } from "@/lib/native/back";
 import { useAppearance, setAppearance } from "@/lib/appearance";
 
@@ -75,7 +76,8 @@ function CompanionPage() {
   }, [setVaultBusy]);
 
   async function read(text: string) {
-    const selected = voices.find(v => v.voiceURI === voice) ?? voices[0];
+    // Android: always go through the native engine; its default voice is fine when none is listed.
+    const selected = voices.find(v => v.voiceURI === voice) ?? voices[0] ?? (isNativeAndroid() ? ANDROID_DEFAULT_VOICE : undefined);
     if (!selected) { setStatus("No on-device voice is installed. Text replies remain available."); return; }
     try { await speakLocal(text, selected, look.companionVoiceSpeed); }
     catch (e) { if (alive.current) setStatus(`${t("Voice playback failed.")} ${e instanceof Error ? e.message : String(e)}`); }
