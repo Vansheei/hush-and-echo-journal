@@ -1,5 +1,6 @@
 // Local, on-device transcription. Audio never leaves the phone.
 import type { Segment, WhisperModel } from "@/lib/storage/db";
+import { collapseRepeats, collapseRepeatedSegments, isSilent, splitAtPauses } from "./cleanup";
 
 export type TranscribeProgress = { phase: "download" | "transcribe"; pct: number };
 
@@ -57,7 +58,6 @@ export async function decodeToMono16k(blob: Blob): Promise<Float32Array> {
   }
 }
 
-const PIECE_SEC = 30;
 
 export async function transcribe(
   blob: Blob,
@@ -70,18 +70,22 @@ export async function transcribe(
 }
 
 export async function transcribeAudio(audio: Float32Array, model: WhisperModel, onProgress: (p: TranscribeProgress) => void): Promise<Segment[]> {
-  const step = PIECE_SEC * 16000;
-  const n = Math.max(1, Math.ceil(audio.length / step));
+  // Cut at natural pauses (≤28 s), skip silent pieces (Whisper hallucinates loops on silence),
+  // and transcribe each piece independently so one bad piece cannot swallow the rest.
+  const parts = splitAtPauses(audio);
+  const n = parts.length;
   const segments: Segment[] = [];
   onProgress({ phase: "transcribe", pct: 0 });
   for (let i = 0; i < n; i++) {
-    const offset = i * PIECE_SEC;
-    const piece = audio.slice(i * step, (i + 1) * step);
-    const pieceEnd = offset + piece.length / 16000;
+    const { start, end } = parts[i]!;
+    const offset = start / 16000;
+    const pieceEnd = end / 16000;
+    const piece = audio.slice(start, end);
+    if (isSilent(piece)) { piece.fill(0); onProgress({ phase: "transcribe", pct: Math.round(((i + 1) / n) * 100) }); continue; }
     const out = await runPiece(piece, model, (p) => onProgress({ phase: "download", pct: p }));
     const chunks = out.chunks?.length ? out.chunks : [{ timestamp: [0, null] as [number, null], text: out.text }];
     for (const c of chunks) {
-      const text = c.text.trim();
+      const text = collapseRepeats(c.text.trim()).text;
       if (!text) continue;
       segments.push({
         start: offset + (c.timestamp[0] ?? 0),
@@ -93,5 +97,5 @@ export async function transcribeAudio(audio: Float32Array, model: WhisperModel, 
   }
   // Caller owns decoded audio and wipes it after tone analysis. Keep the speech-only
   // worker/model alive across locking; it contains no vault key or diary history.
-  return segments;
+  return collapseRepeatedSegments(segments);
 }
