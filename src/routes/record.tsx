@@ -71,7 +71,7 @@ function RecordPage() {
     navigator.mediaDevices
       .getUserMedia(
         kind === "video"
-          ? { audio: true, video: { width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: facing } }
+          ? { audio: true, video: { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 }, facingMode: facing } }
           : { audio: true },
       )
       .then((s) => {
@@ -105,7 +105,7 @@ function RecordPage() {
           target.width = video.videoWidth;
           target.height = video.videoHeight;
         }
-        const ctx = target.getContext("2d");
+        const ctx = target.getContext("2d", { alpha: false, desynchronized: true });
         if (ctx) {
           ctx.save();
           if (facing === "user") { ctx.translate(target.width, 0); ctx.scale(-1, 1); }
@@ -118,6 +118,22 @@ function RecordPage() {
     raf = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(raf);
   }, [kind, facing, state]);
+
+  // Keep the screen awake while the camera or mic is in use.
+  useEffect(() => {
+    if (state === "review") return;
+    let lock: WakeLockSentinel | null = null;
+    let gone = false;
+    const take = () => {
+      if (document.visibilityState !== "visible" || !("wakeLock" in navigator)) return;
+      navigator.wakeLock.request("screen").then((l) => { if (gone) void l.release(); else lock = l; }).catch(() => {});
+    };
+    take();
+    document.addEventListener("visibilitychange", take);
+    return () => { gone = true; document.removeEventListener("visibilitychange", take); void lock?.release().catch(() => {}); };
+  }, [state]);
+
+  const screenFlash = torch && !hasTorch && kind === "video" && state !== "review";
 
   useEffect(() => {
     if (state !== "rec") return;
@@ -194,14 +210,12 @@ function RecordPage() {
     }
   }
 
-  const screenFlash = torch && !hasTorch && kind === "video" && state !== "review";
-
   return (
     <div className="fixed inset-0 z-40 flex flex-col overflow-hidden bg-stage text-stage-foreground" style={{ paddingTop: "var(--safe-top)", paddingBottom: "var(--safe-bottom)", paddingLeft: "var(--safe-left)", paddingRight: "var(--safe-right)" }}>
       {/* Full-screen camera canvas; hidden raw camera element feeds it. */}
       <video ref={camera} autoPlay muted playsInline className="hidden" />
       {kind === "video" && state !== "review" && (
-        <canvas ref={canvas} className="absolute inset-0 size-full object-cover" />
+        <canvas ref={canvas} className={screenFlash ? "absolute inset-x-[12%] top-[18%] z-30 h-[52%] w-[76%] rounded-3xl object-cover shadow-2xl" : "absolute inset-0 size-full object-cover"} />
       )}
       {kind === "audio" && state !== "review" && (
         <div className="absolute inset-0 grid place-items-center">
@@ -218,7 +232,7 @@ function RecordPage() {
         )
       )}
       {/* Front-flash: flood the whole screen with warm white while recording. */}
-      {screenFlash && <div aria-hidden className="absolute inset-0 z-20" style={{ background: "oklch(0.97 0.03 90)" }} />}
+      {screenFlash && <div aria-hidden className="absolute inset-0 z-20" style={{ background: "oklch(0.99 0.03 85)" }} />}
 
       {/* Floating controls above the preview and the flash. */}
       <div className="relative z-30 flex items-center justify-between p-4">
