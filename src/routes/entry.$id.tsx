@@ -148,7 +148,7 @@ function EntryPage() {
         </button>
 
         <section className="space-y-3">
-          <div className="flex items-end justify-between gap-3">
+          <div className="flex flex-wrap items-end justify-between gap-3">
             <h2 className="font-display text-3xl">{t("Transcript")}</h2>
             {entry.segments.length > 0 && !editing && (
               <Button variant="ghost" size="sm" onClick={() => setEditing(true)} aria-label={t("Edit transcript")}>
