@@ -449,4 +449,9 @@ export const messages: Record<string, readonly [string, string]> = {
   "Entry saved": ["प्रविष्टि सहेजी गई", "Eintrag gespeichert"],
   "Encrypted and kept on this phone.": ["एन्क्रिप्ट होकर इसी फ़ोन पर रखी गई।", "Verschlüsselt und auf diesem Handy gespeichert."],
   "Paused": ["रुका हुआ", "Pausiert"],
+  "Edit transcript": ["लिप्यंतरण बदलें", "Transkript bearbeiten"],
+  "Could not save.": ["सहेजा नहीं जा सका।", "Konnte nicht gespeichert werden."],
+  "Change any words, then save. Times stay as they were.": ["कोई भी शब्द बदलें, फिर सहेजें। समय वैसे ही रहेंगे।", "Ändere beliebige Wörter und speichere. Die Zeiten bleiben erhalten."],
+  "Transcript part {n}": ["लिप्यंतरण भाग {n}", "Transkriptteil {n}"],
+  "Transcript changed while editing. Close and try again.": ["बदलते समय लिप्यंतरण बदल गया। बंद करके फिर कोशिश करें।", "Das Transkript hat sich beim Bearbeiten geändert. Schließe und versuche es erneut."],
 };
