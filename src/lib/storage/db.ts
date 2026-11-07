@@ -65,6 +65,8 @@ export type Entry = {
   ribbon?: boolean;
   flagged?: string[];
   reflection?: Reflection;
+  /** Replies to the reflection and the owner's private notes, encrypted with the entry. */
+  thread?: ThreadItem[];
 };
 
 /** A written entry: text only, no media, ready immediately. */
