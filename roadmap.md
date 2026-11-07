@@ -55,4 +55,4 @@
 - [ ] Save confirmation after every saved entry, with an Open button.
 - [ ] Pause/resume for video and audio recordings (already present; add a clear Paused indicator).
 - [ ] Voice-to-text through AI Gateway (blocked: needs a server and sends diary audio off the phone, against the owner rules "no backend" and "nothing leaves the device"; on-phone transcription already gives editable text — needs owner confirmation).
-- [ ] Report what was left unfinished on the 6 November 2026 run.
+- [x] Report what was left unfinished on the 6 November 2026 run.
