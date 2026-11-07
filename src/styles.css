@@ -454,6 +454,9 @@
 .book-index h2, .book-index h3 { font-weight: 700; }
 .index-letter { display: block; margin-top: 0.4rem; font-size: 1.6rem; font-weight: 700; opacity: 0.6; }
 .index-row { display: flex; align-items: baseline; gap: 0.4rem; padding: 0.15rem 0; font-size: 2.1rem; line-height: 1.15; }
+.index-entry { display: block; padding: 0.15rem 0; }
+.index-entry > .index-row { padding: 0; }
+.index-hint { display: block; margin-top: -0.1rem; font-family: var(--font-sans-family); font-size: 0.8rem; line-height: 1.2; color: var(--color-muted-foreground); }
 .index-dots { flex: 1; border-bottom: 1px dotted color-mix(in oklab, var(--ink) 40%, transparent); transform: translateY(-0.35rem); }
 
 /* ---------- Turnable book ---------- */
@@ -487,3 +490,11 @@
   background: linear-gradient(to top, oklch(0 0 0 / 60%), oklch(0 0 0 / 35%) 60%, transparent);
 }
 .cover-full-controls > * { width: 100%; max-width: 22rem; }
+
+/* Phone-sized (about 411 CSS px wide, 20:9): scale the whole interface down a step. */
+@media (max-width: 480px) {
+  html { font-size: 93.75%; }
+  .index-row { font-size: 1.75rem; }
+  .index-letter { font-size: 1.3rem; }
+  .writing-script { font-size: 1.6rem; line-height: 2.2rem; background-image: repeating-linear-gradient(to bottom, transparent 0 calc(2.2rem - 1px), color-mix(in oklab, var(--tape-3) 22%, transparent) calc(2.2rem - 1px) 2.2rem); }
+}
