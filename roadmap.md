@@ -50,3 +50,9 @@
 - [x] Anthropic key setup flow in Settings with validation and Companion/Reflections/Week's Tale readiness.
 - [ ] Share an entry + AI Gateway reflection (blocked: conflicts with owner rules "no sharing" and "no backend; browser-direct Claude with own key" — needs owner confirmation).
 - [x] Android app icon (all densities, adaptive, round) and splash from the green cover; label "Vanshika’s Diary".
+
+- [ ] Phone test fixes plan (Nov 4): finish UI size, edit transcript in place, reflection replies + own notes, section subtitles/empty states, full-screen lock cover check, app icon.
+- [ ] Save confirmation after every saved entry, with an Open button.
+- [ ] Pause/resume for video and audio recordings (already present; add a clear Paused indicator).
+- [ ] Voice-to-text through AI Gateway (blocked: needs a server and sends diary audio off the phone, against the owner rules "no backend" and "nothing leaves the device"; on-phone transcription already gives editable text — needs owner confirmation).
+- [ ] Report what was left unfinished on the 6 November 2026 run.
