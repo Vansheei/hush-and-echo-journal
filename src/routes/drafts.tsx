@@ -71,7 +71,7 @@ function DraftsPage() {
     finally { if (active.current) setBusy(false); controller.current = null; }
   }
 
-  return <div className="app-shell"><AppHeader back title={t("Unsent Letters")} /><main className="space-y-5 px-4 pb-20">
+  return <div className="app-shell"><AppHeader back title={t("Unsent Letters")} section="Unsent Letters" /><main className="space-y-5 px-4 pb-20">
     <p className="text-sm text-muted-foreground">{t("Claude writes a text or email from an entry or your conversation. It never sends anything — you copy it yourself.")}</p>
     <Select value={source} onValueChange={setSource}>
       <SelectTrigger aria-label={t("Draft source")}><SelectValue /></SelectTrigger>

@@ -30,12 +30,13 @@ function PeoplePage() {
   useEffect(() => { let active = true; if (key) getPersonal(key).then(d => { if (active) setPeople(d.people); }); return () => { active = false; }; }, [key, version]);
   return (
     <div className="app-shell">
-      <AppHeader back title={t("Side Characters")} />
+      <AppHeader back title={t("Side Characters")} section="Side Characters" />
       <main className="space-y-4 px-4 pb-20">
         <Input aria-label={t("Person name")} placeholder={t("Name")} value={name} onChange={e => setName(e.target.value)} />
         <Input aria-label={t("Nicknames")} placeholder={t("Nicknames, separated by commas")} value={nicknames} onChange={e => setNicknames(e.target.value)} />
         <div className="flex gap-2"><Button disabled={!name.trim()} onClick={async () => { if (!key) return; try { const person = { id: edit ?? crypto.randomUUID(), name: name.trim(), nicknames: nicknames.split(",").map(s => s.trim()).filter(Boolean) }; await updatePersonal(key, d => ({ ...d, people: [...d.people.filter(p => p.id !== edit), person] })); setName(""); setNicknames(""); setEdit(null); bump(); } catch { setError("Could not save person."); } }}>{edit ? t("Save person") : t("Confirm new person")}</Button>{edit && <Button variant="ghost" onClick={() => { setEdit(null); setName(""); setNicknames(""); }}>{t("Cancel")}</Button>}</div>
         {error && <p role="alert">{t(error)}</p>}
+        {people.length === 0 && <p className="text-sm text-muted-foreground">{t("No one here yet. Add someone, or confirm names when your companion asks who someone is.")}</p>}
         {people.map(person => <section key={person.id} className="space-y-2 border-t border-border pt-3"><h2 className="font-display text-3xl"><Link to="/people/$id" params={{ id: person.id }} className="underline decoration-gold underline-offset-4">{person.name}</Link></h2><p className="break-words">{person.nicknames.join(", ")}</p><div className="flex gap-2"><Button size="sm" variant="outline" onClick={() => { setEdit(person.id); setName(person.name); setNicknames(person.nicknames.join(", ")); }}>{t("Edit")}</Button><Button size="sm" variant="ghost" onClick={async () => { if (!key || !window.confirm(t("Forget this person?"))) return; try { await updatePersonal(key, d => ({ ...d, people: d.people.filter(p => p.id !== person.id) })); bump(); } catch { setError("Could not forget person."); } }}>{t("Forget")}</Button></div></section>)}
       </main>
     </div>
