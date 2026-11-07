@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { fmtDuration } from "@/components/diary/AppHeader";
 import { saveEntry } from "@/lib/storage/db";
 import { useVault } from "@/lib/vault-context";
+import { announceSaved } from "@/lib/saved-toast";
 
 export const Route = createFileRoute("/record")({
   ssr: false,
@@ -195,15 +196,16 @@ function RecordPage() {
     if (!key || !result) return;
     setSaving(true);
     try {
-      await saveEntry(key, result.blob, {
-      kind,
-      mimeType: result.blob.type,
-      durationSec: Math.max(1, secs),
-    });
-    URL.revokeObjectURL(result.url);
-    saved.current = true;
-    bump();
+      const entry = await saveEntry(key, result.blob, {
+        kind,
+        mimeType: result.blob.type,
+        durationSec: Math.max(1, secs),
+      });
+      URL.revokeObjectURL(result.url);
+      saved.current = true;
+      bump();
       await nav({ to: "/" });
+      announceSaved(() => void nav({ to: "/entry/$id", params: { id: entry.id } }));
     } catch {
       setErr("Could not save. Your recording is still here; try again.");
       setSaving(false);
@@ -239,7 +241,9 @@ function RecordPage() {
         <Button variant="ghost" size="icon" className="icon-btn" aria-label={t("Close")} disabled={state !== "idle" || saving} onClick={() => nav({ to: "/" })}>
           <X className="size-5" />
         </Button>
-        <span className="rounded-full bg-stage/60 px-3 py-1 font-mono text-lg tabular-nums">{fmtDuration(secs)}</span>
+        <span className={`rounded-full bg-stage/60 px-3 py-1 font-mono text-lg tabular-nums ${state === "paused" ? "animate-pulse" : ""}`} aria-live="polite">
+          {fmtDuration(secs)}{state === "paused" && <span className="ml-2 font-sans text-sm">{t("Paused")}</span>}
+        </span>
         {kind === "video" && state !== "review" ? (
           <div className="flex gap-1">
           <button className="icon-btn" aria-label={t(torch ? "Light off" : "Light on")} aria-pressed={torch} onClick={() => void toggleTorch()}>

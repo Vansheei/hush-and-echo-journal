@@ -1,5 +1,6 @@
 import { t, useLanguage } from "@/lib/i18n";
 import { Link } from "@tanstack/react-router";
+import { sectionHint } from "@/lib/section-hints";
 
 export type IndexItem = { label: string; to?: string; onSelect?: () => void };
 
@@ -17,6 +18,11 @@ export const SECTIONS: IndexItem[] = [
   { label: "Begin a Chapter", to: "/record" },
   { label: "Inner Universe", to: "/notebook" },
 ];
+
+const hint = (label: string) => {
+  const h = sectionHint(label);
+  return h ? <span className="index-hint">{t(h)}</span> : null;
+};
 
 const sortKey = (s: string) => s.replace(/^The\s+/i, "").toLowerCase();
 
@@ -36,8 +42,8 @@ export function BookIndex({ items, days }: { items: IndexItem[]; days: { label: 
             <li key={it.label}>
               {head && <span className="index-letter">{l}</span>}
               {it.to
-                ? <Link to={it.to} className="index-row"><span>{t(it.label)}</span><span className="index-dots" /></Link>
-                : <button type="button" onClick={it.onSelect} className="index-row w-full text-left"><span>{t(it.label)}</span><span className="index-dots" /></button>}
+                ? <Link to={it.to} className="index-entry"><span className="index-row"><span>{t(it.label)}</span><span className="index-dots" /></span>{hint(it.label)}</Link>
+                : <button type="button" onClick={it.onSelect} className="index-entry w-full text-left"><span className="index-row"><span>{t(it.label)}</span><span className="index-dots" /></span>{hint(it.label)}</button>}
             </li>
           );
         })}

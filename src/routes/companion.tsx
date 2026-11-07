@@ -211,7 +211,7 @@ function CompanionPage() {
     void deliver(text);
   }
 
-  return <div className="app-shell"><AppHeader back title={t("Night Companion")} /><main className="space-y-5 px-4 pb-20">
+  return <div className="app-shell"><AppHeader back title={t("Night Companion")} section="Night Companion" /><main className="space-y-5 px-4 pb-20">
     <div className="flex flex-wrap gap-2">{["CBT", "Interpersonal", "Combined"].map(v => <Button size="sm" key={v} variant={approach === v ? "default" : "outline"} onClick={() => setApproach(v)} disabled={busy}>{v}</Button>)}</div>
     <label className="flex items-center justify-between gap-3">{t("Trust this conversation: skip the send preview until you leave or lock")}<Switch checked={trust} onCheckedChange={setTrust} /></label>
     <label className="flex items-center justify-between gap-3">{t("Read replies aloud")}<Switch checked={speak} onCheckedChange={v => { setAppearance({ readRepliesAloud: v }); if (!v) void stopSpeech().catch(() => {}); }} /></label>

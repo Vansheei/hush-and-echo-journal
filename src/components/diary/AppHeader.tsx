@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { useVault } from "@/lib/vault-context";
 import { PageFrame } from "./PageFrame";
 import { Button } from "@/components/ui/button";
+import { sectionHint } from "@/lib/section-hints";
 
 /** Curled parchment scroll banner holding a page title. */
 export function ScrollBanner({ children }: { children: ReactNode }) {
@@ -50,8 +51,9 @@ function Lantern() {
   );
 }
 
-export function AppHeader({ title, back, backTo }: { title: ReactNode; back?: boolean; backTo?: "/settings" }) {
+export function AppHeader({ title, back, backTo, section }: { title: ReactNode; back?: boolean; backTo?: "/settings"; section?: string }) {
   useLanguage();
+  const hint = section ? sectionHint(section) : undefined;
   const { lock } = useVault();
   return (
     <>
@@ -70,6 +72,7 @@ export function AppHeader({ title, back, backTo }: { title: ReactNode; back?: bo
           <ScrollBanner>{typeof title === "string" ? t(title) : title}</ScrollBanner>
           <Link to="/companion" className="lantern-link grid h-14 w-12 shrink-0 place-items-center" aria-label={t("Night Companion")} title={t("Night Companion")}><Lantern /></Link>
         </div>
+        {hint && <p className="-mt-1 mb-3 text-center text-sm text-muted-foreground">{t(hint)}</p>}
       </header>
     </>
   );

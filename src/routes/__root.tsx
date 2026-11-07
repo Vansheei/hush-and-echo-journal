@@ -18,6 +18,7 @@ import { VaultProvider } from "@/lib/vault-context";
 import { Gate } from "@/components/diary/Gate";
 import { NativeBack } from "@/components/diary/NativeBack";
 import { NativeInsets } from "@/components/diary/NativeInsets";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   useLanguage();
@@ -122,6 +123,11 @@ function RootComponent() {
           <NativeBack />
           <Gate>
             <Outlet />
+            <Toaster
+              position="top-center"
+              offset={{ top: "calc(var(--safe-top) + 0.75rem)" }}
+              mobileOffset={{ top: "calc(var(--safe-top) + 0.75rem)", left: "0.75rem", right: "0.75rem" }}
+            />
           </Gate>
         </VaultProvider>
       </ClientOnly>

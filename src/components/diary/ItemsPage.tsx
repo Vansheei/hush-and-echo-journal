@@ -28,7 +28,7 @@ export function ItemsPage({ kind }: { kind: DiaryItem["kind"] }) {
     catch { setError("Could not save. Please try again."); }
   }
   return <div className="app-shell">
-    <AppHeader back title={kind === "loose" ? t("Unfinished Chapters") : t("Quiet Garden")} />
+    <AppHeader back title={kind === "loose" ? t("Unfinished Chapters") : t("Quiet Garden")} section={kind === "loose" ? "Unfinished Chapters" : "Quiet Garden"} />
     <main className="space-y-6 px-4 pb-20">
       <form className="flex gap-2" onSubmit={async (e) => {
         e.preventDefault(); if (!text.trim()) return;
