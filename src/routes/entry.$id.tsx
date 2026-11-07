@@ -1,7 +1,8 @@
 import { t, useLanguage, format } from "@/lib/i18n";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
+import { TranscriptEditor } from "@/components/diary/TranscriptEditor";
 import { AppHeader, fmtDuration } from "@/components/diary/AppHeader";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -52,6 +53,7 @@ function EntryPage() {
   const [url, setUrl] = useState<string | null>(null);
   const [now, setNow] = useState(0);
   const [view, setView] = useState<"journal" | "timed">("journal");
+  const [editing, setEditing] = useState(false);
   const media = useRef<HTMLVideoElement & HTMLAudioElement>(null);
 
   useEffect(() => {
@@ -148,7 +150,12 @@ function EntryPage() {
         <section className="space-y-3">
           <div className="flex items-end justify-between gap-3">
             <h2 className="font-display text-3xl">{t("Transcript")}</h2>
-            {entry.segments.length > 0 && (
+            {entry.segments.length > 0 && !editing && (
+              <Button variant="ghost" size="sm" onClick={() => setEditing(true)} aria-label={t("Edit transcript")}>
+                <Pencil /> {t("Edit")}
+              </Button>
+            )}
+            {entry.segments.length > 0 && !editing && entry.kind !== "written" && (
               <div className="flex gap-1 text-sm" role="tablist">
                 {(["journal", "timed"] as const).map((v) => (
                   <button key={v} role="tab" aria-selected={view === v} onClick={() => { setView(v); pageTurn(); }}
@@ -187,10 +194,11 @@ function EntryPage() {
           {entry.status === "done" && entry.segments.length === 0 && (
             <p className="text-sm text-muted-foreground">{t("No speech detected.")}</p>
           )}
-          {view === "journal" && entry.segments.length > 0 && (
+          {editing && <TranscriptEditor entry={entry} onDone={() => setEditing(false)} />}
+          {!editing && view === "journal" && entry.segments.length > 0 && (
             <div className="journal-page">{entry.segments.map((s, i) => <span key={i}><TranscriptWords entry={entry} segment={i} />{" "}</span>)}</div>
           )}
-          <ul className={`space-y-1 ${view === "journal" ? "hidden" : ""}`}>
+          <ul className={`space-y-1 ${view === "journal" || editing ? "hidden" : ""}`}>
             {entry.segments.map((s, i) => {
               const active = now >= s.start && now < s.end;
               return (
