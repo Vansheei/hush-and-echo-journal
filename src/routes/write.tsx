@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { saveWritten } from "@/lib/storage/db";
 import { useVault } from "@/lib/vault-context";
+import { announceSaved } from "@/lib/saved-toast";
 
 export const Route = createFileRoute("/write")({
   ssr: false,
@@ -31,9 +32,10 @@ function WritePage() {
     if (!key || !text.trim() || saving) return;
     setSaving(true);
     try {
-      await saveWritten(key, text);
+      const entry = await saveWritten(key, text);
       bump();
       await nav({ to: "/" });
+      announceSaved(() => void nav({ to: "/entry/$id", params: { id: entry.id } }));
     } catch { setError("Could not save. Your words are still here; try again."); setSaving(false); }
   }
   return (
