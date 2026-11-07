@@ -446,4 +446,8 @@ export const messages: Record<string, readonly [string, string]> = {
   "Preparing local search {current}/{total}…": ["स्थानीय खोज तैयार {current}/{total}…", "Lokale Suche wird vorbereitet: {current}/{total}…"],
   "Encrypted diary backup": ["एन्क्रिप्टेड डायरी बैकअप", "Verschlüsselte Tagebuchsicherung"],
   "Save encrypted diary backup": ["एन्क्रिप्टेड डायरी बैकअप सहेजें", "Verschlüsselte Tagebuchsicherung speichern"],
+  "Entry saved": ["प्रविष्टि सहेजी गई", "Eintrag gespeichert"],
+  "Encrypted and kept on this phone.": ["एन्क्रिप्ट होकर इसी फ़ोन पर रखी गई।", "Verschlüsselt und auf diesem Handy gespeichert."],
+  "Open": ["खोलें", "Öffnen"],
+  "Paused": ["रुका हुआ", "Pausiert"],
 };

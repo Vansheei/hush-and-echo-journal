@@ -56,3 +56,4 @@
 - [ ] Pause/resume for video and audio recordings (already present; add a clear Paused indicator).
 - [ ] Voice-to-text through AI Gateway (blocked: needs a server and sends diary audio off the phone, against the owner rules "no backend" and "nothing leaves the device"; on-phone transcription already gives editable text — needs owner confirmation).
 - [x] Report what was left unfinished on the 6 November 2026 run.
+- [ ] End this run with a plain done / not-done list.
